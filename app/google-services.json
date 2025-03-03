@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "857145254620",
+    "firebase_url": "https://basecamp-c417d-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "basecamp-c417d",
+    "storage_bucket": "basecamp-c417d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:857145254620:android:910b80a218241bcd140a19",
+        "android_client_info": {
+          "package_name": "com.basecampers"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCaeP1Vf9jMzgvKTrEuLdH78_TAUgvba00"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
