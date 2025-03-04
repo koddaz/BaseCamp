@@ -12,7 +12,7 @@ import com.example.basecamp.navigation.models.Routes
 
 
 @Composable
-fun HomeNavigation(navController: NavHostController) {
+fun HomeNavigation() {
     val navController = rememberNavController()
     val loading: Boolean = true
 

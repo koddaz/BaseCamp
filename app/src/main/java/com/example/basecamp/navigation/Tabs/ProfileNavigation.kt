@@ -12,7 +12,7 @@ import com.example.basecamp.navigation.models.Routes
 
 
 @Composable
-fun ProfileNavigation(navController: NavHostController) {
+fun ProfileNavigation() {
     val navController = rememberNavController()
     val loading: Boolean = true
 

@@ -48,6 +48,10 @@ dependencies {
     implementation("com.google.firebase:firebase-database:21.0.0")
     implementation("com.google.firebase:firebase-firestore-ktx:25.0.0")
 
+    // Tab navigation
+    implementation("com.arkivanov.decompose:decompose:1.0.0")
+    implementation("com.arkivanov.decompose:extensions-compose-jetpack:1.0.0")
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

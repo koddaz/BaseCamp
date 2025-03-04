@@ -11,7 +11,7 @@ import com.example.basecamp.navigation.models.Routes
 
 
 @Composable
-fun BookingsNavigation(navController: NavHostController) {
+fun BookingsNavigation() {
     val navController = rememberNavController()
     val loading: Boolean = true
 
