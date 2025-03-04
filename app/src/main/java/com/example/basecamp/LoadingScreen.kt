@@ -1,0 +1,31 @@
+package com.example.basecamp
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
+import com.example.basecamp.components.NavButton
+import com.example.basecamp.navigation.models.Routes
+
+@Composable
+fun LoadingScreen(goDetail: () -> Unit) {
+    val navController = rememberNavController()
+
+    Column(modifier = Modifier.fillMaxSize() ) {
+        NavButton(
+            onClick = {
+                navController.navigate(route = Routes.PROFILE)
+            },
+            title = "Next"
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LoadingScreenPreview() {
+    LoadingScreen(goDetail = {})
+}

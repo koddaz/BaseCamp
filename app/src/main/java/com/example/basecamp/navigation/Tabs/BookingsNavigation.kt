@@ -6,25 +6,22 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.basecamp.LoadingScreen
-import com.example.basecamp.TabScreens.HomeTab
+import com.example.basecamp.TabScreens.BookingsTab
 import com.example.basecamp.navigation.models.Routes
 
 
 @Composable
-fun HomeNavigation(navController: NavHostController) {
+fun BookingsNavigation(navController: NavHostController) {
     val navController = rememberNavController()
     val loading: Boolean = true
 
-    NavHost(navController = navController, startDestination = Routes.HOME) {
+    NavHost(navController = navController, startDestination = Routes.BOOKING) {
 
-
-
-        composable(route = Routes.HOME) {
-            HomeTab()
+        composable(route = Routes.BOOKING) {
+            BookingsTab()
         }
 
 
-
     }
+
 }
