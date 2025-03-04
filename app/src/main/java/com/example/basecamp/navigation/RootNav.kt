@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -18,7 +19,7 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun RootNav() {
+fun RootNav(modifier: Modifier) {
     val navController = rememberNavController()
     var loading: Boolean by remember { mutableStateOf(true) }
     val tempFunction: () -> Unit = {
@@ -38,5 +39,5 @@ fun RootNav() {
 @Preview(showBackground = true)
 @Composable
 fun RootNavPreview() {
-    RootNav()
+    RootNav(modifier = Modifier)
 }
