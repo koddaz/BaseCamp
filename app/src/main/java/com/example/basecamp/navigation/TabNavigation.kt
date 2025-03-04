@@ -22,19 +22,19 @@ fun TabNavigation() {
 
 
         composable(route = Routes.HOME) {
-            HomeNavigation(navController = navController)
+            HomeNavigation()
         }
 
         composable(route = Routes.BOOKING) {
-            BookingsNavigation(navController = navController)
+            BookingsNavigation()
         }
 
         composable(route = Routes.PROFILE) {
-            ProfileNavigation(navController = navController)
+            ProfileNavigation()
         }
 
         composable(route = Routes.SOCIAL) {
-            SocialNavigation(navController = navController)
+            SocialNavigation()
         }
 
 

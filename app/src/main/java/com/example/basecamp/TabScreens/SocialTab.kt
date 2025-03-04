@@ -13,7 +13,7 @@ fun SocialTab() {
     Column(modifier = Modifier
         .fillMaxSize()
         .background(color = MaterialTheme.colorScheme.background)) {
-        Text("Profile Tab",
+        Text("Social Tab",
             color = MaterialTheme.colorScheme.onBackground)
     }
 }

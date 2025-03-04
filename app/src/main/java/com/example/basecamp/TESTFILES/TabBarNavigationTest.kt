@@ -51,10 +51,10 @@ fun Screen() {
                 HomeNavigation()
             } else if (selectedItem == 1) {
                 BookingsNavigation()
-            } else if (selectedItem == 2) {
-                SocialNavigation()
             } else if (selectedItem == 3) {
                 ProfileNavigation()
+            } else if (selectedItem == 2) {
+                SocialNavigation()
             } else {
                 Text("FEL FINNS INTE")
             }
