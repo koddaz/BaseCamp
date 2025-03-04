@@ -8,7 +8,4 @@ object Routes {
     const val BOOKING = "booking"
     const val PROFILE = "profile"
     const val SOCIAL = "social"
-
-
-
 }

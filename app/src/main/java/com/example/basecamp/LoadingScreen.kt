@@ -11,13 +11,13 @@ import com.example.basecamp.components.NavButton
 import com.example.basecamp.navigation.models.Routes
 
 @Composable
-fun LoadingScreen(goDetail: () -> Unit) {
-    val navController = rememberNavController()
+fun LoadingScreen(tempFunction: () -> Unit) {
+
 
     Column(modifier = Modifier.fillMaxSize() ) {
         NavButton(
             onClick = {
-                navController.navigate(route = Routes.PROFILE)
+                tempFunction()
             },
             title = "Next"
         )
@@ -27,5 +27,5 @@ fun LoadingScreen(goDetail: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun LoadingScreenPreview() {
-    LoadingScreen(goDetail = {})
+    LoadingScreen(tempFunction = {})
 }

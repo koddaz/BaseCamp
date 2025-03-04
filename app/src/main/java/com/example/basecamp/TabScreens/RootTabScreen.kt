@@ -34,11 +34,11 @@ import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.value.Value
 import com.example.basecamp.components.NavButtonIcon
-import com.example.basecamp.navigation.TabNavigation
+
 import com.example.basecamp.navigation.models.Routes
 import com.example.basecamp.ui.theme.BaseCampTheme
 
-
+/*
 sealed class TabBarItem(
     val image: ImageVector,
     val route: String,
@@ -172,7 +172,6 @@ fun RootTabScreen() {
     val navController = rememberNavController()
     Column(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.weight(1f)) {
-            TabNavigation()
         }
         Row(modifier = Modifier
             .fillMaxWidth()
@@ -212,3 +211,5 @@ fun RootTabScreenPreview() {
     RootTabScreen()
         }
 }
+
+ */
