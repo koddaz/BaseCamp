@@ -20,7 +20,7 @@ fun NavButtonIcon(
     contentDescription: String,
     modifier: Modifier = Modifier
     ) {
-    IconButton(onClick = { onClick }, modifier.size(64.dp).fillMaxSize()) {
+    IconButton(onClick = onClick, modifier.size(64.dp).fillMaxSize()) {
         Icon(icon, contentDescription = contentDescription, modifier = Modifier.size(54.dp))
     }
 }

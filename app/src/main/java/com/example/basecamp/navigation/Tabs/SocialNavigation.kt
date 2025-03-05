@@ -11,7 +11,6 @@ import com.basecampers.navigation.models.Routes
 @Composable
 fun SocialNavigation() {
     val navController = rememberNavController()
-    val loading: Boolean = true
 
     NavHost(navController = navController, startDestination = Routes.SOCIAL) {
 

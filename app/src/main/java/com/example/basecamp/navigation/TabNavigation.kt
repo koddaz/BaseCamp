@@ -41,16 +41,22 @@ fun TabNavigation() {
     var selectedItem by remember { mutableIntStateOf(0) }
     Column(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.weight(1f)) {
-            if (selectedItem == 0) {
-                HomeNavigation()
-            } else if (selectedItem == 1) {
-                BookingsNavigation()
-            } else if (selectedItem == 3) {
-                ProfileNavigation()
-            } else if (selectedItem == 2) {
-                SocialNavigation()
-            } else {
-                Text("FEL FINNS INTE")
+            when (selectedItem) {
+                0 -> {
+                    HomeNavigation()
+                }
+                1 -> {
+                    BookingsNavigation()
+                }
+                3 -> {
+                    ProfileNavigation()
+                }
+                2 -> {
+                    SocialNavigation()
+                }
+                else -> {
+                    Text("FEL FINNS INTE")
+                }
             }
 
         }
