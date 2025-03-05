@@ -1,17 +1,14 @@
-package com.basecampers
+package com.example.basecamp
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.basecampers.navigation.RootNav
 import com.basecampers.ui.theme.BaseCampTheme
+import com.example.basecamp.aRootFolder.Root
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,11 +17,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             BaseCampTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    RootNav()
+                    Root()
                 }
             }
         }
     }
 }
+
+
 
 
