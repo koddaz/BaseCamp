@@ -7,6 +7,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.basecampers.navigation.Tabs.BookingsNavigation
 
 
 @Composable
@@ -16,5 +17,6 @@ fun BookingsTab() {
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.background)) {
         Text("Bookings Tab", color = MaterialTheme.colorScheme.onBackground)
+        BookingsNavigation()
     }
 }

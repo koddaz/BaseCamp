@@ -1,4 +1,4 @@
-package com.example.basecamp.TabScreens
+package com.example.basecamp.tabscreens
 
 /*
 sealed class TabBarItem(
