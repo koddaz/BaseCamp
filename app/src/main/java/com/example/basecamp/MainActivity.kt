@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             BaseCampTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    RootNav(modifier = Modifier.padding(innerPadding))
+                    RootNav()
                 }
             }
         }

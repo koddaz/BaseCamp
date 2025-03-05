@@ -35,5 +35,5 @@ fun RootNav() {
 @Preview(showBackground = true)
 @Composable
 fun RootNavPreview() {
-    RootNav(modifier = Modifier)
+    RootNav()
 }
