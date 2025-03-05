@@ -1,4 +1,4 @@
-package com.example.basecamp.TabScreens
+package com.basecampers.TabScreens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column

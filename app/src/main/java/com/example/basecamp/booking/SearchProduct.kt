@@ -1,2 +1,2 @@
-package com.example.basecamp.booking
+package com.basecampers.booking
 

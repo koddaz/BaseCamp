@@ -1,4 +1,4 @@
-package com.example.basecamp
+package com.basecampers
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
-import com.example.basecamp.navigation.RootNav
-import com.example.basecamp.ui.theme.BaseCampTheme
+import com.basecampers.navigation.RootNav
+import com.basecampers.ui.theme.BaseCampTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

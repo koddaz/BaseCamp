@@ -1,2 +1,2 @@
-package com.example.basecamp.navigation.Authentication
+package com.basecampers.navigation.Authentication
 

@@ -1,4 +1,4 @@
-package com.example.basecamp.ui.theme
+package com.basecampers.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

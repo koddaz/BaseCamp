@@ -1,4 +1,4 @@
-package com.example.basecamp.TESTFILES
+package com.basecampers.navigation
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
@@ -29,11 +29,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import com.example.basecamp.navigation.Tabs.BookingsNavigation
-import com.example.basecamp.navigation.Tabs.HomeNavigation
-import com.example.basecamp.navigation.Tabs.ProfileNavigation
-import com.example.basecamp.navigation.Tabs.SocialNavigation
-import com.example.basecamp.ui.theme.BaseCampTheme
+import com.basecampers.navigation.Tabs.BookingsNavigation
+import com.basecampers.navigation.Tabs.HomeNavigation
+import com.basecampers.navigation.Tabs.ProfileNavigation
+import com.basecampers.navigation.Tabs.SocialNavigation
+import com.basecampers.ui.theme.BaseCampTheme
+
 
 @Composable
 fun TabNavigation() {

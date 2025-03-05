@@ -1,2 +1,2 @@
-package com.example.basecamp.comunication
+package com.basecampers.comunication
 

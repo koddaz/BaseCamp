@@ -1,2 +1,2 @@
-package com.example.basecamp.profile
+package com.basecampers.profile
 

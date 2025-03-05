@@ -1,13 +1,12 @@
-package com.example.basecamp.navigation.Tabs
+package com.basecampers.navigation.Tabs
 
 
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.basecamp.TabScreens.BookingsTab
-import com.example.basecamp.navigation.models.Routes
+import com.basecampers.TabScreens.BookingsTab
+import com.basecampers.navigation.models.Routes
 
 
 @Composable
