@@ -1,5 +1,5 @@
 package com.basecampers.Authentication
-
+import com.google.firebase.auth.ktx.auth
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -8,6 +8,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.basecamp.navigation.models.LoginModel
+import com.google.firebase.ktx.Firebase
 
 @Composable
 fun LoginScreen(loginModel: LoginModel = viewModel()) {
@@ -15,12 +16,16 @@ fun LoginScreen(loginModel: LoginModel = viewModel()) {
     var password by remember { mutableStateOf("") }
     val isLoggedIn by loginModel.loggedin.collectAsState()
 
+
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
-            println("Logged in user: ${'$'}{Firebase.auth.currentUser?.email}")
+            val currentUser = Firebase.auth.currentUser
+            println("Logged in user: ${currentUser?.email ?: "No user logged in"}")
 
         }
     }
+
+
 
 
     Column(modifier = Modifier.padding(16.dp)) {
