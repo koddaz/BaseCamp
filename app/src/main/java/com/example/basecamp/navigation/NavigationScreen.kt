@@ -1,4 +1,4 @@
-package com.example.basecamp.navigation
+package com.basecampers.navigation
 
 import androidx.compose.runtime.Composable
 
