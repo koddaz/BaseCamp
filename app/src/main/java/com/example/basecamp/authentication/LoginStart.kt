@@ -19,6 +19,6 @@ fun LoginStart(loginmodel : LoginModel = viewModel()) {
     if(loggedin) {
        RootNav()
     } else {
-        LoginScreen(loginmodel)
+        LoginScreen(loginmodel, goRegister = {}, goConfirm = {})
     }
 }

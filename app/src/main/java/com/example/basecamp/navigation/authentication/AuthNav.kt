@@ -1,2 +1,32 @@
 package com.basecampers.navigation.Authentication
 
+import androidx.compose.runtime.Composable
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.basecampers.Authentication.LoginScreen
+import com.basecampers.Authentication.RegisterScreen
+import com.basecampers.booking.ConfirmScreen
+import com.example.basecamp.navigation.models.LoginModel
+
+@Composable
+fun AuthNav(loginmodel : LoginModel) {
+    val navController = rememberNavController()
+
+    NavHost(navController = navController, startDestination = "login") {
+
+        composable("login") {
+            LoginScreen(loginmodel, goRegister = {
+                navController.navigate(route = "register")
+            }, goConfirm = {
+                navController.navigate(route = "confirm")
+            })
+        }
+        composable("register") {
+            RegisterScreen()
+        }
+        composable("confirm") {
+            ConfirmScreen()
+        }
+    }
+}

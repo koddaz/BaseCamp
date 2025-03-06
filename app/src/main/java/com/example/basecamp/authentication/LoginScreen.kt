@@ -1,4 +1,6 @@
 package com.basecampers.Authentication
+
+import android.util.Log
 import com.google.firebase.auth.ktx.auth
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -11,11 +13,10 @@ import com.example.basecamp.navigation.models.LoginModel
 import com.google.firebase.ktx.Firebase
 
 @Composable
-fun LoginScreen(loginModel: LoginModel = viewModel()) {
+fun LoginScreen(loginModel: LoginModel = viewModel(), goRegister : () -> Unit, goConfirm : () -> Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val isLoggedIn by loginModel.loggedin.collectAsState()
-
 
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
@@ -60,14 +61,34 @@ fun LoginScreen(loginModel: LoginModel = viewModel()) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
-                onClick = { loginModel.register(email, password) },
+                onClick = { goRegister() },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Register")
             }
+
+            Button(
+                onClick = { goConfirm() },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Confirm")
+            }
+
+            Button(onClick = {
+                loginModel.loginUser1()
+            }) {
+                Text("User 1")
+            }
+
+            Button(onClick = {
+                loginModel.loginUser2()
+            }) {
+                Text("User 2")
+            }
+
         } else {
 
-            Text("You are logged in!", style = MaterialTheme.typography.bodyLarge)
+            Text("You are logged in to: ${Firebase.auth.currentUser?.email}", style = MaterialTheme.typography.bodyLarge)
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
@@ -95,5 +116,5 @@ fun LoginScreen(loginModel: LoginModel = viewModel()) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewLoginScreen() {
-    LoginScreen()
+    LoginScreen(goRegister = {}, goConfirm = {})
 }

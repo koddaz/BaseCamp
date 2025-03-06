@@ -35,6 +35,26 @@ class LoginModel : ViewModel() {
         }
     }
 
+    fun loginUser1() {
+        val email = "1@hotmail.com"
+        val password = "test1234"
+        Firebase.auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
+            checklogin()
+        }.addOnFailureListener {
+            // FEL
+        }
+    }
+
+    fun loginUser2() {
+        val email = "2@hotmail.com"
+        val password = "test123"
+        Firebase.auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
+            checklogin()
+        }.addOnFailureListener {
+            // FEL
+        }
+    }
+
     fun register(email: String, password: String) {
         Firebase.auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
             checklogin()
