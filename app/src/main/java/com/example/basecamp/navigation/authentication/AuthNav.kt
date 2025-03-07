@@ -16,14 +16,18 @@ fun AuthNav(loginmodel : LoginModel) {
     NavHost(navController = navController, startDestination = "login") {
 
         composable("login") {
-            LoginScreen(loginmodel, goRegister = {
-                navController.navigate(route = "register")
+            LoginScreen(loginmodel,
+                goRegister = {
+                    navController.navigate(route = "register")
             }, goConfirm = {
                 navController.navigate(route = "confirm")
             })
         }
         composable("register") {
-            RegisterScreen()
+            RegisterScreen(loginmodel ,
+                goLogin = {
+                    navController.navigate("login")
+            })
         }
         composable("confirm") {
             ConfirmScreen()

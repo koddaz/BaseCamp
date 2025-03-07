@@ -55,6 +55,10 @@ class LoginModel : ViewModel() {
         }
     }
 
+    fun forgotPassword() {
+        // Kod
+    }
+
     fun register(email: String, password: String) {
         Firebase.auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
             checklogin()
