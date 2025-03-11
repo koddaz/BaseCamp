@@ -27,8 +27,6 @@ fun LoginScreen(loginModel: LoginModel = viewModel(), goRegister : () -> Unit, g
     }
 
 
-
-
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Authentication", style = MaterialTheme.typography.headlineMedium)
 

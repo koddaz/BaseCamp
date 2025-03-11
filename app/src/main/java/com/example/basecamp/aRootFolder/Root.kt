@@ -30,7 +30,7 @@ fun Root(loginmodel : LoginModel) {
         } else if(isLoggedin) {
             TabNavigation()
         } else {
-            AuthNavHost()
+            AuthNavHost(loginmodel)
         }
     }
 }

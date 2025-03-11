@@ -20,7 +20,7 @@ fun AuthNav(loginmodel : LoginModel) {
             LoginScreen(loginmodel,
                 goRegister = {
                     navController.navigate(route = "register")
-            }, goConfirm = {
+            }, goForgotPass = {
                 navController.navigate(route = "confirm")
             })
         }
