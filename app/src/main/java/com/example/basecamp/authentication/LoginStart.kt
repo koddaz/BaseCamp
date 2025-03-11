@@ -14,11 +14,7 @@ import com.example.basecamp.navigation.models.LoginModel
 @Composable
 fun LoginStart(loginmodel : LoginModel = viewModel()) {
 
-    val loggedin by loginmodel.loggedin.collectAsState()
 
-    if(loggedin) {
-       Root()
-    } else {
-        LoginScreen(loginmodel, goRegister = {}, goConfirm = {})
-    }
+
+
 }

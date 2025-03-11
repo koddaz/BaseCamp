@@ -13,7 +13,7 @@ import com.example.basecamp.navigation.models.LoginModel
 import com.google.firebase.ktx.Firebase
 
 @Composable
-fun LoginScreen(loginModel: LoginModel = viewModel(), goRegister : () -> Unit, goConfirm : () -> Unit) {
+fun LoginScreen(loginModel: LoginModel = viewModel(), goRegister : () -> Unit, goForgotPass : () -> Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val isLoggedIn by loginModel.loggedin.collectAsState()
@@ -68,10 +68,10 @@ fun LoginScreen(loginModel: LoginModel = viewModel(), goRegister : () -> Unit, g
             }
 
             Button(
-                onClick = { goConfirm() },
+                onClick = { goForgotPass() },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Confirm")
+                Text("Forgot Password")
             }
 
             Button(onClick = {
@@ -116,5 +116,5 @@ fun LoginScreen(loginModel: LoginModel = viewModel(), goRegister : () -> Unit, g
 @Preview(showBackground = true)
 @Composable
 fun PreviewLoginScreen() {
-    LoginScreen(goRegister = {}, goConfirm = {})
+    LoginScreen(goRegister = {}, goForgotPass = {})
 }
