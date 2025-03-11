@@ -28,7 +28,7 @@ fun Root(loginmodel : LoginModel) {
                 tempFunction = tempFunction,
             )
         } else if(isLoggedin) {
-            TabNavigation()
+            TabNavigation(loginmodel)
         } else {
             AuthNavHost(loginmodel)
         }

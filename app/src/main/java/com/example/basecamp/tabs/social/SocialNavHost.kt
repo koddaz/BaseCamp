@@ -14,7 +14,7 @@ fun SocialNavHost() {
 
     NavHost(navController = navController, startDestination = socialRoutes.MAIN) {
         composable(socialRoutes.MAIN) {
-            HomeScreen()
+            SocialScreen()
         }
     }
 

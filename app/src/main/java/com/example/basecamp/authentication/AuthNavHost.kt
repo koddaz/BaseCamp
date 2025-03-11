@@ -27,7 +27,7 @@ fun AuthNavHost(loginmodel : LoginModel) {
                 goLogin = {navController.navigate(route = authRoutes.LOGIN)})
         }
         composable(authRoutes.FORGOTPASS) {
-            ConfirmScreen()
+            ConfirmScreen(loginmodel)
         }
     }
 

@@ -9,6 +9,7 @@ import com.basecampers.Authentication.LoginScreen
 import com.basecampers.Authentication.RegisterScreen
 
 import com.example.basecamp.navigation.models.LoginModel
+import kotlin.math.log
 
 @Composable
 fun AuthNav(loginmodel : LoginModel) {
@@ -31,7 +32,7 @@ fun AuthNav(loginmodel : LoginModel) {
             })
         }
         composable("confirm") {
-            ConfirmScreen()
+            ConfirmScreen(loginmodel)
         }
     }
 }

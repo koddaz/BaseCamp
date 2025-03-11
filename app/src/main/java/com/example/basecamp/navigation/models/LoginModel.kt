@@ -1,5 +1,6 @@
 package com.example.basecamp.navigation.models
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.ktx.database
@@ -55,8 +56,14 @@ class LoginModel : ViewModel() {
         }
     }
 
-    fun forgotPassword() {
-        // Kod
+    fun forgotPassword(email : String) {
+        Firebase.auth.sendPasswordResetEmail(email)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Log.d("BASECAMPDEBUG", "Email Sent to user")
+                }
+
+            }
     }
 
     fun register(email: String, password: String) {
