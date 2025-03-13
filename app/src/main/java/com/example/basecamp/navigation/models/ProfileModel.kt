@@ -1,5 +1,6 @@
 package com.example.basecamp.navigation.models
 
+
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.ktx.database
@@ -8,7 +9,7 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class LoginModel : ViewModel() {
+class ProfileModel : ViewModel() {
 
     val database = Firebase.database.reference
     val firestore = Firebase.firestore
@@ -79,3 +80,4 @@ class LoginModel : ViewModel() {
         return Pair(username, email)
     }
 }
+

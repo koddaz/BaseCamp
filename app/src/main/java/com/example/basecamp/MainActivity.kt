@@ -12,8 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.basecampers.Authentication.LoginScreen
-import com.basecampers.navigation.RootNav
 
+import com.basecampers.Authentication.ProfileScreen
+import com.basecampers.navigation.RootNav
+import com.basecampers.Authentication.RegisterScreen
 
 import com.basecampers.ui.theme.BaseCampTheme
 import com.example.basecamp.authentication.LoginStart
@@ -25,8 +27,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             BaseCampTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-
-                   LoginScreen()
+//RegisterScreen()
+                    ProfileScreen()
+                 //  LoginScreen()
                    // LoginStart()
                 }
             }
@@ -39,8 +42,9 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun GreetingPreview() {
     BaseCampTheme {
-
-       LoginScreen()
+//RegisterScreen()
+       ProfileScreen()
+       //LoginScreen()
 //LoginStart()
     }
 }

@@ -10,7 +10,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.basecamp.navigation.models.LoginModel
 
 @Composable
-fun RegisterScreen(loginModel: LoginModel = viewModel()) {
+fun ProfileScreen(loginModel: LoginModel = viewModel()) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val isLoggedIn by loginModel.loggedin.collectAsState()
@@ -25,7 +25,7 @@ fun RegisterScreen(loginModel: LoginModel = viewModel()) {
     }
 
     Column(modifier = Modifier.padding(16.dp)) {
-        Text("Authentication", style = MaterialTheme.typography.headlineMedium)
+        Text("Profile", style = MaterialTheme.typography.headlineMedium)
 
         if (!isLoggedIn) {
             TextField(
@@ -93,6 +93,6 @@ fun RegisterScreen(loginModel: LoginModel = viewModel()) {
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewRegisterScreen() {
-    RegisterScreen()
+fun ProfilePreviewScreen() {
+    ProfileScreen()
 }
