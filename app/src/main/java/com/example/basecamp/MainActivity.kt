@@ -27,8 +27,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             BaseCampTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-//RegisterScreen()
-                    ProfileScreen()
+RegisterScreen()
+                    //ProfileScreen()
                  //  LoginScreen()
                    // LoginStart()
                 }
@@ -42,8 +42,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun GreetingPreview() {
     BaseCampTheme {
-//RegisterScreen()
-       ProfileScreen()
+RegisterScreen()
+    //   ProfileScreen()
        //LoginScreen()
 //LoginStart()
     }

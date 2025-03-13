@@ -16,19 +16,29 @@ class LoginModel : ViewModel() {
     private val _loggedin = MutableStateFlow(false)
     val loggedin = _loggedin.asStateFlow()
 
+    private val _userInfo = MutableStateFlow<Pair<String?, String?>>(Pair(null, null))
+    val userInfo = _userInfo.asStateFlow()
+
     init {
         checklogin()
     }
 
     fun checklogin() {
-        _loggedin.value = Firebase.auth.currentUser != null
+        val user = Firebase.auth.currentUser
+        _loggedin.value = user != null
+
+        if (user != null) {
+            fetchUserInfoFromFirestore(user.uid)
+        } else {
+            _userInfo.value = Pair(null, null)
+        }
     }
 
     fun login(email: String, password: String) {
         Firebase.auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
             checklogin()
         }.addOnFailureListener {
-
+            // fel
         }
     }
 
@@ -36,7 +46,7 @@ class LoginModel : ViewModel() {
         Firebase.auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
             checklogin()
         }.addOnFailureListener {
-
+            // fel
         }
     }
 
@@ -46,7 +56,7 @@ class LoginModel : ViewModel() {
             if (userId != null) {
                 val user = mapOf(
                     "email" to email,
-                    "username" to email.substringBefore("@") // Basic username logic
+                    "username" to email.substringBefore("@") // user before at sign
                 )
 
                 firestore.collection("users").document(userId).set(user)
@@ -54,11 +64,11 @@ class LoginModel : ViewModel() {
                         checklogin()
                     }
                     .addOnFailureListener {
-                        // Firestore
+                        //  Firestore fel
                     }
             }
         }.addOnFailureListener {
-            // Auth
+            //  Auth fel
         }
     }
 
@@ -68,14 +78,30 @@ class LoginModel : ViewModel() {
     }
 
     fun deleteUser() {
-        Firebase.auth.currentUser?.delete()
-        checklogin()
+        Firebase.auth.currentUser?.delete()?.addOnCompleteListener {
+            checklogin()
+        }
     }
 
-    fun getUserInfo(): Pair<String?, String?> {
-        val user = Firebase.auth.currentUser
-        val username = user?.displayName ?: user?.email?.substringBefore("@") // Default username
-        val email = user?.email
-        return Pair(username, email)
+
+
+    fun getCurrentUserUid(): String? {
+        return Firebase.auth.currentUser?.uid
+    }
+
+
+
+    fun fetchUserInfoFromFirestore(userId: String) {
+        firestore.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val username = document.getString("username")
+                    val email = document.getString("email")
+                    _userInfo.value = Pair(username, email)
+                }
+            }
+            .addOnFailureListener {
+                _userInfo.value = Pair(null, null) // firestore fel
+            }
     }
 }

@@ -75,7 +75,7 @@ class ProfileModel : ViewModel() {
 
     fun getUserInfo(): Pair<String?, String?> {
         val user = Firebase.auth.currentUser
-        val username = user?.displayName ?: user?.email?.substringBefore("@") // Default username
+        val username = user?.displayName ?: user?.email?.substringBefore("@") // Def username
         val email = user?.email
         return Pair(username, email)
     }

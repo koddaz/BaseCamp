@@ -14,13 +14,11 @@ fun ProfileScreen(loginModel: LoginModel = viewModel()) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val isLoggedIn by loginModel.loggedin.collectAsState()
-    val userInfo by remember { mutableStateOf(loginModel.getUserInfo()) }
+    val userInfo by loginModel.userInfo.collectAsState() // Now observing Firestore data
 
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
-            val (username, email) = loginModel.getUserInfo()
-            println("Logged in user: $email")
-            println("Username: $username")
+            loginModel.checklogin() // Ensure user info is fetched from Firestore
         }
     }
 
@@ -63,11 +61,13 @@ fun ProfileScreen(loginModel: LoginModel = viewModel()) {
             }
         } else {
             val (username, email) = userInfo
+            val uid = loginModel.getCurrentUserUid() // Get UID from Firebase Auth
 
             Text("You are logged in!", style = MaterialTheme.typography.bodyLarge)
             Spacer(modifier = Modifier.height(8.dp))
             Text("Username: ${username ?: "N/A"}", style = MaterialTheme.typography.bodyMedium)
             Text("Email: ${email ?: "N/A"}", style = MaterialTheme.typography.bodyMedium)
+            Text("UID: ${uid ?: "N/A"}", style = MaterialTheme.typography.bodyMedium)
 
             Spacer(modifier = Modifier.height(16.dp))
 
