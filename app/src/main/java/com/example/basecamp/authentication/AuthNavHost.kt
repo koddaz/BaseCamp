@@ -15,7 +15,7 @@ fun AuthNavHost() {
 
     NavHost(navController = navController, startDestination = authRoutes.MAIN) {
         composable(profileRoutes.MAIN) {
-            LoginScreen()
+            LoginScreen(goConfirm = {}, goRegister = {})
         }
     }
 
