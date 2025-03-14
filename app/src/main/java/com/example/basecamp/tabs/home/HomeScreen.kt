@@ -7,10 +7,10 @@ import androidx.compose.runtime.Composable
 import com.example.basecamp.navigation.models.LoginModel
 
 @Composable
-fun HomeScreen(loginmodel: LoginModel) {
+fun HomeScreen(loginModel: LoginModel) {
     Text("Home Screen", style = MaterialTheme.typography.titleLarge)
     Button(onClick = {
-        loginmodel.logout()
+        loginModel.logout()
     }) {
         Text("Logout")
     }
