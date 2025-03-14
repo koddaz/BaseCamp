@@ -16,11 +16,11 @@ import com.example.basecamp.authentication.AuthNavHost
 import com.example.basecamp.navigation.models.LoginModel
 
 @Composable
-fun Root(loginmodel : LoginModel) {
+fun Root(loginModel : LoginModel = viewModel()) {
     var isLoading by remember { mutableStateOf(true) }
     val tempFunction = { isLoading = false }
 
-    val isLoggedin by loginmodel.loggedin.collectAsState()
+    val isLoggedin by loginModel.loggedin.collectAsState()
 
     Column(Modifier.fillMaxSize()) {
         if (isLoading) {
@@ -28,9 +28,9 @@ fun Root(loginmodel : LoginModel) {
                 tempFunction = tempFunction,
             )
         } else if(isLoggedin) {
-            TabNavigation(loginmodel)
+            TabNavigation(loginModel)
         } else {
-            AuthNavHost(loginmodel)
+            AuthNavHost(loginModel)
         }
     }
 }
@@ -38,5 +38,5 @@ fun Root(loginmodel : LoginModel) {
 @Preview(showBackground = true)
 @Composable
 fun RootPreview() {
-    Root(loginmodel = viewModel())
+    Root(loginModel = viewModel())
 }
