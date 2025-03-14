@@ -21,7 +21,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.basecamp.navigation.models.LoginModel
 
 @Composable
-fun RegisterScreen(loginmodel : LoginModel, goLogin : () -> Unit) {
+fun RegisterScreen(loginModel : LoginModel, goLogin : () -> Unit) {
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -48,7 +48,7 @@ fun RegisterScreen(loginmodel : LoginModel, goLogin : () -> Unit) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(onClick = {
-            loginmodel.register(email, password)
+            loginModel.register(email, password)
             goLogin()
         },
             modifier = Modifier.fillMaxWidth()
@@ -62,5 +62,5 @@ fun RegisterScreen(loginmodel : LoginModel, goLogin : () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun RegisterScreenPreview() {
-    RegisterScreen(loginmodel = viewModel(), goLogin = {})
+    RegisterScreen(loginModel = viewModel(), goLogin = {})
 }
