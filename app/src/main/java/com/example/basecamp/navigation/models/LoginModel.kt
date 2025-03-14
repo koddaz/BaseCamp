@@ -20,17 +20,30 @@ class LoginModel : ViewModel() {
         checklogin()
     }
 
+    fun isLoggedInTrue() {
+        _loggedin.value = true
+        Log.i("isLoggedInTrueDEBUG", "Logged in = ${loggedin.value}")
+    }
+
+    fun isLoggedInFalse() {
+        _loggedin.value = false
+        Log.i("isLoggedInFalseDEBUG", "Logged out = ${loggedin.value}")
+    }
+
     fun checklogin() {
         if (Firebase.auth.currentUser == null) {
             _loggedin.value = false
+            Log.i("CHECKLOGINDEBUG", "Logged in = ${loggedin.value}")
         } else {
             _loggedin.value = true
+            Log.i("CHECKLOGINDEBUG", "Logged in = ${loggedin.value}")
         }
     }
 
     fun login(email: String, password: String) {
         Firebase.auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
             checklogin()
+            Log.i("LOGINDEBUG", "Checked login")
         }.addOnFailureListener {
             // VISA FEL
         }

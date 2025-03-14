@@ -16,7 +16,7 @@ import com.example.basecamp.authentication.AuthNavHost
 import com.example.basecamp.navigation.models.LoginModel
 
 @Composable
-fun Root(loginModel : LoginModel) {
+fun Root(loginModel : LoginModel = viewModel()) {
     var isLoading by remember { mutableStateOf(true) }
     val tempFunction = { isLoading = false }
 

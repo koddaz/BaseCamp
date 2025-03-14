@@ -17,16 +17,17 @@ fun AuthNavHost(loginModel : LoginModel) {
     NavHost(navController = navController, startDestination = authRoutes.LOGIN) {
         composable(authRoutes.LOGIN) {
             LoginScreen(
-                goRegister = { navController.navigate(route = authRoutes.REGISTER)},
-                goForgotPass = { navController.navigate(route = authRoutes.FORGOTPASS)}
-            ) }
+                goRegister = { navController.navigate(route = authRoutes.REGISTER) },
+                goForgotPass = { navController.navigate(route = authRoutes.FORGOTPASS) },
+                loginModel = loginModel
+            )
+        }
         composable(authRoutes.REGISTER) {
             RegisterScreen(loginModel,
-                goLogin = {navController.navigate(route = authRoutes.LOGIN)})
+                goLogin = { navController.navigate(route = authRoutes.LOGIN) })
         }
         composable(authRoutes.FORGOTPASS) {
             ConfirmScreen(loginModel)
         }
     }
-
 }
