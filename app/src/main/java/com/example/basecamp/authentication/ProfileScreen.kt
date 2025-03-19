@@ -10,8 +10,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.basecamp.navigation.models.LoginModel
 
 @Composable
-fun RegisterScreen(loginModel : LoginModel, goLogin : () -> Unit) {
-
+fun ProfileScreen(loginModel: LoginModel = viewModel()) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val isLoggedIn by loginModel.loggedin.collectAsState()
@@ -24,7 +23,7 @@ fun RegisterScreen(loginModel : LoginModel, goLogin : () -> Unit) {
     }
 
     Column(modifier = Modifier.padding(16.dp)) {
-        Text("Register", style = MaterialTheme.typography.headlineMedium)
+        Text("Profile", style = MaterialTheme.typography.headlineMedium)
 
         if (!isLoggedIn) {
             TextField(
@@ -64,7 +63,7 @@ fun RegisterScreen(loginModel : LoginModel, goLogin : () -> Unit) {
             val (username, email) = userInfo
             val uid = loginModel.getCurrentUserUid() // Get UID from Firebase Auth
 
-            Text("You have registered!", style = MaterialTheme.typography.bodyLarge)
+            Text("You are logged in!", style = MaterialTheme.typography.bodyLarge)
             Spacer(modifier = Modifier.height(8.dp))
             Text("Username: ${username ?: "N/A"}", style = MaterialTheme.typography.bodyMedium)
             Text("Email: ${email ?: "N/A"}", style = MaterialTheme.typography.bodyMedium)
@@ -88,20 +87,12 @@ fun RegisterScreen(loginModel : LoginModel, goLogin : () -> Unit) {
             ) {
                 Text("Delete Account")
             }
-        Button(onClick = {
-            loginModel.register(email, password)
-            goLogin()
-        },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Register")
         }
     }
 }
 
-
 @Preview(showBackground = true)
 @Composable
-fun RegisterScreenPreview() {
-    RegisterScreen(loginModel = viewModel(), goLogin = {})
+fun ProfilePreviewScreen() {
+    ProfileScreen()
 }
