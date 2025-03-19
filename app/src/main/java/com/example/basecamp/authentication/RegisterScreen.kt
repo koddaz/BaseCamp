@@ -61,13 +61,13 @@ fun RegisterScreen(loginModel : LoginModel, goLogin : () -> Unit) {
                 Text("Register")
             }
         } else {
-            val (username, email) = userInfo
+            val (username, userEmail) = userInfo
             val uid = loginModel.getCurrentUserUid() // Get UID from Firebase Auth
 
             Text("You have registered!", style = MaterialTheme.typography.bodyLarge)
             Spacer(modifier = Modifier.height(8.dp))
             Text("Username: ${username ?: "N/A"}", style = MaterialTheme.typography.bodyMedium)
-            Text("Email: ${email ?: "N/A"}", style = MaterialTheme.typography.bodyMedium)
+            Text("Email: ${userEmail ?: "N/A"}", style = MaterialTheme.typography.bodyMedium)
             Text("UID: ${uid ?: "N/A"}", style = MaterialTheme.typography.bodyMedium)
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -88,17 +88,18 @@ fun RegisterScreen(loginModel : LoginModel, goLogin : () -> Unit) {
             ) {
                 Text("Delete Account")
             }
-        Button(onClick = {
-            loginModel.register(email, password)
-            goLogin()
-        },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Register")
+            Button(
+                onClick = {
+                    loginModel.register(email, password)
+                    goLogin()
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Register")
+            }
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable

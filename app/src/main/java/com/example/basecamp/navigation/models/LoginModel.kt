@@ -40,115 +40,114 @@ class LoginModel : ViewModel() {
 
         if (user != null) {
             fetchUserInfoFromFirestore(user.uid)
-        if (Firebase.auth.currentUser == null) {
-            _loggedin.value = false
-            Log.i("CHECKLOGINDEBUG", "Logged in = ${loggedin.value}")
-        } else {
-            _userInfo.value = Pair(null, null)
-            _loggedin.value = true
-            Log.i("CHECKLOGINDEBUG", "Logged in = ${loggedin.value}")
-        }
-    }
-
-    fun login(email: String, password: String) {
-        Firebase.auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
-            checklogin()
-            Log.i("LOGINDEBUG", "Checked login")
-        }.addOnFailureListener {
-            // fel
-        }
-    }
-
-    fun loginUser1() {
-        val email = "1@hotmail.com"
-        val password = "test1234"
-        Firebase.auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
-            checklogin()
-        }.addOnFailureListener {
-            // FEL
-        }
-    }
-
-    fun loginUser2() {
-        val email = "2@hotmail.com"
-        val password = "test123"
-        Firebase.auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
-            checklogin()
-        }.addOnFailureListener {
-            // FEL
-        }
-    }
-
-    fun forgotPassword(email : String) {
-        Firebase.auth.sendPasswordResetEmail(email)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Log.d("BASECAMPDEBUG", "Email Sent to user")
-                }
-
+            if (Firebase.auth.currentUser == null) {
+                _loggedin.value = false
+                Log.i("CHECKLOGINDEBUG", "Logged in = ${loggedin.value}")
+            } else {
+                _userInfo.value = Pair(null, null)
+                _loggedin.value = true
+                Log.i("CHECKLOGINDEBUG", "Logged in = ${loggedin.value}")
             }
-    }
-
-    fun register(email: String, password: String) {
-        Firebase.auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
-            checklogin()
-        }.addOnFailureListener {
-            // fel
         }
     }
+        fun login(email: String, password: String) {
+            Firebase.auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
+                checklogin()
+                Log.i("LOGINDEBUG", "Checked login")
+            }.addOnFailureListener {
+                // fel
+            }
+        }
 
-    fun registerAndCreateUserInFirestore(email: String, password: String) {
-        Firebase.auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener { authResult ->
-            val userId = authResult.user?.uid
-            if (userId != null) {
-                val user = mapOf(
-                    "email" to email,
-                    "username" to email.substringBefore("@") // user before at sign
-                )
+        fun loginUser1() {
+            val email = "1@hotmail.com"
+            val password = "test1234"
+            Firebase.auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
+                checklogin()
+            }.addOnFailureListener {
+                // FEL
+            }
+        }
 
-                firestore.collection("users").document(userId).set(user)
-                    .addOnSuccessListener {
-                        checklogin()
+        fun loginUser2() {
+            val email = "2@hotmail.com"
+            val password = "test123"
+            Firebase.auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
+                checklogin()
+            }.addOnFailureListener {
+                // FEL
+            }
+        }
+
+        fun forgotPassword(email: String) {
+            Firebase.auth.sendPasswordResetEmail(email)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Log.d("BASECAMPDEBUG", "Email Sent to user")
                     }
-                    .addOnFailureListener {
-                        //  Firestore fel
-                    }
-            }
-        }.addOnFailureListener {
-            //  Auth fel
+
+                }
         }
-    }
 
-    fun logout() {
-        Firebase.auth.signOut()
-        checklogin()
-    }
+        fun register(email: String, password: String) {
+            Firebase.auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
+                checklogin()
+            }.addOnFailureListener {
+                // fel
+            }
+        }
 
-    fun deleteUser() {
-        Firebase.auth.currentUser?.delete()?.addOnCompleteListener {
+        fun registerAndCreateUserInFirestore(email: String, password: String) {
+            Firebase.auth.createUserWithEmailAndPassword(email, password)
+                .addOnSuccessListener { authResult ->
+                    val userId = authResult.user?.uid
+                    if (userId != null) {
+                        val user = mapOf(
+                            "email" to email,
+                            "username" to email.substringBefore("@") // user before at sign
+                        )
+
+                        firestore.collection("users").document(userId).set(user)
+                            .addOnSuccessListener {
+                                checklogin()
+                            }
+                            .addOnFailureListener {
+                                //  Firestore fel
+                            }
+                    }
+                }.addOnFailureListener {
+                //  Auth fel
+            }
+        }
+
+        fun logout() {
+            Firebase.auth.signOut()
             checklogin()
         }
-    }
+
+        fun deleteUser() {
+            Firebase.auth.currentUser?.delete()?.addOnCompleteListener {
+                checklogin()
+            }
+        }
 
 
-
-    fun getCurrentUserUid(): String? {
-        return Firebase.auth.currentUser?.uid
-    }
-
+        fun getCurrentUserUid(): String? {
+            return Firebase.auth.currentUser?.uid
+        }
 
 
-    fun fetchUserInfoFromFirestore(userId: String) {
-        firestore.collection("users").document(userId).get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    val username = document.getString("username")
-                    val email = document.getString("email")
-                    _userInfo.value = Pair(username, email)
+        fun fetchUserInfoFromFirestore(userId: String) {
+            firestore.collection("users").document(userId).get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        val username = document.getString("username")
+                        val email = document.getString("email")
+                        _userInfo.value = Pair(username, email)
+                    }
                 }
-            }
-            .addOnFailureListener {
-                _userInfo.value = Pair(null, null) // firestore fel
-            }
+                .addOnFailureListener {
+                    _userInfo.value = Pair(null, null) // firestore fel
+                }
+        }
     }
-}
