@@ -14,7 +14,7 @@ import com.example.basecamp.navigation.models.LoginModel
 fun AuthNavHost(loginModel : LoginModel) {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = authRoutes.LOGIN) {
+    NavHost(navController = navController, startDestination = authRoutes.REGISTER) {
         composable(authRoutes.LOGIN) {
             LoginScreen(
                 goRegister = { navController.navigate(route = authRoutes.REGISTER) },
