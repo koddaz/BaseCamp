@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.basecampers.Authentication.ConfirmScreen
+import com.basecampers.Authentication.ForgotPasswordScreen
 import com.basecampers.Authentication.LoginScreen
 import com.basecampers.Authentication.RegisterScreen
 import com.example.basecamp.authentication.models.authRoutes
@@ -27,7 +27,7 @@ fun AuthNavHost(loginModel : LoginModel) {
                 goLogin = { navController.navigate(route = authRoutes.LOGIN) })
         }
         composable(authRoutes.FORGOTPASS) {
-            ConfirmScreen(loginModel)
+            ForgotPasswordScreen(loginModel)
         }
     }
 }

@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.example.basecamp.navigation.models.LoginModel
 
 @Composable
-fun ConfirmScreen(loginModel : LoginModel) {
+fun ForgotPasswordScreen(loginModel : LoginModel) {
 
     var email by remember { mutableStateOf("") }
 
