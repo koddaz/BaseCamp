@@ -31,18 +31,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
-import com.basecampers.profile.ProfileScreen
 import com.basecampers.ui.theme.BaseCampTheme
-import com.example.basecamp.navigation.models.LoginModel
+import com.example.basecamp.navigation.models.AuthViewModel
 import com.example.basecamp.tabs.booking.BookingNavHost
 import com.example.basecamp.tabs.home.HomeNavHost
 import com.example.basecamp.tabs.profile.ProfileNavHost
 import com.example.basecamp.tabs.social.SocialNavHost
-import com.example.basecamp.tabs.social.SocialScreen
 
 
 @Composable
-fun TabNavigation(loginmodel : LoginModel) {
+fun TabNavigation(loginmodel : AuthViewModel) {
     var selectedItem by remember { mutableIntStateOf(0) }
     var navController = rememberNavController()
 

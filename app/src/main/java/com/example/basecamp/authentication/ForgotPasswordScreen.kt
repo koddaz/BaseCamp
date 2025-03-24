@@ -16,10 +16,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.basecamp.navigation.models.LoginModel
+import com.example.basecamp.navigation.models.AuthViewModel
 
 @Composable
-fun ConfirmScreen(loginModel : LoginModel) {
+fun ForgotPasswordScreen(authViewModel : AuthViewModel) {
 
     var email by remember { mutableStateOf("") }
 
@@ -36,7 +36,7 @@ fun ConfirmScreen(loginModel : LoginModel) {
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(onClick = {
-            loginModel.forgotPassword(email)
+            authViewModel.forgotPassword(email)
         }, modifier = Modifier.fillMaxWidth()) {
             Text("Send Email")
         }

@@ -6,20 +6,20 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import com.example.basecamp.navigation.models.LoginModel
+import com.example.basecamp.navigation.models.AuthViewModel
 
 @Composable
-fun HomeScreen(loginModel: LoginModel) {
+fun HomeScreen(authViewModel: AuthViewModel) {
     Column(verticalArrangement = Arrangement.Center) {
         Text("Home Screen", style = MaterialTheme.typography.titleLarge)
         Button(onClick = {
-            loginModel.logout()
+            authViewModel.logout()
         }) {
             Text("Logout")
         }
 
         Button(onClick = {
-            loginModel.isLoggedInFalse()
+            authViewModel.isLoggedInFalse()
         }) {
             Text("Change isLoggedIn to False")
         }
