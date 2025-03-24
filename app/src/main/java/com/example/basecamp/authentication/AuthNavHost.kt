@@ -8,10 +8,10 @@ import com.basecampers.Authentication.ForgotPasswordScreen
 import com.basecampers.Authentication.LoginScreen
 import com.basecampers.Authentication.RegisterScreen
 import com.example.basecamp.authentication.models.authRoutes
-import com.example.basecamp.navigation.models.LoginModel
+import com.example.basecamp.navigation.models.AuthViewModel
 
 @Composable
-fun AuthNavHost(loginModel : LoginModel) {
+fun AuthNavHost(authViewModel : AuthViewModel) {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = authRoutes.REGISTER) {
@@ -19,15 +19,15 @@ fun AuthNavHost(loginModel : LoginModel) {
             LoginScreen(
                 goRegister = { navController.navigate(route = authRoutes.REGISTER) },
                 goForgotPass = { navController.navigate(route = authRoutes.FORGOTPASS) },
-                loginModel = loginModel
+                authViewModel = authViewModel
             )
         }
         composable(authRoutes.REGISTER) {
-            RegisterScreen(loginModel,
+            RegisterScreen(authViewModel,
                 goLogin = { navController.navigate(route = authRoutes.LOGIN) })
         }
         composable(authRoutes.FORGOTPASS) {
-            ForgotPasswordScreen(loginModel)
+            ForgotPasswordScreen(authViewModel)
         }
     }
 }

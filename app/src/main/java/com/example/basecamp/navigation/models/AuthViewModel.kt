@@ -9,7 +9,7 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class LoginModel : ViewModel() {
+class AuthViewModel : ViewModel() {
 
     val database = Firebase.database.reference
     val firestore = Firebase.firestore

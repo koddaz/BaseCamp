@@ -7,19 +7,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.basecamp.navigation.models.LoginModel
+import com.example.basecamp.navigation.models.AuthViewModel
 
 @Composable
-fun RegisterScreen(loginModel : LoginModel, goLogin : () -> Unit) {
+fun RegisterScreen(authViewModel : AuthViewModel, goLogin : () -> Unit) {
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    val isLoggedIn by loginModel.loggedin.collectAsState()
-    val userInfo by loginModel.userInfo.collectAsState() // Now observing Firestore data
+    val isLoggedIn by authViewModel.loggedin.collectAsState()
+    val userInfo by authViewModel.userInfo.collectAsState() // Now observing Firestore data
 
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
-            loginModel.checklogin() // Ensure user info is fetched from Firestore
+            authViewModel.checklogin() // Ensure user info is fetched from Firestore
         }
     }
 
@@ -46,7 +46,7 @@ fun RegisterScreen(loginModel : LoginModel, goLogin : () -> Unit) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { loginModel.login(email, password) },
+                onClick = { authViewModel.login(email, password) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Login")
@@ -55,14 +55,19 @@ fun RegisterScreen(loginModel : LoginModel, goLogin : () -> Unit) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
-                onClick = { loginModel.registerAndCreateUserInFirestore(email, password) },
+                onClick = { authViewModel.registerAndCreateUserInFirestore(email, password) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Register")
             }
+            Button(onClick = {
+                goLogin()
+            }) {
+                Text("Go to Login")
+            }
         } else {
             val (username, userEmail) = userInfo
-            val uid = loginModel.getCurrentUserUid() // Get UID from Firebase Auth
+            val uid = authViewModel.getCurrentUserUid() // Get UID from Firebase Auth
 
             Text("You have registered!", style = MaterialTheme.typography.bodyLarge)
             Spacer(modifier = Modifier.height(8.dp))
@@ -73,7 +78,7 @@ fun RegisterScreen(loginModel : LoginModel, goLogin : () -> Unit) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { loginModel.logout() },
+                onClick = { authViewModel.logout() },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Logout")
@@ -82,7 +87,7 @@ fun RegisterScreen(loginModel : LoginModel, goLogin : () -> Unit) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
-                onClick = { loginModel.deleteUser() },
+                onClick = { authViewModel.deleteUser() },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error)
             ) {
@@ -90,7 +95,7 @@ fun RegisterScreen(loginModel : LoginModel, goLogin : () -> Unit) {
             }
             Button(
                 onClick = {
-                    loginModel.register(email, password)
+                    authViewModel.register(email, password)
                     goLogin()
                 },
                 modifier = Modifier.fillMaxWidth()
@@ -104,5 +109,5 @@ fun RegisterScreen(loginModel : LoginModel, goLogin : () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun RegisterScreenPreview() {
-    RegisterScreen(loginModel = viewModel(), goLogin = {})
+    RegisterScreen(authViewModel = viewModel(), goLogin = {})
 }

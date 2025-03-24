@@ -7,18 +7,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.basecamp.navigation.models.LoginModel
+import com.example.basecamp.navigation.models.AuthViewModel
 
 @Composable
-fun ProfileScreen(loginModel: LoginModel = viewModel()) {
+fun ProfileScreen(authViewModel: AuthViewModel = viewModel()) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    val isLoggedIn by loginModel.loggedin.collectAsState()
-    val userInfo by loginModel.userInfo.collectAsState() // Now observing Firestore data
+    val isLoggedIn by authViewModel.loggedin.collectAsState()
+    val userInfo by authViewModel.userInfo.collectAsState() // Now observing Firestore data
 
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
-            loginModel.checklogin() // Ensure user info is fetched from Firestore
+            authViewModel.checklogin() // Ensure user info is fetched from Firestore
         }
     }
 
@@ -45,7 +45,7 @@ fun ProfileScreen(loginModel: LoginModel = viewModel()) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { loginModel.login(email, password) },
+                onClick = { authViewModel.login(email, password) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Login")
@@ -54,14 +54,14 @@ fun ProfileScreen(loginModel: LoginModel = viewModel()) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
-                onClick = { loginModel.registerAndCreateUserInFirestore(email, password) },
+                onClick = { authViewModel.registerAndCreateUserInFirestore(email, password) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Register")
             }
         } else {
             val (username, email) = userInfo
-            val uid = loginModel.getCurrentUserUid() // Get UID from Firebase Auth
+            val uid = authViewModel.getCurrentUserUid() // Get UID from Firebase Auth
 
             Text("You are logged in!", style = MaterialTheme.typography.bodyLarge)
             Spacer(modifier = Modifier.height(8.dp))
@@ -72,7 +72,7 @@ fun ProfileScreen(loginModel: LoginModel = viewModel()) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { loginModel.logout() },
+                onClick = { authViewModel.logout() },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Logout")
@@ -81,7 +81,7 @@ fun ProfileScreen(loginModel: LoginModel = viewModel()) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
-                onClick = { loginModel.deleteUser() },
+                onClick = { authViewModel.deleteUser() },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error)
             ) {

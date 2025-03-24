@@ -8,14 +8,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.basecamp.navigation.models.LoginModel
+import com.example.basecamp.navigation.models.AuthViewModel
 import com.google.firebase.ktx.Firebase
 
 @Composable
-fun LoginScreen(loginModel: LoginModel, goRegister : () -> Unit, goForgotPass : () -> Unit) {
+fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotPass : () -> Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    val isLoggedIn by loginModel.loggedin.collectAsState()
+    val isLoggedIn by authViewModel.loggedin.collectAsState()
 
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
@@ -48,7 +48,7 @@ fun LoginScreen(loginModel: LoginModel, goRegister : () -> Unit, goForgotPass : 
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { loginModel.login(email, password) },
+                onClick = { authViewModel.login(email, password) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Login")
@@ -71,19 +71,19 @@ fun LoginScreen(loginModel: LoginModel, goRegister : () -> Unit, goForgotPass : 
             }
 
             Button(onClick = {
-                loginModel.isLoggedInTrue()
+                authViewModel.isLoggedInTrue()
             }) {
                 Text("Change isLoggedIn to True")
             }
 
             Button(onClick = {
-                loginModel.loginUser1()
+                authViewModel.loginUser1()
             }) {
                 Text("User 1")
             }
 
             Button(onClick = {
-                loginModel.loginUser2()
+                authViewModel.loginUser2()
             }) {
                 Text("User 2")
             }
@@ -93,5 +93,5 @@ fun LoginScreen(loginModel: LoginModel, goRegister : () -> Unit, goForgotPass : 
 @Preview(showBackground = true)
 @Composable
 fun PreviewLoginScreen() {
-    LoginScreen(goRegister = {}, goForgotPass = {}, loginModel = viewModel())
+    LoginScreen(goRegister = {}, goForgotPass = {}, authViewModel = viewModel())
 }
