@@ -16,16 +16,10 @@ fun ProfileScreen(authViewModel: AuthViewModel = viewModel()) {
     val isLoggedIn by authViewModel.loggedin.collectAsState()
     val userInfo by authViewModel.userInfo.collectAsState() // Now observing Firestore data
 
-    LaunchedEffect(isLoggedIn) {
-        if (isLoggedIn) {
-            authViewModel.checklogin() // Ensure user info is fetched from Firestore
-        }
-    }
 
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Profile", style = MaterialTheme.typography.headlineMedium)
 
-        if (!isLoggedIn) {
             TextField(
                 label = { Text("Email") },
                 value = email,
@@ -59,35 +53,7 @@ fun ProfileScreen(authViewModel: AuthViewModel = viewModel()) {
             ) {
                 Text("Register")
             }
-        } else {
-            val (username, email) = userInfo
-            val uid = authViewModel.getCurrentUserUid() // Get UID from Firebase Auth
 
-            Text("You are logged in!", style = MaterialTheme.typography.bodyLarge)
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("Username: ${username ?: "N/A"}", style = MaterialTheme.typography.bodyMedium)
-            Text("Email: ${email ?: "N/A"}", style = MaterialTheme.typography.bodyMedium)
-            Text("UID: ${uid ?: "N/A"}", style = MaterialTheme.typography.bodyMedium)
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = { authViewModel.logout() },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Logout")
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Button(
-                onClick = { authViewModel.deleteUser() },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error)
-            ) {
-                Text("Delete Account")
-            }
-        }
     }
 }
 
