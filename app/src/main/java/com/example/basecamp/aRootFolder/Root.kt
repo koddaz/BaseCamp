@@ -20,14 +20,15 @@ fun Root(authViewModel : AuthViewModel = viewModel()) {
     var isLoading by remember { mutableStateOf(true) }
     val tempFunction = { isLoading = false }
 
-    val isLoggedin by authViewModel.loggedin.collectAsState()
+    val isLoggedIn by authViewModel.loggedin.collectAsState()
 
     Column(Modifier.fillMaxSize()) {
         if (isLoading) {
             LoadingScreen(
                 tempFunction = tempFunction,
+                isLoggedIn = isLoggedIn
             )
-        } else if(isLoggedin) {
+        } else if(isLoggedIn) {
             TabNavigation(authViewModel)
         } else {
             AuthNavHost(authViewModel)
