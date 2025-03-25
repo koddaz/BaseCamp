@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.basecamp.components.PasswordTextField
 import com.example.basecamp.navigation.models.AuthViewModel
 
 @Composable
@@ -14,8 +15,8 @@ fun RegisterScreen(authViewModel : AuthViewModel, goLogin : () -> Unit) {
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    val isLoggedIn by authViewModel.loggedin.collectAsState()
-    val userInfo by authViewModel.userInfo.collectAsState() // Now observing Firestore data
+    var confirmPassword by remember { mutableStateOf("") }
+
 
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Register", style = MaterialTheme.typography.headlineMedium)
@@ -30,11 +31,16 @@ fun RegisterScreen(authViewModel : AuthViewModel, goLogin : () -> Unit) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            TextField(
-                label = { Text("Password") },
-                value = password,
+            PasswordTextField(
+                password = password,
                 onValueChange = { password = it },
-                modifier = Modifier.fillMaxWidth()
+                label = "Password"
+            )
+
+            PasswordTextField(
+                password = confirmPassword,
+                onValueChange = { confirmPassword = it },
+                label = "Confirm Password"
             )
 
             Spacer(modifier = Modifier.height(16.dp))
