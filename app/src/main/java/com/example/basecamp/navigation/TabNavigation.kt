@@ -40,20 +40,20 @@ import com.example.basecamp.tabs.social.SocialNavHost
 
 
 @Composable
-fun TabNavigation(loginmodel : AuthViewModel) {
+fun TabNavigation(authViewModel : AuthViewModel) {
     var selectedItem by remember { mutableIntStateOf(0) }
     var navController = rememberNavController()
 
     Column(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.weight(1f)) {
             if (selectedItem == 0) {
-                HomeNavHost(loginmodel)
+                HomeNavHost(authViewModel)
             } else if (selectedItem == 1) {
                 BookingNavHost()
             } else if (selectedItem == 2) {
                 SocialNavHost()
             } else if (selectedItem == 3) {
-                ProfileNavHost()
+                ProfileNavHost(authViewModel)
             } else {
                 Text("FEL FINNS INTE")
             }
@@ -107,6 +107,6 @@ fun NavigationBar(
 @Composable
 fun NavigationBarPreview() {
     BaseCampTheme {
-        TabNavigation(loginmodel = viewModel())
+        TabNavigation(authViewModel = viewModel())
     }
 }

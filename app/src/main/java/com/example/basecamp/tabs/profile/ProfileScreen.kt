@@ -31,15 +31,6 @@ fun ProfileScreen(authViewModel: AuthViewModel) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { authViewModel.logout() },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Logout")
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Button(
             onClick = { authViewModel.deleteUser() },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error)
