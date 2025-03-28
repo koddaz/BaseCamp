@@ -13,24 +13,25 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.navigation.TabNavigation
 import com.example.basecamp.authentication.AuthNavHost
-import com.example.basecamp.navigation.models.LoginModel
+import com.example.basecamp.navigation.models.AuthViewModel
 
 @Composable
-fun Root(loginModel : LoginModel = viewModel()) {
+fun Root(authViewModel : AuthViewModel = viewModel()) {
     var isLoading by remember { mutableStateOf(true) }
     val tempFunction = { isLoading = false }
 
-    val isLoggedin by loginModel.loggedin.collectAsState()
+    val isLoggedIn by authViewModel.loggedin.collectAsState()
 
     Column(Modifier.fillMaxSize()) {
         if (isLoading) {
             LoadingScreen(
                 tempFunction = tempFunction,
+                isLoggedIn = isLoggedIn
             )
-        } else if(isLoggedin) {
-            TabNavigation(loginModel)
+        } else if(isLoggedIn) {
+            TabNavigation(authViewModel)
         } else {
-            AuthNavHost(loginModel)
+            AuthNavHost(authViewModel)
         }
     }
 }
@@ -38,5 +39,5 @@ fun Root(loginModel : LoginModel = viewModel()) {
 @Preview(showBackground = true)
 @Composable
 fun RootPreview() {
-    Root(loginModel = viewModel())
+    Root(authViewModel = viewModel())
 }
