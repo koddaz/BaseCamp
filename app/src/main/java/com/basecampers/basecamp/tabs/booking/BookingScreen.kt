@@ -1,4 +1,4 @@
-package com.basecampers.booking
+package com.basecampers.basecamp.tabs.booking
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -22,10 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.basecampers.basecamp.tabs.booking.adminstuff.RegisterAdmin
 import com.basecampers.basecamp.tabs.booking.models.BookingItems
-import com.basecampers.basecamp.tabs.booking.BookingSelectionComposable
 import com.basecampers.basecamp.tabs.booking.models.BookingViewModel
-import com.basecampers.basecamp.tabs.booking.DatePickerComposable
 import com.basecampers.components.NavButton
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,12 +83,13 @@ fun BookingScreen(
                 title = "Next",
                 onClick = { onNext() }
             )
-        }
-        Row(modifier.fillMaxWidth()) {
             NavButton(
                 title = "Back",
                 onClick = { onBack() }
             )
+        }
+        Row(modifier.fillMaxWidth()) {
+            RegisterAdmin()
         }
     }
 }

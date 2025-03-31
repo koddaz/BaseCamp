@@ -11,11 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import com.basecampers.Authentication.RegisterScreen
 import com.basecampers.basecamp.navigation.models.AuthViewModel
 import com.basecampers.basecamp.tabs.booking.models.BookingViewModel
-import com.basecampers.booking.BookingScreen
 import com.basecampers.basecamp.tabs.booking.models.bookingRoutes
-import com.google.firebase.database.ktx.database
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 
 
 @Composable

@@ -1,7 +1,9 @@
 package com.basecampers.basecamp.aRootFolder
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -15,24 +17,25 @@ import com.basecampers.basecamp.navigation.TabNavigation
 import com.basecampers.basecamp.authentication.AuthNavHost
 import com.basecampers.basecamp.navigation.models.AuthViewModel
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun Root(authViewModel : AuthViewModel = viewModel()) {
+fun Root(modifier: Modifier = Modifier, authViewModel : AuthViewModel = viewModel()) {
     var isLoading by remember { mutableStateOf(true) }
     val tempFunction = { isLoading = false }
 
     val isLoggedin by authViewModel.loggedin.collectAsState()
 
-    Column(Modifier.fillMaxSize()) {
-        if (isLoading) {
-            LoadingScreen(
-                tempFunction = tempFunction,
-            )
-        } else if(isLoggedin) {
-            TabNavigation(authViewModel)
-        } else {
-            AuthNavHost(authViewModel)
+        Column(modifier.fillMaxSize()) {
+            if (isLoading) {
+                LoadingScreen(
+                    tempFunction = tempFunction,
+                )
+            } else if (isLoggedin) {
+                TabNavigation(authViewModel)
+            } else {
+                AuthNavHost(authViewModel)
+            }
         }
-    }
 }
 
 @Preview(showBackground = true)
