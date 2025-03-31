@@ -25,8 +25,6 @@ fun BookingNavHost() {
     val bookingViewModel: BookingViewModel = viewModel()
 
     val isLoggedIn = authViewModel.loggedin.collectAsState().value
-    val userInfo = authViewModel.userInfo.collectAsState().value
-    val db = Firebase.firestore
 
     LaunchedEffect(isLoggedIn) {
         authViewModel.checklogin()
