@@ -17,6 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,12 +27,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.basecamp.navigation.models.AuthViewModel
+import com.example.basecamp.navigation.models.RegisterErrors
 
 
 @Composable
-fun PasswordTextField(password : String, onValueChange : (String) -> Unit, label : String) {
+fun PasswordTextField(password : String, onValueChange : (String) -> Unit, label : String, modifier : Modifier, authViewModel : AuthViewModel) {
     val state = remember { TextFieldState() }
     var showPassword by remember { mutableStateOf(false) }
+    val errorMessage by authViewModel.registerErrorMessage.collectAsState()
     BasicSecureTextField(
         state = state,
         textObfuscationMode =
@@ -43,7 +48,14 @@ fun PasswordTextField(password : String, onValueChange : (String) -> Unit, label
         modifier = Modifier
             .fillMaxWidth()
             .padding(6.dp)
-            .border(1.dp, Color.LightGray, RoundedCornerShape(6.dp))
+            .border(
+                1.dp,
+                if(
+                    errorMessage.contains(RegisterErrors.PASSWORD) ||
+                    errorMessage.contains(RegisterErrors.CONFIRM_PASSWORD))
+                    Color.Red else Color.LightGray,
+                    RoundedCornerShape(6.dp)
+            )
             .padding(6.dp),
         decorator = { innerTextField ->
             Box(modifier = Modifier.fillMaxWidth()) {
@@ -85,5 +97,5 @@ fun PasswordTextField(password : String, onValueChange : (String) -> Unit, label
 @Preview(showBackground = true)
 @Composable
 fun PasswordTextFieldPreview() {
-    PasswordTextField(password = "", onValueChange = {}, label = "")
+    PasswordTextField(password = "", onValueChange = {}, label = "", modifier = Modifier, authViewModel = viewModel())
 }

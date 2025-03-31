@@ -24,7 +24,7 @@ fun ForgotPasswordScreen(authViewModel : AuthViewModel) {
     var email by remember { mutableStateOf("") }
 
     Column(modifier = Modifier.padding(16.dp)) {
-        // Ska ändras till forgot password
+
         Text("Forgot password", style = MaterialTheme.typography.headlineMedium)
 
         TextField(
