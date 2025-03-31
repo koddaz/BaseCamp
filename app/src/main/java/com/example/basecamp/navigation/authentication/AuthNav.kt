@@ -4,34 +4,34 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.basecampers.Authentication.ConfirmScreen
+import com.basecampers.Authentication.ForgotPasswordScreen
 import com.basecampers.Authentication.LoginScreen
 import com.basecampers.Authentication.RegisterScreen
 
-import com.example.basecamp.navigation.models.LoginModel
+import com.example.basecamp.navigation.models.AuthViewModel
 
 @Composable
-fun AuthNav(loginmodel : LoginModel) {
+fun AuthNav(authViewModel : AuthViewModel) {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = "login") {
 
         composable("login") {
-            LoginScreen(loginmodel,
+            LoginScreen(authViewModel,
                 goRegister = {
                     navController.navigate(route = "register")
-            }, goConfirm = {
+            }, goForgotPass = {
                 navController.navigate(route = "confirm")
             })
         }
         composable("register") {
-            RegisterScreen(loginmodel ,
+            RegisterScreen(authViewModel ,
                 goLogin = {
                     navController.navigate("login")
             })
         }
         composable("confirm") {
-            ConfirmScreen()
+            ForgotPasswordScreen(authViewModel)
         }
     }
 }

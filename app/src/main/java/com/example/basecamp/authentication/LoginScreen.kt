@@ -1,6 +1,5 @@
 package com.basecampers.Authentication
 
-import android.util.Log
 import com.google.firebase.auth.ktx.auth
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -9,14 +8,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.basecamp.navigation.models.LoginModel
+import com.example.basecamp.navigation.models.AuthViewModel
 import com.google.firebase.ktx.Firebase
 
 @Composable
-fun LoginScreen(loginModel: LoginModel = viewModel(), goRegister : () -> Unit, goConfirm : () -> Unit) {
+fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotPass : () -> Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    val isLoggedIn by loginModel.loggedin.collectAsState()
+    val isLoggedIn by authViewModel.loggedin.collectAsState()
 
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
@@ -27,12 +26,9 @@ fun LoginScreen(loginModel: LoginModel = viewModel(), goRegister : () -> Unit, g
     }
 
 
-
-
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Authentication", style = MaterialTheme.typography.headlineMedium)
 
-        if (!isLoggedIn) {
             TextField(
                 label = { Text("Email") },
                 value = email,
@@ -52,7 +48,7 @@ fun LoginScreen(loginModel: LoginModel = viewModel(), goRegister : () -> Unit, g
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { loginModel.login(email, password) },
+                onClick = { authViewModel.login(email, password) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Login")
@@ -68,53 +64,34 @@ fun LoginScreen(loginModel: LoginModel = viewModel(), goRegister : () -> Unit, g
             }
 
             Button(
-                onClick = { goConfirm() },
+                onClick = { goForgotPass() },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Confirm")
+                Text("Forgot Password")
             }
 
             Button(onClick = {
-                loginModel.loginUser1()
+                authViewModel.isLoggedInTrue()
+            }) {
+                Text("Change isLoggedIn to True")
+            }
+
+            Button(onClick = {
+                authViewModel.loginUser1()
             }) {
                 Text("User 1")
             }
 
             Button(onClick = {
-                loginModel.loginUser2()
+                authViewModel.loginUser2()
             }) {
                 Text("User 2")
             }
-
-        } else {
-
-            Text("You are logged in to: ${Firebase.auth.currentUser?.email}", style = MaterialTheme.typography.bodyLarge)
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = { loginModel.logout() },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Logout")
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Button(
-                onClick = { loginModel.deleteUser() },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error)
-            ) {
-                Text("Delete Account")
-            }
-
-
-        }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun PreviewLoginScreen() {
-    LoginScreen(goRegister = {}, goConfirm = {})
+    LoginScreen(goRegister = {}, goForgotPass = {}, authViewModel = viewModel())
 }
