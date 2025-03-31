@@ -36,7 +36,7 @@ import com.example.basecamp.navigation.models.AuthViewModel
 import com.example.basecamp.tabs.booking.BookingNavHost
 import com.example.basecamp.tabs.home.HomeNavHost
 import com.example.basecamp.tabs.profile.ProfileNavHost
-import com.example.basecamp.tabs.social.SocialNavHost
+import com.example.basecamp.tabs.social.navHost.SocialNavHost
 
 
 @Composable
