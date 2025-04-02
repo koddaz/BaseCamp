@@ -20,15 +20,17 @@ import androidx.compose.ui.unit.dp
 import com.basecampers.components.NavButton
 
 @Composable
-fun LoadingScreen(tempFunction: () -> Unit, isLoggedIn: Boolean = false) {
-
+fun LoadingScreen() {
+    
     val progress = remember { Animatable(0f) }
-
+    
     LaunchedEffect(Unit) {
-        progress.animateTo(targetValue = 1f, animationSpec = tween(durationMillis = 2000))
-        tempFunction()
+        progress.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 2000)
+        )
     }
-
+    
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -39,7 +41,7 @@ fun LoadingScreen(tempFunction: () -> Unit, isLoggedIn: Boolean = false) {
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.padding(bottom = 16.dp)
         )
-
+        
         LinearProgressIndicator(
             progress = {progress.value},
             modifier = Modifier.fillMaxWidth(0.7f).height(8.dp),
@@ -52,5 +54,5 @@ fun LoadingScreen(tempFunction: () -> Unit, isLoggedIn: Boolean = false) {
 @Preview(showBackground = true)
 @Composable
 fun LoadingScreenPreview() {
-    LoadingScreen(tempFunction = {})
+    LoadingScreen()
 }
