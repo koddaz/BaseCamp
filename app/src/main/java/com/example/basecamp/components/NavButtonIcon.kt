@@ -1,4 +1,4 @@
-package com.basecampers.components
+package com.example.basecamp.components
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size

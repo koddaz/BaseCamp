@@ -1,4 +1,4 @@
-package com.basecampers.navigation
+package com.example.basecamp.navigation
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope

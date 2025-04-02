@@ -12,7 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.basecampers.navigation.TabNavigation
+import com.example.basecamp.navigation.TabNavigation
 import com.example.basecamp.authentication.AuthNavHost
 import com.example.basecamp.navigation.models.AuthViewModel
 import kotlinx.coroutines.delay
