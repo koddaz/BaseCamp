@@ -12,11 +12,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.navigation.TabNavigation
+import com.example.basecamp.UserViewModel
 import com.example.basecamp.authentication.AuthNavHost
 import com.example.basecamp.navigation.models.AuthViewModel
 
 @Composable
-fun Root(authViewModel : AuthViewModel = viewModel()) {
+fun Root(authViewModel : AuthViewModel = viewModel(), userViewModel : UserViewModel = viewModel()) {
     var isLoading by remember { mutableStateOf(true) }
     val tempFunction = { isLoading = false }
 
@@ -31,7 +32,7 @@ fun Root(authViewModel : AuthViewModel = viewModel()) {
         } else if(isLoggedIn) {
             TabNavigation(authViewModel)
         } else {
-            AuthNavHost(authViewModel)
+            AuthNavHost(authViewModel, userViewModel)
         }
     }
 }

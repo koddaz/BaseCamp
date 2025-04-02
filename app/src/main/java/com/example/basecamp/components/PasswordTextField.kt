@@ -37,6 +37,20 @@ fun PasswordTextField(password : String, onValueChange : (String) -> Unit, label
     val state = remember { TextFieldState() }
     var showPassword by remember { mutableStateOf(false) }
     val errorMessage by authViewModel.registerErrorMessage.collectAsState()
+
+    val hasPasswordError = errorMessage.any { it in listOf(
+        RegisterErrors.PASSWORD_EMPTY,
+        RegisterErrors.PASSWORD_TOO_SHORT,
+        RegisterErrors.PASSWORD_NO_SPECIAL_CHAR,
+        RegisterErrors.PASSWORD_NO_UPPERCASE,
+        RegisterErrors.PASSWORD_NO_NUMBER
+    ) }
+
+    val hasConfirmPasswordError = errorMessage.any { it in listOf(
+        RegisterErrors.CONFIRM_PASSWORD_EMPTY,
+        RegisterErrors.CONFIRM_PASSWORD_MISMATCH
+    ) }
+
     BasicSecureTextField(
         state = state,
         textObfuscationMode =
@@ -50,11 +64,8 @@ fun PasswordTextField(password : String, onValueChange : (String) -> Unit, label
             .padding(6.dp)
             .border(
                 1.dp,
-                if(
-                    errorMessage.contains(RegisterErrors.PASSWORD) ||
-                    errorMessage.contains(RegisterErrors.CONFIRM_PASSWORD))
-                    Color.Red else Color.LightGray,
-                    RoundedCornerShape(6.dp)
+                if(hasPasswordError || hasConfirmPasswordError)
+                    Color.Red else Color.LightGray, RoundedCornerShape(6.dp)
             )
             .padding(6.dp),
         decorator = { innerTextField ->

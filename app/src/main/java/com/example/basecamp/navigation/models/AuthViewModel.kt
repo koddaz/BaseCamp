@@ -102,9 +102,14 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    fun registerAndCreateUserInFirestore(email: String, password: String, confirmPassword: String) {
+    fun registerAndCreateUserInFirestore(email: String, password: String, confirmPassword: String, companyName : String?) {
 
-        var checkError = validateRegister(email, password, confirmPassword)
+        val checkError = mutableListOf<RegisterErrors>().apply {
+            addAll(validateEmail(email))
+            addAll(validatePassword(password))
+            addAll(validateConfirmPassword(password, confirmPassword))
+        }
+
 
         _registerErrorMessage.value = checkError
 
@@ -165,53 +170,57 @@ class AuthViewModel : ViewModel() {
             }
     }
 
-    fun validateRegister(email: String, password: String, confirmPassword: String) : List<RegisterErrors> {
-        var checkError = mutableListOf<RegisterErrors>()
-        val specialCharPattern = "[!@#\$%^&*()\\-+=\\[\\]{}|;:,.<>?/]"
-        //isEmailValid(email)
-
-        if(email.isEmpty()) {
-            checkError.add(RegisterErrors.EMAIL)
-        }
-
-        if(!email.contains("@")) {
-            checkError.add(RegisterErrors.EMAIL)
-        }
-
-        if(!email.contains(".")) {
-            checkError.add(RegisterErrors.EMAIL)
-        }
+    fun validatePassword(password: String) : List<RegisterErrors> {
+        val checkError = mutableListOf<RegisterErrors>()
+        val specialCharPattern = Regex("[!@#\$%^&*()\\-+=\\[\\]{}|;:,.<>?/]")
+        val uppercaseRegex = Regex("[A-Z]")
+        val digitRegex = Regex("[0-9]")
 
         if(password.isEmpty()) {
-            checkError.add(RegisterErrors.PASSWORD)
+            checkError.add(RegisterErrors.PASSWORD_EMPTY)
         }
-
         if(password.length < 6) {
-            checkError.add(RegisterErrors.PASSWORD)
+            checkError.add(RegisterErrors.PASSWORD_TOO_SHORT)
         }
-
-        if(!password.contains(Regex(specialCharPattern))) {
-            checkError.add(RegisterErrors.PASSWORD)
+        if(!password.contains((specialCharPattern))) {
+            checkError.add(RegisterErrors.PASSWORD_NO_SPECIAL_CHAR)
         }
-
-        if(!password.contains(Regex("[A-Z]"))) {
-            checkError.add(RegisterErrors.PASSWORD)
+        if(!password.contains(uppercaseRegex)) {
+            checkError.add(RegisterErrors.PASSWORD_NO_UPPERCASE)
         }
-
-        if(!password.contains(Regex("[0-9]"))) {
-            checkError.add(RegisterErrors.PASSWORD)
+        if(!password.contains(digitRegex)) {
+            checkError.add(RegisterErrors.PASSWORD_NO_NUMBER)
         }
-
-        if(password != confirmPassword) {
-            checkError.add(RegisterErrors.CONFIRM_PASSWORD)
-        }
-
-        if(confirmPassword.isEmpty()) {
-            checkError.add(RegisterErrors.CONFIRM_PASSWORD)
-        }
-
         return checkError
     }
+
+    fun validateConfirmPassword(password: String, confirmPassword: String) : List<RegisterErrors> {
+        val checkError = mutableListOf<RegisterErrors>()
+
+        if(password != confirmPassword) {
+            checkError.add(RegisterErrors.CONFIRM_PASSWORD_MISMATCH)
+        }
+        if(confirmPassword.isEmpty()) {
+            checkError.add(RegisterErrors.CONFIRM_PASSWORD_EMPTY)
+        }
+        return checkError
+    }
+
+    fun validateEmail(email: String) : List<RegisterErrors> {
+        val checkError = mutableListOf<RegisterErrors>()
+
+        if(email.isEmpty()) {
+            checkError.add(RegisterErrors.EMAIL_EMPTY)
+        }
+        if(!email.contains("@")) {
+            checkError.add(RegisterErrors.EMAIL_NO_AT)
+        }
+        if(!email.contains(".")) {
+            checkError.add(RegisterErrors.EMAIL_NO_DOT)
+        }
+        return checkError
+    }
+
 /*
     fun isEmailValid(email: String): Boolean {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
@@ -220,5 +229,14 @@ class AuthViewModel : ViewModel() {
 }
 
 enum class RegisterErrors {
-    EMAIL, PASSWORD, CONFIRM_PASSWORD
+    PASSWORD_EMPTY,
+    PASSWORD_TOO_SHORT,
+    PASSWORD_NO_SPECIAL_CHAR,
+    PASSWORD_NO_UPPERCASE,
+    PASSWORD_NO_NUMBER,
+    CONFIRM_PASSWORD_EMPTY,
+    CONFIRM_PASSWORD_MISMATCH,
+    EMAIL_EMPTY,
+    EMAIL_NO_AT,
+    EMAIL_NO_DOT
 }
