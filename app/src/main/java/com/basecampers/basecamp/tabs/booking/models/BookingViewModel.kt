@@ -1,6 +1,7 @@
 package com.basecampers.basecamp.tabs.booking.models
 
 import androidx.lifecycle.ViewModel
+import com.basecampers.basecamp.tabs.booking.admin.BookingCategories
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -9,12 +10,20 @@ import kotlinx.coroutines.flow.StateFlow
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.text.set
 
 class BookingViewModel : ViewModel() {
+    val db = Firebase.firestore
 
     private val _selectedDateRange = MutableStateFlow<Pair<Long?, Long?>>(Pair(null, null))
     private val _startDate = MutableStateFlow<Long?>(null)
     private val _endDate = MutableStateFlow<Long?>(null)
+
+    private val _bookingItemsList = MutableStateFlow<List<BookingItems>>(emptyList())
+    val bookingItemsList: StateFlow<List<BookingItems>> = _bookingItemsList
+
+    private val _categories = MutableStateFlow<List<BookingCategories>>(emptyList())
+    val categories: StateFlow<List<BookingCategories>> = _categories
 
     private val _formattedDateRange = MutableStateFlow<String>("")
     val formattedDateRange: StateFlow<String> = _formattedDateRange
@@ -26,6 +35,61 @@ class BookingViewModel : ViewModel() {
     val seleectedExtraItems: StateFlow<List<ExtraItems>> = _selectedExtraItems
 
     val currentUserId = Firebase.auth.currentUser?.uid
+
+    init {
+        retrieveCategories()
+    }
+
+    fun retrieveCategories() {
+        db.collection("companies")
+            .document("companyName")
+            .collection("bookings")
+            .document("bookingCategories")
+            .collection("category")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val categoryList = snapshot.documents.mapNotNull { doc ->
+                    val id = doc.id
+                    val name = doc.getString("name") ?: ""
+                    val info = doc.getString("info") ?: ""
+                    BookingCategories(id, name, info)
+                }
+                _categories.value = categoryList
+            }
+    }
+
+    fun retrieveBookingItems(categoryId: String) {
+        db.collection("companies")
+            .document("companyName")
+            .collection("bookings")
+            .document("bookingCategories")
+            .collection("category")
+            .document(categoryId)
+            .collection("items")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val itemsList = snapshot.documents.mapNotNull { doc ->
+                    val id = doc.getLong("id")?.toInt() ?: 0
+                    val name = doc.getString("name") ?: ""
+                    val info = doc.getString("info") ?: ""
+                    val price = doc.getDouble("pricePerDay") ?: 0.0
+
+                    BookingItems(
+                        id = id,
+                        name = name,
+                        info = info,
+                        price = price
+                    )
+                }
+                _bookingItemsList.value = itemsList
+            }
+    }
+
+    fun loadItemsForCategory(category: BookingCategories) {
+        retrieveBookingItems(category.id)
+    }
+
+
 
     fun addExtraItem(item: ExtraItems) {
         _selectedExtraItems.value = _selectedExtraItems.value + item
@@ -90,13 +154,35 @@ class BookingViewModel : ViewModel() {
                 )
             },
             "timestamp" to com.google.firebase.Timestamp.now(),
-            "totalPrice" to (selectedItem.price + seleectedExtraItems.value.sumOf { it.price })
+            "totalPrice" to (selectedItem.price + seleectedExtraItems.value.sumOf { it.price }),
+            "userId" to currentUserUid // Add user reference
         )
 
-        Firebase.firestore.collection("users")
+        // Add to company bookings
+        val companyBookingRef = db.collection("companies")
+            .document("companyName")
+            .collection("bookings")
+            .document("currentBookings")
+            .collection("bookings")
+
+        // Add to user bookings
+        val userBookingRef = db.collection("companies")
+            .document("companyName")
+            .collection("users")
             .document(currentUserUid)
             .collection("bookings")
-            .add(booking)
+
+        // Use a batch write to ensure both operations complete together
+        val batch = db.batch()
+
+        // Create document references with the same ID
+        val newBookingRef = companyBookingRef.document()
+        val bookingId = newBookingRef.id
+
+        batch.set(newBookingRef, booking)
+        batch.set(userBookingRef.document(bookingId), booking)
+
+        batch.commit()
             .addOnSuccessListener {
                 onSuccess()
             }

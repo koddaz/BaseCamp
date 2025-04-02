@@ -10,8 +10,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.basecampers.Authentication.RegisterScreen
 import com.basecampers.basecamp.navigation.models.AuthViewModel
+import com.basecampers.basecamp.tabs.booking.admin.AdminBooking
 import com.basecampers.basecamp.tabs.booking.models.BookingViewModel
 import com.basecampers.basecamp.tabs.booking.models.bookingRoutes
+import com.basecampers.basecamp.tabs.booking.unknown.BookingCornfirmation
+import com.basecampers.basecamp.tabs.booking.unknown.BookingExtra
+import com.basecampers.basecamp.tabs.booking.user.BookingView
 
 
 @Composable
@@ -28,10 +32,15 @@ fun BookingNavHost() {
 
     NavHost(navController = navController, startDestination = bookingRoutes.MAIN) {
         composable(bookingRoutes.MAIN) {
-            BookingScreen(
+            BookingView(
+                bookingViewModel = bookingViewModel,
+            )
+           /* BookingScreen(
                 bookingViewModel = bookingViewModel,
                 onBack = { navController.popBackStack() },
                 onNext = { navController.navigate(bookingRoutes.EXTRA) })
+
+            */
         }
         composable(bookingRoutes.EXTRA) {
             BookingExtra(
@@ -39,6 +48,9 @@ fun BookingNavHost() {
                 onBack = { navController.popBackStack() },
                 onNext = { navController.navigate(bookingRoutes.CONFIRMATION) }
             )
+        }
+        composable(bookingRoutes.ADMIN) {
+            AdminBooking()
         }
         composable(bookingRoutes.REGISTER) {
             RegisterScreen(
@@ -56,11 +68,19 @@ fun BookingNavHost() {
                     if (isLoggedIn) {
                         bookingViewModel.createBooking(
                             onSuccess = {
-                                Toast.makeText(navController.context, "Booking confirmed!", Toast.LENGTH_LONG).show()
+                                Toast.makeText(
+                                    navController.context,
+                                    "Booking confirmed!",
+                                    Toast.LENGTH_LONG
+                                ).show()
                                 navController.navigate(bookingRoutes.MAIN)
                             },
                             onFailure = { error ->
-                                Toast.makeText(navController.context, "Error: ${error.message}", Toast.LENGTH_LONG).show()
+                                Toast.makeText(
+                                    navController.context,
+                                    "Error: ${error.message}",
+                                    Toast.LENGTH_LONG
+                                ).show()
                             }
                         )
                     } else {

@@ -1,4 +1,4 @@
-package com.basecampers.basecamp.tabs.booking
+package com.basecampers.basecamp.tabs.booking.unknown
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.basecampers.basecamp.tabs.booking.adminstuff.RegisterAdmin
+import com.basecampers.basecamp.tabs.booking.DatePickerView
 import com.basecampers.basecamp.tabs.booking.models.BookingItems
 import com.basecampers.basecamp.tabs.booking.models.BookingViewModel
 import com.basecampers.components.NavButton
@@ -66,7 +66,7 @@ fun BookingScreen(
                 },
             )
             if (showDatePicker) {
-                DatePickerComposable(
+                DatePickerView(
                     onDateRangeSelected = { startDate, endDate ->
                         bookingViewModel.updateSelectedDateRange(startDate, endDate)
                     },
@@ -87,9 +87,6 @@ fun BookingScreen(
                 title = "Back",
                 onClick = { onBack() }
             )
-        }
-        Row(modifier.fillMaxWidth()) {
-            RegisterAdmin()
         }
     }
 }

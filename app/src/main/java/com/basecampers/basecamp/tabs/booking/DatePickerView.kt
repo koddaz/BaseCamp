@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DateRangePicker
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -15,21 +16,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.basecampers.basecamp.tabs.booking.models.BookingViewModel
+import kotlin.compareTo
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DatePickerComposable(
+fun DatePickerView(
     onDateRangeSelected: (Long?, Long?) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val dateRangePickerState = rememberDateRangePickerState()
+    val today = System.currentTimeMillis()
+    val dateRangePickerState = rememberDateRangePickerState(
+        selectableDates = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                return utcTimeMillis >= today
+            }
+        }
+    )
 
-    Column(modifier = Modifier.fillMaxSize()) {
 
-
+    Column {
 
         DatePickerDialog(
             onDismissRequest = onDismiss,
@@ -69,7 +75,7 @@ fun DatePickerComposable(
 @Preview(showBackground = true)
 @Composable
 fun DatePreview() {
-    DatePickerComposable(
+    DatePickerView(
         onDateRangeSelected = { _, _ -> },
         onDismiss = {}
     )
