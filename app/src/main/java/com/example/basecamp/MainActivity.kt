@@ -16,12 +16,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        var loginmodel = AuthViewModel()
+        val authViewModel = AuthViewModel()
 
         setContent {
             BaseCampTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Root(loginmodel)
+                    Root(authViewModel)
                 }
             }
         }
