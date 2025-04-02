@@ -34,6 +34,7 @@ fun BookingNavHost() {
         composable(bookingRoutes.MAIN) {
             BookingView(
                 bookingViewModel = bookingViewModel,
+                onClick = { navController.navigate(bookingRoutes.ADMIN) },
             )
            /* BookingScreen(
                 bookingViewModel = bookingViewModel,
@@ -50,7 +51,7 @@ fun BookingNavHost() {
             )
         }
         composable(bookingRoutes.ADMIN) {
-            AdminBooking()
+            AdminBooking(onClick = {navController.navigate(bookingRoutes.MAIN)})
         }
         composable(bookingRoutes.REGISTER) {
             RegisterScreen(

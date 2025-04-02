@@ -40,7 +40,11 @@ import com.basecampers.basecamp.tabs.booking.models.BookingItems
 import com.basecampers.basecamp.tabs.booking.models.BookingViewModel
 
 @Composable
-fun BookingView(modifier: Modifier = Modifier, bookingViewModel: BookingViewModel = viewModel()) {
+fun BookingView(
+    modifier: Modifier = Modifier,
+    bookingViewModel: BookingViewModel = viewModel(),
+    onClick: () -> Unit) {
+
     val categories by bookingViewModel.categories.collectAsState()
     val bookingItems by bookingViewModel.bookingItemsList.collectAsState()
     val selectedDates by bookingViewModel.formattedDateRange.collectAsState()
@@ -55,6 +59,9 @@ fun BookingView(modifier: Modifier = Modifier, bookingViewModel: BookingViewMode
     }
 
     Column(modifier.fillMaxSize().padding(16.dp)) {
+
+        CustomButton(text = "ADMIN", onClick = onClick)
+
         CustomColumn(title = "Category") {
             Row(modifier.fillMaxWidth()) {
                 categories.forEach { category ->

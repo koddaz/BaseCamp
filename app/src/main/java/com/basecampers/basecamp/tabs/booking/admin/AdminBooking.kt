@@ -32,7 +32,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AdminBooking(modifier: Modifier = Modifier, adminBookingViewModel: AdminBookingViewModel = viewModel()) {
+fun AdminBooking(
+    modifier: Modifier = Modifier,
+    adminBookingViewModel: AdminBookingViewModel = viewModel(),
+    onClick: () -> Unit = {}
+) {
     var name by remember { mutableStateOf("") }
     var info by remember { mutableStateOf("") }
     var pricePerDay by remember { mutableStateOf("") }
@@ -50,6 +54,7 @@ fun AdminBooking(modifier: Modifier = Modifier, adminBookingViewModel: AdminBook
         var pageNumber by remember { mutableStateOf(1) }
 
         Row(modifier.fillMaxWidth()) {
+            CustomButton(text = "USER", onClick = onClick)
             CustomButton(text = "change page", onClick = {
                 pageNumber = if (pageNumber == 1) {
                     2
