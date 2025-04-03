@@ -1,6 +1,8 @@
 package com.example.basecamp.tabs.booking.user
 
+import android.util.Log
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
@@ -24,17 +27,28 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.basecamp.tabs.booking.DatePickerView
-import com.example.basecamp.tabs.booking.admin.BookingCategories
-import com.example.basecamp.tabs.booking.admin.CustomButton
-import com.example.basecamp.tabs.booking.admin.CustomColumn
+import com.example.basecamp.CompanyModel
+import com.example.basecamp.UserModel
+import com.example.basecamp.UserStatus
+import com.example.basecamp.components.CustomButton
+import com.example.basecamp.components.CustomColumn
+import com.example.basecamp.navigation.models.AuthViewModel
+import com.example.basecamp.tabs.booking.models.BookingCategories
 import com.example.basecamp.tabs.booking.models.BookingItems
-import com.example.basecamp.tabs.booking.models.BookingViewModel
+import com.example.basecamp.tabs.booking.models.UserBookingViewModel
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import java.net.URL
+import kotlin.String
+import kotlin.text.set
+import kotlin.toString
 
 @Composable
 fun BookingView(
     modifier: Modifier = Modifier,
-    bookingViewModel: BookingViewModel = viewModel(),
+    authViewModel: AuthViewModel,
+    bookingViewModel: UserBookingViewModel = viewModel(),
     onClick: () -> Unit) {
 
     val categories by bookingViewModel.categories.collectAsState()
@@ -52,7 +66,12 @@ fun BookingView(
 
     Column(modifier.fillMaxSize().padding(16.dp)) {
 
-        CustomButton(text = "ADMIN", onClick = onClick)
+        Column(modifier = Modifier.weight(1f)) {
+
+
+
+
+
 
         CustomColumn(title = "Category") {
             Row(modifier.fillMaxWidth()) {
@@ -124,7 +143,114 @@ fun BookingView(
         )
     }
     }
+        Column() {
+            FIREBASETESTSTUFF()
+            CustomButton(text = "ADMIN", onClick = onClick)
+        }
+    }
 
+}
+
+@Composable
+fun FIREBASETESTSTUFF(
+    authViewModel: AuthViewModel = viewModel()
+) {
+    val userEmail = "user@example.com"
+    val userPassword = "Admin123!"
+
+    val superUserEmail = "super@example.com"
+    val superUserPassword = "Admin123!"
+
+    val adminEmail = "admin@example.com"
+    val adminPassword = "Admin123!"
+
+    Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
+
+
+        CustomButton(
+            text = "USER",
+            onClick = {
+               authViewModel.login(userEmail, userPassword)
+            }
+        )
+
+        CustomButton(
+            text = "SUPER_USER",
+            onClick = {
+                authViewModel.login(superUserEmail, superUserPassword)
+            }
+
+        )
+
+        CustomButton(
+            text = "ADMIN",
+            onClick = {
+               authViewModel.login(adminEmail, adminPassword)
+            }
+
+        )
+    }
+    CustomButton(text = "Sign Out", onClick = { authViewModel.logout() })
+    /*
+    CustomButton(text = "CREATE ADMIN ACCOUNT", onClick = {
+
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnSuccessListener { authResult ->
+                val userId = authResult.user?.uid ?: return@addOnSuccessListener
+
+                // Create company document
+                val companyName = "Actual Company Name"  // Replace with actual company name or ID
+                val companyData =
+                    CompanyModel(
+                        bio = "No bio yet",
+                        imageUrl = null,
+                        companyName = "A Company Inc",
+                        ownerUID = userId
+                    )
+
+
+                // Create the company in Firestore
+                db.collection("companies")
+                    .document(companyName)
+                    .set(companyData)
+                    .addOnSuccessListener {
+                        // Create admin user document within the company
+                        val userData =
+                            UserModel(
+                                email = email,
+                                name = "Regular User",
+                                imageUrl = null,
+                                bio = "Company User",
+                                status = UserStatus.USER,
+                                id = userId,
+                                companyName = companyName
+                            )
+
+
+                        // Add the user to the company's users collection
+                        db.collection("companies")
+                            .document(companyName)
+                            .collection("users")
+                            .document(userId)
+                            .set(userData)
+                            .addOnSuccessListener {
+                                Log.d("AdminCreation", "Admin user created successfully")
+                                // You could show a success message or navigate to a different screen here
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e("AdminCreation", "Error creating admin user", e)
+                            }
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("AdminCreation", "Error creating company", e)
+                    }
+            }
+            .addOnFailureListener { e ->
+                Log.e("AdminCreation", "Error creating auth user", e)
+            }
+    })
+
+     */
 }
 
 
@@ -139,7 +265,7 @@ fun ItemCard(
         modifier = modifier
             .padding(vertical = 4.dp)
             .clickable(onClick = onClick),
-        colors = androidx.compose.material3.CardDefaults.cardColors(
+        colors = CardDefaults.cardColors(
             containerColor = if (isSelected)
                 colorScheme.primaryContainer
             else
@@ -178,7 +304,7 @@ fun CategoryCard(
         modifier = modifier
             .padding(4.dp)
             .clickable(onClick = onClick),
-        colors = androidx.compose.material3.CardDefaults.cardColors(
+        colors = CardDefaults.cardColors(
                 containerColor = if (isSelected)
                     colorScheme.primaryContainer
                 else

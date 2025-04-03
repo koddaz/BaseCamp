@@ -22,9 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.basecamp.tabs.booking.DatePickerView
+import com.example.basecamp.tabs.booking.user.DatePickerView
 import com.example.basecamp.tabs.booking.models.BookingItems
-import com.example.basecamp.tabs.booking.models.BookingViewModel
+import com.example.basecamp.tabs.booking.models.UserBookingViewModel
 import com.example.components.NavButton
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,7 +33,7 @@ fun BookingScreen(
     onNext: () -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
-    bookingViewModel: BookingViewModel = viewModel()
+    bookingViewModel: UserBookingViewModel = viewModel()
     ) {
 
     val formattedDateRange by bookingViewModel.formattedDateRange.collectAsState()
@@ -44,12 +44,6 @@ fun BookingScreen(
         .fillMaxSize()
         .padding(16.dp)) {
         Column(modifier.weight(1f)) {
-            BookingSelectionComposable(
-                bookingViewModel = bookingViewModel,
-                onItemSelected = { item ->
-                    selectedItem = item
-                }
-            )
             OutlinedTextField(
                 modifier = modifier.fillMaxWidth(),
                 value = formattedDateRange,

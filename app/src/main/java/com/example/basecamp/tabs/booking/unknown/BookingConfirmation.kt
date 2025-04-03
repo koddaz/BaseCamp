@@ -11,14 +11,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.basecamp.tabs.booking.models.BookingViewModel
+import com.example.basecamp.tabs.booking.models.UserBookingViewModel
 import com.example.components.NavButton
 
 @Composable
 fun BookingCornfirmation(
     onComplete: () -> Unit,
     onBack: () -> Unit,
-    bookingViewModel: BookingViewModel = viewModel(),
+    bookingViewModel: UserBookingViewModel = viewModel(),
     modifier: Modifier = Modifier,
 ) {
 

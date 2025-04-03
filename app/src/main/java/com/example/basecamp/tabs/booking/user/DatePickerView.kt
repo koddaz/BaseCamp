@@ -1,4 +1,4 @@
-package com.example.basecamp.tabs.booking
+package com.example.basecamp.tabs.booking.user
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth

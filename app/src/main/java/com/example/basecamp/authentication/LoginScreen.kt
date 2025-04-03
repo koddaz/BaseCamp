@@ -9,6 +9,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.basecamp.navigation.models.AuthViewModel
+import com.example.basecamp.tabs.booking.user.FIREBASETESTSTUFF
 import com.google.firebase.ktx.Firebase
 
 @Composable
@@ -81,7 +82,11 @@ fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotP
         }) {
             Text("User 2")
         }
-        
+
+        FIREBASETESTSTUFF(
+            authViewModel = authViewModel
+        )
+
         Spacer(modifier = Modifier.weight(1f))
         
         Button(

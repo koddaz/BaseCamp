@@ -1,10 +1,12 @@
-package com.example.basecamp.tabs.booking.admin
+package com.example.basecamp.tabs.booking.models
 
 import androidx.lifecycle.ViewModel
+import com.example.basecamp.UserModel
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlin.text.get
 
 class AdminBookingViewModel : ViewModel() {
     val db = Firebase.firestore
@@ -12,13 +14,11 @@ class AdminBookingViewModel : ViewModel() {
     val categories : StateFlow<List<BookingCategories>> = _categories
 
 
-    init {
-        retrieveCategories()
-    }
 
-    fun addBookingItem(bookingItem: BookingItem, selectedCategory: String) {
+
+    fun addBookingItem(user: UserModel, bookingItem: BookingItem, selectedCategory: String) {
         db.collection("companies")
-            .document("companyName")
+            .document(user.companyName)
             .collection("bookings")
             .document("bookingCategories")
             .collection("category")
@@ -26,37 +26,46 @@ class AdminBookingViewModel : ViewModel() {
             .collection("items")
             .add(bookingItem)
             .addOnSuccessListener {
-
+                retrieveBookingItems(
+                    user = user,
+                    selectedCategory = selectedCategory
+                )
             }
     }
 
-    fun addBookingCategory(bookingCategory: BookingCategories) {
+    fun addBookingCategory(user: UserModel, bookingCategory: BookingCategories) {
         db.collection("companies")
-            .document("companyName")
+            .document(user.companyName)
             .collection("bookings")
-            .document("bookingCategories")
-            .collection("category")
+            .document("categories")
+            .collection("categories")
             .add(bookingCategory)
             .addOnSuccessListener {
-                retrieveCategories()
+                retrieveCategories(user)
             }
     }
 
-    fun retrieveBookingItems(selectedCategory: String) {
+    fun retrieveBookingItems(user: UserModel, selectedCategory: String) {
         db.collection("companies")
-            .document("companyName")
+            .document(user.companyName)
             .collection("bookings")
             .document("bookingCategories")
             .collection("category")
             .document(selectedCategory)
+            .collection("items")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                // Handle success
+            }
     }
 
-    fun retrieveCategories() {
+    fun retrieveCategories(user: UserModel) {
         db.collection("companies")
-            .document("companyName")
+            .document(user.companyName)
             .collection("bookings")
-            .document("bookingCategories")
-            .collection("category").get()
+            .document("categories")
+            .collection("categories")
+            .get()
             .addOnSuccessListener { snapshot ->
                 val categoryList = snapshot.documents.mapNotNull { doc ->
                     val id = doc.id
@@ -67,5 +76,7 @@ class AdminBookingViewModel : ViewModel() {
                 _categories.value = categoryList
             }
     }
+
+
 
 }

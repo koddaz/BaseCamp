@@ -1,5 +1,5 @@
 package com.example.basecamp.tabs.booking.unknown
-
+/*
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,14 +13,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.basecamp.tabs.booking.models.BookingViewModel
+import com.example.basecamp.tabs.booking.models.UserBookingViewModel
 import com.example.basecamp.tabs.booking.models.ExtraItems
 import com.example.basecamp.tabs.booking.models.ExtraItemsCatalog.extraItems
 
 @Composable
 fun BookingExtraComposable(
     modifier: Modifier = Modifier,
-    bookingViewModel: BookingViewModel = viewModel(),
+    bookingViewModel: UserBookingViewModel = viewModel(),
     selectedExtraItems: List<ExtraItems>) {
     LazyColumn(modifier.fillMaxWidth().border(width = 1.dp, color = colorScheme.primary).padding(16.dp)) {
         items(extraItems.size) { index ->
@@ -52,3 +52,5 @@ fun BookingExtraComposable(
         }
     }
 }
+
+ */

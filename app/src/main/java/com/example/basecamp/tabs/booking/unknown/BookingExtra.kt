@@ -1,5 +1,5 @@
 package com.example.basecamp.tabs.booking.unknown
-
+/*
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.basecamp.tabs.booking.models.BookingViewModel
+import com.example.basecamp.tabs.booking.models.UserBookingViewModel
 import com.example.components.NavButton
 
 @Composable
@@ -24,7 +24,7 @@ fun BookingExtra(
     modifier: Modifier = Modifier,
     onNext: () -> Unit,
     onBack: () -> Unit,
-    bookingViewModel: BookingViewModel = viewModel(),
+    bookingViewModel: UserBookingViewModel = viewModel(),
 ) {
     // Track selected items from the ViewModel
     val selectedExtraItems = bookingViewModel.seleectedExtraItems.collectAsState().value
@@ -84,3 +84,6 @@ BookingExtraComposable(bookingViewModel = bookingViewModel, selectedExtraItems =
 fun BookingExtraPreview() {
     BookingExtra(onNext = {}, onBack = {})
 }
+
+
+ */

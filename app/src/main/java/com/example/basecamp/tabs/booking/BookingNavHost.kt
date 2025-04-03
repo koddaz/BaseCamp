@@ -9,20 +9,19 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.Authentication.RegisterScreen
+import com.example.basecamp.UserModel
 import com.example.basecamp.navigation.models.AuthViewModel
 import com.example.basecamp.tabs.booking.admin.AdminBooking
-import com.example.basecamp.tabs.booking.models.BookingViewModel
+import com.example.basecamp.tabs.booking.models.UserBookingViewModel
 import com.example.basecamp.tabs.booking.models.bookingRoutes
 import com.example.basecamp.tabs.booking.unknown.BookingCornfirmation
-import com.example.basecamp.tabs.booking.unknown.BookingExtra
 import com.example.basecamp.tabs.booking.user.BookingView
 
 
 @Composable
-fun BookingNavHost() {
-    val authViewModel: AuthViewModel = viewModel()
+fun BookingNavHost(authViewModel: AuthViewModel, user: UserModel) {
     val navController = rememberNavController()
-    val bookingViewModel: BookingViewModel = viewModel()
+    val bookingViewModel: UserBookingViewModel = viewModel()
 
     val isLoggedIn = authViewModel.loggedin.collectAsState().value
 
@@ -33,25 +32,16 @@ fun BookingNavHost() {
     NavHost(navController = navController, startDestination = bookingRoutes.MAIN) {
         composable(bookingRoutes.MAIN) {
             BookingView(
+                authViewModel = authViewModel,
                 bookingViewModel = bookingViewModel,
                 onClick = { navController.navigate(bookingRoutes.ADMIN) },
             )
-           /* BookingScreen(
-                bookingViewModel = bookingViewModel,
-                onBack = { navController.popBackStack() },
-                onNext = { navController.navigate(bookingRoutes.EXTRA) })
-
-            */
-        }
-        composable(bookingRoutes.EXTRA) {
-            BookingExtra(
-                bookingViewModel = bookingViewModel,
-                onBack = { navController.popBackStack() },
-                onNext = { navController.navigate(bookingRoutes.CONFIRMATION) }
-            )
         }
         composable(bookingRoutes.ADMIN) {
-            AdminBooking(onClick = {navController.navigate(bookingRoutes.MAIN)})
+            AdminBooking(
+                authViewModel = authViewModel,
+                user = user,
+                onClick = {navController.navigate(bookingRoutes.MAIN)})
         }
         composable(bookingRoutes.REGISTER) {
             RegisterScreen(

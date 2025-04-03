@@ -1,7 +1,6 @@
 package com.example.basecamp.tabs.booking.models
 
 import androidx.lifecycle.ViewModel
-import com.example.basecamp.tabs.booking.admin.BookingCategories
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -11,7 +10,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class BookingViewModel : ViewModel() {
+class UserBookingViewModel : ViewModel() {
     val db = Firebase.firestore
 
     private val _selectedDateRange = MutableStateFlow<Pair<Long?, Long?>>(Pair(null, null))
