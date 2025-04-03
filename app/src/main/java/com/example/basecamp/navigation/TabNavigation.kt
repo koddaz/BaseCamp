@@ -27,86 +27,68 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
-import com.basecampers.profile.ProfileScreen
 import com.basecampers.ui.theme.BaseCampTheme
+import com.example.basecamp.navigation.models.AuthViewModel
 import com.example.basecamp.tabs.booking.BookingNavHost
 import com.example.basecamp.tabs.home.HomeNavHost
 import com.example.basecamp.tabs.profile.ProfileNavHost
 import com.example.basecamp.tabs.social.SocialNavHost
-import com.example.basecamp.tabs.social.SocialScreen
 
 
 @Composable
-fun TabNavigation() {
-    var selectedItem by remember { mutableIntStateOf(0) }
-    var navController = rememberNavController()
+fun TabNavigation(authViewModel : AuthViewModel) {
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.weight(1f)) {
-            if (selectedItem == 0) {
-                HomeNavHost()
-            } else if (selectedItem == 1) {
-                BookingNavHost()
-            } else if (selectedItem == 2) {
-                SocialNavHost()
-            } else if (selectedItem == 3) {
-                ProfileNavHost()
-            } else {
-                Text("FEL FINNS INTE")
+            when (selectedTabIndex) {
+                0 -> HomeNavHost(authViewModel)
+                1 -> BookingNavHost()
+                2 -> SocialNavHost()
+                3 -> ProfileNavHost(authViewModel)
+                else -> Text("Error: Tab not found")
             }
-
-
         }
-        NavigationBar() {
-            val items = listOf("Home", "Booking", "Social", "Profile")
-            val selectedIcons = listOf(Icons.Filled.Home, Icons.Filled.Search, Icons.Filled.ThumbUp, Icons.Filled.Person)
-            val unselectedIcons = listOf(Icons.Outlined.Home, Icons.Outlined.Search, Icons.Outlined.ThumbUp, Icons.Outlined.Person)
-            // var selectedItem by remember { mutableIntStateOf(0) }
+        NavigationBar {
+            val tabs = listOf(
+                TabItem("Home", Icons.Filled.Home, Icons.Outlined.Home),
+                TabItem("Booking", Icons.Filled.Search, Icons.Outlined.Search),
+                TabItem("Social", Icons.Filled.ThumbUp, Icons.Outlined.ThumbUp),
+                TabItem("Profile", Icons.Filled.Person, Icons.Outlined.Person)
+            )
 
-            items.forEachIndexed { index, item ->
+            tabs.forEachIndexed { index, tab ->
                 NavigationBarItem(
                     icon = {
                         Icon(
-                            if (selectedItem == index) selectedIcons[index] else unselectedIcons[index],
-                            contentDescription = item
+                            imageVector = if (selectedTabIndex == index) tab.selectedIcon else tab.unselectedIcon,
+                            contentDescription = tab.label
                         )
                     },
-                    label = { Text(item) },
-                    selected = selectedItem == index,
-                    onClick = { selectedItem = index }
+                    label = { Text(tab.label) },
+                    selected = selectedTabIndex == index,
+                    onClick = { selectedTabIndex = index }
                 )
             }
         }
     }
 }
 
-
-@Composable
-fun NavigationBar(
-    modifier: Modifier = Modifier,
-    containerColor: Color = NavigationBarDefaults.containerColor,
-    contentColor: Color = MaterialTheme.colorScheme.contentColorFor(containerColor),
-    tonalElevation: Dp = NavigationBarDefaults.Elevation,
-    windowInsets: WindowInsets = NavigationBarDefaults.windowInsets,
-    content: @Composable RowScope.() -> Unit
-) {
-    NavigationBar(
-        modifier = modifier,
-        containerColor = containerColor,
-        contentColor = contentColor,
-        tonalElevation = tonalElevation,
-        windowInsets = windowInsets,
-        content = content
-    )
-}
+private data class TabItem(
+    val label: String,
+    val selectedIcon: ImageVector,
+    val unselectedIcon: ImageVector
+)
 
 @Preview(showBackground = true)
 @Composable
 fun NavigationBarPreview() {
     BaseCampTheme {
-        TabNavigation()
+        TabNavigation(authViewModel = viewModel())
     }
 }

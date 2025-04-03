@@ -1,6 +1,7 @@
 package com.basecampers.components
 
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
@@ -12,7 +13,7 @@ fun NavButton(
 
 ) {
         Button(onClick = onClick) {
-            Text(title)
+            Text(title, color = colorScheme.primary)
         }
 }
 

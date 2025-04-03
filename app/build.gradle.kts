@@ -2,23 +2,26 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    // Google Service
     id("com.google.gms.google-services")
+    // Enabling kapt
+    kotlin("kapt")
 }
 
 android {
     namespace = "com.basecampers"
     compileSdk = 35
-
+    
     defaultConfig {
         applicationId = "com.basecampers"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-
+        
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-
+    
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -41,16 +44,28 @@ android {
 }
 
 dependencies {
+    // Firebase
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
+    ///Analytics
     implementation("com.google.firebase:firebase-analytics")
+    ///Auth
     implementation("com.google.firebase:firebase-auth:23.2.0")
+    ///Realtime Database
     implementation("com.google.firebase:firebase-database:21.0.0")
+    ///Firestore
     implementation("com.google.firebase:firebase-firestore-ktx:25.0.0")
-
+    
     // Tab navigation
     implementation("com.arkivanov.decompose:decompose:1.0.0")
     implementation("com.arkivanov.decompose:extensions-compose-jetpack:1.0.0")
-
+    
+    // Room dependencies
+    implementation("androidx.room:room-runtime:2.6.0")
+    implementation("androidx.room:room-ktx:2.6.0")
+    
+    // Kotlin annotation processing
+    kapt("androidx.room:room-compiler:2.6.0")
+    
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -60,7 +75,8 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
-
+    
+    // Test dependencies
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -68,4 +84,6 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation("androidx.compose.material:material-icons-extended:")
 }
