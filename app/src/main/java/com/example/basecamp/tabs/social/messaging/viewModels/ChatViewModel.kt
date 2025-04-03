@@ -1,7 +1,7 @@
 package com.example.basecamp.tabs.social.messaging.viewModels
 
 import androidx.lifecycle.ViewModel
-import com.example.basecamp.tabs.social.models.Message
+import com.example.basecamp.tabs.social.messaging.models.Message
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow

@@ -1,14 +1,11 @@
 package com.example.basecamp.tabs.social.messaging.viewModels
 
 import androidx.lifecycle.ViewModel
-import com.example.basecamp.tabs.social.models.Chat
-import com.example.basecamp.tabs.social.models.Message
 import com.example.basecamp.tabs.social.models.User
 import com.example.basecamp.tabs.social.models.UserRole
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import java.text.SimpleDateFormat
 import java.util.*
 
 class UserMessagingViewModel : ViewModel() {

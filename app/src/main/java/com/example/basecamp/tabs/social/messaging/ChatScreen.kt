@@ -17,7 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.basecamp.tabs.social.messaging.viewModels.ChatViewModel
-import com.example.basecamp.tabs.social.models.Message
+import com.example.basecamp.tabs.social.messaging.models.Message
 import java.text.SimpleDateFormat
 import java.util.*
 

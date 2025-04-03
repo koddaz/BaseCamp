@@ -1,4 +1,4 @@
-package com.example.basecamp.tabs.social.models
+package com.example.basecamp.tabs.social.messaging.models
 
 import java.util.UUID
 
