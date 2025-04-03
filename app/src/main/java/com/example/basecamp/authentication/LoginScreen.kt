@@ -16,77 +16,80 @@ fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotP
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val isLoggedIn by authViewModel.loggedin.collectAsState()
-
+    
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
             val currentUser = Firebase.auth.currentUser
             println("Logged in user: ${currentUser?.email ?: "No user logged in"}")
-
+            
         }
     }
-
-
+    
+    
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Authentication", style = MaterialTheme.typography.headlineMedium)
-
-            TextField(
-                label = { Text("Email") },
-                value = email,
-                onValueChange = { email = it },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            TextField(
-                label = { Text("Password") },
-                value = password,
-                onValueChange = { password = it },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = { authViewModel.login(email, password) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Login")
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Button(
-                onClick = { goRegister() },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Register")
-            }
-
-            Button(
-                onClick = { goForgotPass() },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Forgot Password")
-            }
-
-            Button(onClick = {
-                authViewModel.isLoggedInTrue()
-            }) {
-                Text("Change isLoggedIn to True")
-            }
-
-            Button(onClick = {
-                authViewModel.loginUser1()
-            }) {
-                Text("User 1")
-            }
-
-            Button(onClick = {
-                authViewModel.loginUser2()
-            }) {
-                Text("User 2")
-            }
+        
+        TextField(
+            label = { Text("Email") },
+            value = email,
+            onValueChange = { email = it },
+            modifier = Modifier.fillMaxWidth()
+        )
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        TextField(
+            label = { Text("Password") },
+            value = password,
+            onValueChange = { password = it },
+            modifier = Modifier.fillMaxWidth()
+        )
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        Button(
+            onClick = { authViewModel.login(email, password) },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = email.isNotBlank() && password.isNotBlank()
+        ) {
+            Text("Login")
+        }
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Button(
+            onClick = { goForgotPass() },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Forgot Password")
+        }
+        
+        Button(onClick = {
+            authViewModel.isLoggedInTrue()
+        }) {
+            Text("Change isLoggedIn to True")
+        }
+        
+        Button(onClick = {
+            authViewModel.loginUser1()
+        }) {
+            Text("User 1")
+        }
+        
+        Button(onClick = {
+            authViewModel.loginUser2()
+        }) {
+            Text("User 2")
+        }
+        
+        Spacer(modifier = Modifier.weight(1f))
+        
+        Button(
+            onClick = { goRegister() }
+        ) {
+            Text("Go to Register")
+        }
+        Spacer(modifier = Modifier.height(50.dp))
     }
 }
 
