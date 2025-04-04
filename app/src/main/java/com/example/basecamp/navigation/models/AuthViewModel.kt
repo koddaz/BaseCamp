@@ -2,12 +2,17 @@ package com.example.basecamp.navigation.models
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.ktx.database
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 class AuthViewModel : ViewModel() {
 
@@ -24,6 +29,27 @@ class AuthViewModel : ViewModel() {
 
     private val _registerErrorMessage = MutableStateFlow(listOf<RegisterErrors>())
     val registerErrorMessage = _registerErrorMessage.asStateFlow()
+
+    val hasEmailError = registerErrorMessage.map { errors ->
+    errors.any { it in listOf(
+        RegisterErrors.EMAIL_EMPTY,
+        RegisterErrors.EMAIL_NO_AT,
+        RegisterErrors.EMAIL_NO_DOT)
+    } }.stateIn(viewModelScope, SharingStarted.Lazily, false)
+
+    var errorMessages = mapOf(
+        RegisterErrors.EMAIL_EMPTY to "Email cannot be empty",
+        RegisterErrors.EMAIL_NO_AT to "Email must contain @",
+        RegisterErrors.EMAIL_NO_DOT to "Email must contain .",
+        RegisterErrors.PASSWORD_EMPTY to "Password cannot be empty",
+        RegisterErrors.PASSWORD_TOO_SHORT to "Password must be at least 6 characters long",
+        RegisterErrors.PASSWORD_NO_SPECIAL_CHAR to "Password must contain at least one special character",
+        RegisterErrors.PASSWORD_NO_UPPERCASE to "Password must contain at least one uppercase letter",
+        RegisterErrors.PASSWORD_NO_NUMBER to "Password must contain at least one number",
+        RegisterErrors.CONFIRM_PASSWORD_EMPTY to "Confirm password cannot be empty",
+        RegisterErrors.CONFIRM_PASSWORD_MISMATCH to "Passwords do not match"
+    )
+
 
     init {
         checklogin()

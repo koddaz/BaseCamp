@@ -33,17 +33,14 @@ import com.example.basecamp.navigation.models.RegisterErrors
 
 
 @Composable
-fun PasswordTextField(password : String, onValueChange : (String) -> Unit, label : String, modifier : Modifier, authViewModel : AuthViewModel) {
+fun ConfirmPasswordTextField(password : String, onValueChange : (String) -> Unit, label : String, modifier : Modifier, authViewModel : AuthViewModel) {
     val state = remember { TextFieldState() }
     var showPassword by remember { mutableStateOf(false) }
     val errorMessage by authViewModel.registerErrorMessage.collectAsState()
 
-    val hasPasswordError = errorMessage.any { it in listOf(
-        RegisterErrors.PASSWORD_EMPTY,
-        RegisterErrors.PASSWORD_TOO_SHORT,
-        RegisterErrors.PASSWORD_NO_SPECIAL_CHAR,
-        RegisterErrors.PASSWORD_NO_UPPERCASE,
-        RegisterErrors.PASSWORD_NO_NUMBER
+    val hasConfirmPasswordError = errorMessage.any { it in listOf(
+        RegisterErrors.CONFIRM_PASSWORD_EMPTY,
+        RegisterErrors.CONFIRM_PASSWORD_MISMATCH
     ) }
 
     BasicSecureTextField(
@@ -59,7 +56,7 @@ fun PasswordTextField(password : String, onValueChange : (String) -> Unit, label
             .padding(6.dp)
             .border(
                 1.dp,
-                if(hasPasswordError)
+                if(hasConfirmPasswordError)
                     Color.Red else Color.LightGray, RoundedCornerShape(6.dp)
             )
             .padding(6.dp),
@@ -102,6 +99,6 @@ fun PasswordTextField(password : String, onValueChange : (String) -> Unit, label
 
 @Preview(showBackground = true)
 @Composable
-fun PasswordTextFieldPreview() {
-    PasswordTextField(password = "", onValueChange = {}, label = "", modifier = Modifier, authViewModel = viewModel())
+fun ConfirmPasswordTextFieldPreview() {
+    ConfirmPasswordTextField(password = "", onValueChange = {}, label = "", modifier = Modifier, authViewModel = viewModel())
 }
