@@ -30,6 +30,15 @@ class AuthViewModel : ViewModel() {
     private val _registerErrorMessage = MutableStateFlow(listOf<RegisterErrors>())
     val registerErrorMessage = _registerErrorMessage.asStateFlow()
 
+    private val _emailValid = MutableStateFlow(false)
+    val emailValid = _emailValid.asStateFlow()
+
+    private val _passwordValid = MutableStateFlow(false)
+    val passwordValid = _passwordValid.asStateFlow()
+
+    private val _confirmPasswordValid = MutableStateFlow(false)
+    val confirmPasswordValid = _confirmPasswordValid.asStateFlow()
+
     val hasEmailError = registerErrorMessage.map { errors ->
     errors.any { it in listOf(
         RegisterErrors.EMAIL_EMPTY,
@@ -196,6 +205,18 @@ class AuthViewModel : ViewModel() {
             }
     }
 
+    fun validateEmailLive(email: String) {
+        _emailValid.value = validateEmail(email).isEmpty()
+    }
+
+    fun validatePasswordLive(password: String) {
+        _passwordValid.value = validatePassword(password).isEmpty()
+    }
+
+    fun validateConfirmPasswordLive(password: String, confirmPassword: String) {
+        _confirmPasswordValid.value = validateConfirmPassword(password, confirmPassword).isEmpty()
+    }
+
     fun validatePassword(password: String) : List<RegisterErrors> {
         val checkError = mutableListOf<RegisterErrors>()
         val specialCharPattern = Regex("[!@#\$%^&*()\\-+=\\[\\]{}|;:,.<>?/]")
@@ -223,7 +244,7 @@ class AuthViewModel : ViewModel() {
     fun validateConfirmPassword(password: String, confirmPassword: String) : List<RegisterErrors> {
         val checkError = mutableListOf<RegisterErrors>()
 
-        if(password != confirmPassword) {
+        if(confirmPassword != password) {
             checkError.add(RegisterErrors.CONFIRM_PASSWORD_MISMATCH)
         }
         if(confirmPassword.isEmpty()) {

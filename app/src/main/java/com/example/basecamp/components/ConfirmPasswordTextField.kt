@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicSecureTextField
 import androidx.compose.foundation.text.input.TextFieldState
@@ -37,6 +38,7 @@ fun ConfirmPasswordTextField(password : String, onValueChange : (String) -> Unit
     val state = remember { TextFieldState() }
     var showPassword by remember { mutableStateOf(false) }
     val errorMessage by authViewModel.registerErrorMessage.collectAsState()
+    val isConfirmPasswordValid by authViewModel.confirmPasswordValid.collectAsState()
 
     val hasConfirmPasswordError = errorMessage.any { it in listOf(
         RegisterErrors.CONFIRM_PASSWORD_EMPTY,
@@ -52,12 +54,15 @@ fun ConfirmPasswordTextField(password : String, onValueChange : (String) -> Unit
                 TextObfuscationMode.RevealLastTyped
             },
         modifier = Modifier
-            .fillMaxWidth()
+            .width(360.dp)
             .padding(6.dp)
             .border(
                 1.dp,
-                if(hasConfirmPasswordError)
-                    Color.Red else Color.LightGray, RoundedCornerShape(6.dp)
+                when{
+                    state.text.isEmpty() -> Color.LightGray
+                    isConfirmPasswordValid && !hasConfirmPasswordError -> Color.Green
+                    else -> Color.Red
+                }
             )
             .padding(6.dp),
         decorator = { innerTextField ->
@@ -92,8 +97,9 @@ fun ConfirmPasswordTextField(password : String, onValueChange : (String) -> Unit
         }
     )
 
-    LaunchedEffect(state.text) {
+    LaunchedEffect(state.text, password) {
         onValueChange(state.text.toString())
+        authViewModel.validateConfirmPasswordLive(password, state.text.toString())
     }
 }
 

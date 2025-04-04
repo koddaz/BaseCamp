@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicSecureTextField
 import androidx.compose.foundation.text.input.TextFieldState
@@ -37,6 +38,7 @@ fun PasswordTextField(password : String, onValueChange : (String) -> Unit, label
     val state = remember { TextFieldState() }
     var showPassword by remember { mutableStateOf(false) }
     val errorMessage by authViewModel.registerErrorMessage.collectAsState()
+    val isPasswordValid by authViewModel.passwordValid.collectAsState()
 
     val hasPasswordError = errorMessage.any { it in listOf(
         RegisterErrors.PASSWORD_EMPTY,
@@ -55,12 +57,15 @@ fun PasswordTextField(password : String, onValueChange : (String) -> Unit, label
                 TextObfuscationMode.RevealLastTyped
             },
         modifier = Modifier
-            .fillMaxWidth()
+            .width(360.dp)
             .padding(6.dp)
             .border(
                 1.dp,
-                if(hasPasswordError)
-                    Color.Red else Color.LightGray, RoundedCornerShape(6.dp)
+                when{
+                    state.text.isEmpty() -> Color.LightGray
+                    isPasswordValid -> Color.Green
+                    else -> Color.Red
+                }
             )
             .padding(6.dp),
         decorator = { innerTextField ->
@@ -97,6 +102,7 @@ fun PasswordTextField(password : String, onValueChange : (String) -> Unit, label
 
     LaunchedEffect(state.text) {
         onValueChange(state.text.toString())
+        authViewModel.validatePasswordLive(state.text.toString())
     }
 }
 

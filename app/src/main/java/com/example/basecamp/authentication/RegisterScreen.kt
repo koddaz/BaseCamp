@@ -12,6 +12,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.basecamp.UserViewModel
 import com.example.basecamp.components.ConfirmPasswordTextField
+import com.example.basecamp.components.PasswordInfoButton
+import com.example.basecamp.components.PasswordPolicyInfo
 import com.example.basecamp.components.PasswordTextField
 import com.example.basecamp.navigation.models.AuthViewModel
 import com.example.basecamp.navigation.models.RegisterErrors
@@ -24,9 +26,10 @@ fun RegisterScreen(authViewModel : AuthViewModel, goLogin : () -> Unit, userView
     var confirmPassword by remember { mutableStateOf("") }
     var isAdmin by remember { mutableStateOf(false) }
     var companyName by remember { mutableStateOf("") }
+    var showPasswordPolicy by remember { mutableStateOf(false) }
     val hasEmailError by authViewModel.hasEmailError.collectAsState()
-
     val errorMessage by authViewModel.registerErrorMessage.collectAsState()
+    val isEmailValid by authViewModel.emailValid.collectAsState()
 
     val emailErrors = errorMessage.filter { error ->
         error in listOf(
@@ -80,10 +83,19 @@ fun RegisterScreen(authViewModel : AuthViewModel, goLogin : () -> Unit, userView
             TextField(
                 label = { Text("Email") },
                 value = email,
-                onValueChange = { email = it },
+                onValueChange = {
+                    email = it
+                    authViewModel.validateEmailLive(it)},
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(1.dp, if(hasEmailError) Color.Red else Color.Transparent)
+                    .border(
+                        1.dp,
+                        when{
+                            email.isEmpty() -> Color.Transparent
+                            isEmailValid -> Color.Green
+                            else -> Color.Red
+                    }
+                )
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -96,6 +108,7 @@ fun RegisterScreen(authViewModel : AuthViewModel, goLogin : () -> Unit, userView
                     color = Color.Red)
             }
         }
+        Row(verticalAlignment = Alignment.CenterVertically) {
             PasswordTextField(
                 password = password,
                 onValueChange = { password = it },
@@ -103,6 +116,12 @@ fun RegisterScreen(authViewModel : AuthViewModel, goLogin : () -> Unit, userView
                 modifier = Modifier,
                 authViewModel
             )
+            Spacer(modifier = Modifier.width(8.dp))
+
+            PasswordInfoButton(onInfoClick = { showPasswordPolicy = !showPasswordPolicy })
+        }
+        PasswordPolicyInfo(visible = showPasswordPolicy)
+
         if(errorMessage.isNotEmpty()) {
             confirmPasswordError.forEach { error ->
                 Text(
@@ -112,7 +131,7 @@ fun RegisterScreen(authViewModel : AuthViewModel, goLogin : () -> Unit, userView
             }
         }
             ConfirmPasswordTextField(
-                password = confirmPassword,
+                password = password,
                 onValueChange = { confirmPassword = it },
                 label = "Confirm Password",
                 modifier = Modifier,
