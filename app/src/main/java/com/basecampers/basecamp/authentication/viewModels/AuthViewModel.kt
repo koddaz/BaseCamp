@@ -17,8 +17,17 @@ class AuthViewModel : ViewModel() {
     private val _loggedin = MutableStateFlow(false)
     val loggedin = _loggedin.asStateFlow()
     
-    private val _userInfo = MutableStateFlow<Pair<String?, String?>>(Pair(null, null))
+    private val _userInfo = MutableStateFlow<ProfileInfo?>(null)
     val userInfo = _userInfo.asStateFlow()
+    
+    data class ProfileInfo(
+        val email: String = "",
+        val userName: String = "",
+        val imageUrl: String? = null,
+        val bio: String = "",
+        val status: String = "",
+        val companyName: String = ""
+    )
     
     init {
         checkLoggedin()
@@ -43,15 +52,34 @@ class AuthViewModel : ViewModel() {
         _loggedin.value = user != null
         
         if (user != null) {
-            fetchUserInfoFromFirestore(user.uid)
-            if (Firebase.auth.currentUser == null) {
-                _loggedin.value = false
-                Log.i("CHECKLOGINDEBUG", "Logged in = ${loggedin.value}")
-            } else {
-                _userInfo.value = Pair(null, null)
-                _loggedin.value = true
-                Log.i("CHECKLOGINDEBUG", "Logged in = ${loggedin.value}")
-            }
+            // Fetch complete user info
+            firestore.collection("users").document(user.uid).get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        // Map all fields from Firestore document to ProfileInfo
+                        val profileInfo = ProfileInfo(
+                            email = document.getString("email") ?: "",
+                            userName = document.getString("userName") ?: "",
+                            imageUrl = document.getString("imageUrl"),
+                            bio = document.getString("bio") ?: "",
+                            status = document.getString("status") ?: "",
+                            companyName = document.getString("companyName") ?: ""
+                        )
+                        _userInfo.value = profileInfo
+                        _loggedin.value = true
+                        Log.i("CHECKLOGINDEBUG", "Logged in = ${loggedin.value}")
+                    } else {
+                        _userInfo.value = null
+                        Log.i("CHECKLOGINDEBUG", "User document not found")
+                    }
+                }
+                .addOnFailureListener {
+                    _userInfo.value = null
+                    _loggedin.value = false
+                    Log.e("CHECKLOGINDEBUG", "Failed to fetch user info", it)
+                }
+        } else {
+            _userInfo.value = null
         }
     }
     
@@ -140,10 +168,12 @@ class AuthViewModel : ViewModel() {
                         }
                         .addOnFailureListener {
                             // Firestore error
+                            Log.e("AuthViewModel", "Failed to create user profile in Firestore")
                         }
                 }
             }.addOnFailureListener {
                 // Auth error
+                Log.e("AuthViewModel", "Failed to create user account")
             }
     }
     
@@ -171,13 +201,25 @@ class AuthViewModel : ViewModel() {
         firestore.collection("users").document(userId).get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
-                    val username = document.getString("username")
-                    val email = document.getString("email")
-                    _userInfo.value = Pair(username, email)
+                    // Create a complete ProfileInfo object from the document
+                    val profileInfo = ProfileInfo(
+                        email = document.getString("email") ?: "",
+                        userName = document.getString("userName") ?: "", // Note: using "userName" not "username"
+                        imageUrl = document.getString("imageUrl"),
+                        bio = document.getString("bio") ?: "",
+                        status = document.getString("status") ?: "",
+                        companyName = document.getString("companyName") ?: ""
+                    )
+                    _userInfo.value = profileInfo
+                    Log.d("ProfileFetch", "Successfully fetched profile for $userId")
+                } else {
+                    _userInfo.value = null
+                    Log.d("ProfileFetch", "No profile document exists for $userId")
                 }
             }
-            .addOnFailureListener {
-                _userInfo.value = Pair(null, null) // firestore fel
+            .addOnFailureListener { e ->
+                _userInfo.value = null
+                Log.e("ProfileFetch", "Failed to fetch profile", e)
             }
     }
     
