@@ -47,108 +47,107 @@ import kotlin.toString
 @Composable
 fun BookingView(
     modifier: Modifier = Modifier,
+    userInfo: UserModel?,
     authViewModel: AuthViewModel,
     bookingViewModel: UserBookingViewModel = viewModel(),
-    onClick: () -> Unit) {
-
+    onClick: () -> Unit
+) {
     val categories by bookingViewModel.categories.collectAsState()
     val bookingItems by bookingViewModel.bookingItemsList.collectAsState()
     val selectedDates by bookingViewModel.formattedDateRange.collectAsState()
-    // val selectedBookingItem by bookingViewModel.selectedBookingItem.collectAsState()
+    val selectedBookingItemFromVM by bookingViewModel.selectedBookingItem.collectAsState()
 
-    var selectedBookingItem by remember { mutableStateOf("") }
     var selectedCategoryId by remember { mutableStateOf("") }
     var showDatePicker by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        bookingViewModel.retrieveCategories()
+    // Set the user in the ViewModel when available
+    LaunchedEffect(userInfo) {
+        userInfo?.let { user ->
+            bookingViewModel.setUser(user)
+            bookingViewModel.retrieveCategoriesAndItems()
+        }
     }
 
     Column(modifier.fillMaxSize().padding(16.dp)) {
-
         Column(modifier = Modifier.weight(1f)) {
-
-
-
-
-
-
-        CustomColumn(title = "Category") {
-            Row(modifier.fillMaxWidth()) {
-                categories.forEach { category ->
-                    CategoryCard(
-                        modifier = Modifier.weight(1f),
-                        category = category,
-                        isSelected = category.id == selectedCategoryId,
-                        onClick = {
-                            bookingViewModel.loadItemsForCategory(category)
-                            selectedCategoryId = category.id
-                        }
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        if (bookingItems.isNotEmpty()) {
-            CustomColumn(title = categories.find { it.id == selectedCategoryId }?.name ?: "") {
-                Column {
-                    bookingItems.forEach { item  ->
-                        ItemCard(
-                            item = item,
+            CustomColumn(title = "Category") {
+                Row(modifier.fillMaxWidth()) {
+                    categories.forEach { category ->
+                        CategoryCard(
+                            modifier = Modifier.weight(1f),
+                            category = category,
+                            isSelected = category.id == selectedCategoryId,
                             onClick = {
-                                bookingViewModel.setSelectedBookingItem(item)
-                                selectedBookingItem = item.name
-                            },
-                            isSelected = item.name == selectedBookingItem
+                                selectedCategoryId = category.id
+                                bookingViewModel.retrieveBookingItems(selectedCategoryId)
+
+                            }
                         )
                     }
                 }
             }
-        } else {
-            Text(text = "No items available")
-        }
 
-        Spacer(modifier = Modifier.height(8.dp))
-        if (selectedBookingItem.isNotEmpty()) {
-        CustomColumn(title = "Select a date") {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { showDatePicker = true }
+            Spacer(modifier = Modifier.height(8.dp))
 
-            ) {
-                Row(modifier.fillMaxWidth().padding(16.dp)) {
-                    Text(text = selectedDates)
-                    Spacer(modifier = Modifier.weight(1f))
-                    Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+            if (bookingItems.isNotEmpty()) {
+                CustomColumn(title = categories.find { it.id == selectedCategoryId }?.name ?: "") {
+                    Column {
+                        bookingItems.forEach { item ->
+                            ItemCard(
+                                item = item,
+                                onClick = { bookingViewModel.setSelectedBookingItem(item) },
+                                isSelected = selectedBookingItemFromVM?.id == item.id
+                            )
+                        }
+                    }
+                }
+            } else {
+                Text(text = "No items available")
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            if (selectedBookingItemFromVM != null) {
+                CustomColumn(title = "Select a date") {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showDatePicker = true }
+                    ) {
+                        Row(modifier.fillMaxWidth().padding(16.dp)) {
+                            Text(text = selectedDates)
+                            Spacer(modifier = Modifier.weight(1f))
+                            Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                        }
+                    }
                 }
 
+                CustomButton(text = "Confirm", onClick = {
+                    bookingViewModel.createBooking(onSuccess = {
+                        // Handle success
+                    }, onFailure = { error ->
+                        // Handle error
+                    })
+                })
             }
-        }
-            CustomButton(text = "Confirm", onClick = {
-                bookingViewModel.createBooking(onFailure = {}, onSuccess = {})
-            })
+
+            if (showDatePicker) {
+                DatePickerView(
+                    onDateRangeSelected = { startDate, endDate ->
+                        bookingViewModel.updateSelectedDateRange(startDate, endDate)
+                    },
+                    onDismiss = {
+                        showDatePicker = false
+                    }
+                )
+            }
         }
 
-    if (showDatePicker) {
-        DatePickerView(
-            onDateRangeSelected = { startDate, endDate ->
-                bookingViewModel.updateSelectedDateRange(startDate, endDate)
-            },
-            onDismiss = {
-                showDatePicker = false
-            }
-        )
-    }
-    }
-        Column() {
-            FIREBASETESTSTUFF()
+        Column {
+            FIREBASETESTSTUFF(authViewModel)
             CustomButton(text = "ADMIN", onClick = onClick)
         }
     }
-
 }
 
 @Composable
@@ -175,7 +174,7 @@ fun FIREBASETESTSTUFF(
         )
 
         CustomButton(
-            text = "SUPER_USER",
+            text = "SUPER",
             onClick = {
                 authViewModel.login(superUserEmail, superUserPassword)
             }
@@ -189,8 +188,9 @@ fun FIREBASETESTSTUFF(
             }
 
         )
+        CustomButton(text = "SIGN", onClick = { authViewModel.logout() })
     }
-    CustomButton(text = "Sign Out", onClick = { authViewModel.logout() })
+
     /*
     CustomButton(text = "CREATE ADMIN ACCOUNT", onClick = {
 

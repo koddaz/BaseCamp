@@ -1,7 +1,9 @@
 package com.example.basecamp.aRootFolder
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -18,10 +20,10 @@ import com.example.basecamp.navigation.models.AuthViewModel
 import kotlinx.coroutines.delay
 
 @Composable
-fun Root(authViewModel : AuthViewModel = viewModel()) {
+fun Root(authViewModel : AuthViewModel = viewModel(), padding: PaddingValues) {
     var isLoading by remember { mutableStateOf(true) }
     val isLoggedIn by authViewModel.loggedin.collectAsState()
-    
+
     LaunchedEffect(Unit) {
         initializeAppSession(
             authViewModel = authViewModel,
@@ -29,7 +31,7 @@ fun Root(authViewModel : AuthViewModel = viewModel()) {
         )
     }
 
-    Column(Modifier.fillMaxSize()) {
+    Column(Modifier.fillMaxSize().padding(padding)) {
         if (isLoading) {
             LoadingScreen()
         } else if (isLoggedIn) {
@@ -45,25 +47,25 @@ private suspend fun initializeAppSession(
     onComplete: () -> Unit
 ) {
     authViewModel.checklogin()
-    
+
     if (authViewModel.loggedin.value) {
         val userId = authViewModel.getCurrentUserUid()
         userId?.let {
             authViewModel.fetchUserInfoFromFirestore(it)
-            
+            authViewModel.fetchCurrentUserModel()
             // Check status of user in company (admin? SuperUser?)
             // load company specific data (Categories, Items)
         }
     }
-    
+
     delay(1500) //Temporary delay to simulate loading, vi tar bort denna när vi har lagt till
     // alla funktioner som ska köras på appstart.
-    
+
     onComplete()
 }
 
 @Preview(showBackground = true)
 @Composable
 fun RootPreview() {
-    Root(authViewModel = viewModel())
+    Root(authViewModel = viewModel(), padding = PaddingValues())
 }

@@ -1,6 +1,8 @@
 package com.example.basecamp.navigation
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -12,18 +14,25 @@ import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.basecamp.UserModel
+import com.example.basecamp.UserStatus
 import com.example.ui.theme.BaseCampTheme
 import com.example.basecamp.navigation.models.AuthViewModel
 import com.example.basecamp.tabs.booking.BookingNavHost
@@ -40,7 +49,7 @@ fun TabNavigation(authViewModel : AuthViewModel) {
         Column(modifier = Modifier.weight(1f)) {
             when (selectedTabIndex) {
                 0 -> HomeNavHost(authViewModel)
-                1 -> BookingNavHost()
+                1 -> BookingNavHost(authViewModel)
                 2 -> SocialNavHost()
                 3 -> ProfileNavHost(authViewModel)
                 else -> Text("Error: Tab not found")

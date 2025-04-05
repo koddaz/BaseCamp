@@ -11,6 +11,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,25 +29,33 @@ import com.example.basecamp.tabs.booking.models.BookingItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddBookingView(
+fun AdminBookingView(
     modifier: Modifier = Modifier,
-    user: UserModel,
+    userInfo: UserModel?,
     authViewModel: AuthViewModel,
-    name: String = "",
-    info: String = "",
-    categories: List<BookingCategories> = emptyList(),
-    pricePerDay: String = "",
-    onNameChange: (String) -> Unit = {},
-    onInfoChange: (String) -> Unit = {},
-    onPricePerDayChange: (String) -> Unit = {},
-    adminBookingViewModel: AdminBookingViewModel
+    adminBookingViewModel: AdminBookingViewModel,
+    goBack: () -> Unit,
+    categoryId: String = "",
+    navigateToExtra: (String, String, String, String) -> Unit = { _, _, _, _ -> }
 ) {
     var expanded by remember { mutableStateOf(false) }
     var selectedCategoryId by remember { mutableStateOf("") }
     var selectedCategoryName by remember { mutableStateOf("") }
 
-    CustomColumn(title = "Add Booking Item") {
+    val categories by adminBookingViewModel.categories.collectAsState()
 
+    var name by remember { mutableStateOf("") }
+    var info by remember { mutableStateOf("") }
+    var pricePerDay by remember { mutableStateOf("") }
+
+    LaunchedEffect(categoryId) {
+        val category = categories.find { it.id == categoryId }
+        selectedCategoryName = category?.name ?: ""
+    }
+
+
+    CustomColumn(title = "Add Booking Item") {
+        CustomButton(text = "Back", onClick = goBack)
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded },
@@ -89,7 +99,7 @@ fun AddBookingView(
             modifier = modifier.fillMaxWidth(),
             label = { Text("Name") },
             value = name,
-            onValueChange = onNameChange, // Fixed: Call the function with the argument
+            onValueChange = { name = it }, // Fixed: Call the function with the argument
             maxLines = 1
         )
 
@@ -99,7 +109,7 @@ fun AddBookingView(
             maxLines = 10,
             minLines = 10,
             value = info,
-            onValueChange = { if (it.length <= 500) onInfoChange(it) }, // Fixed: Call with argument
+            onValueChange = { if (it.length <= 500) info = it }, // Fixed: Call with argument
             supportingText = { Text("${info.length}/500 characters") }
         )
 
@@ -107,28 +117,30 @@ fun AddBookingView(
             modifier = modifier.fillMaxWidth(),
             label = { Text("Price per day") },
             value = pricePerDay,
-            onValueChange = { onPricePerDayChange(it) }, // Fixed: Call with argument
+            onValueChange = { pricePerDay = it }, // Fixed: Call with argument
             maxLines = 1,
         )
 
 
         CustomButton(onClick = {
             val price = pricePerDay.toDoubleOrNull() ?: 0.0
+            val bookingId = "${System.currentTimeMillis()}_${(1000..9999).random()}"
             adminBookingViewModel.addBookingItem(
                 bookingItem = BookingItem(
-                    id = 0,
+                    id = bookingId,
                     pricePerDay = price,
                     name = name,
-                    info = info
+                    info = info,
+                    createdBy = userInfo?.name?: ""
                 ),
                 selectedCategory = selectedCategoryId,
-                user = user
             )
-            onNameChange("")
-            onInfoChange("")
-            onPricePerDayChange("")
+            name = ""
+            info = ""
+            pricePerDay = ""
             selectedCategoryName = ""
             selectedCategoryId = ""
         }, text = "Add item")
+        CustomButton(text = "Add Extras", onClick = { navigateToExtra(selectedCategoryId, name, info, pricePerDay) })
     }
 }

@@ -1,6 +1,7 @@
 package com.example.basecamp.tabs.booking.models
 
 import androidx.lifecycle.ViewModel
+import com.example.basecamp.UserModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -9,8 +10,13 @@ import kotlinx.coroutines.flow.StateFlow
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.text.get
+import kotlin.text.toInt
 
 class UserBookingViewModel : ViewModel() {
+
+
+
     val db = Firebase.firestore
 
     private val _selectedDateRange = MutableStateFlow<Pair<Long?, Long?>>(Pair(null, null))
@@ -34,16 +40,126 @@ class UserBookingViewModel : ViewModel() {
 
     val currentUserId = Firebase.auth.currentUser?.uid
 
-    init {
+    private val _user = MutableStateFlow<UserModel?>(null)
+    val user: StateFlow<UserModel?> = _user
+
+
+    fun setUser(userModel: UserModel) {
+        _user.value = userModel
         retrieveCategories()
     }
 
-    fun retrieveCategories() {
+    private fun getCompanyName(): String? {
+        return _user.value?.companyName
+    }
+
+    fun retrieveCategoriesAndItems() {
+        val companyName = getCompanyName() ?: run {
+            // Fallback to existing method if company name not available
+            val currentUserUid = Firebase.auth.currentUser?.uid
+            if (currentUserUid != null) {
+                db.collection("users")
+                    .document(currentUserUid)
+                    .get()
+                    .addOnSuccessListener { userDoc ->
+                        val docCompanyName = userDoc.getString("companyName")
+                        if (docCompanyName != null) {
+                            fetchCategoriesAndItems(docCompanyName)
+                        }
+                    }
+            }
+            return
+        }
+
+        fetchCategoriesAndItems(companyName)
+    }
+
+    private fun fetchCategoriesAndItems(companyName: String) {
         db.collection("companies")
-            .document("companyName")
+            .document(companyName)
+            .collection("bookings")
+            .document("categories")
+            .collection("categories")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val categoryList = snapshot.documents.mapNotNull { doc ->
+                    val id = doc.id
+                    val name = doc.getString("name") ?: ""
+                    val info = doc.getString("info") ?: ""
+                    val createdBy = doc.getString("createdBy") ?: ""
+                    BookingCategories(id, name, info, createdBy)
+                }
+
+                _categories.value = categoryList
+
+                // Get items for all categories
+                if (categoryList.isNotEmpty()) {
+                    val firstCategory = categoryList.first()
+                    fetchItemsForCategory(firstCategory.id, companyName)
+                }
+            }
+    }
+
+    private fun fetchItemsForCategory(categoryId: String, companyName: String) {
+        db.collection("companies")
+            .document(companyName)
             .collection("bookings")
             .document("bookingCategories")
             .collection("category")
+            .document(categoryId)
+            .collection("items")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val itemsList = snapshot.documents.mapNotNull { doc ->
+                    val id = doc.getLong("id")?.toInt() ?: 0
+                    val name = doc.getString("name") ?: ""
+                    val info = doc.getString("info") ?: ""
+                    val price = doc.getDouble("pricePerDay") ?: 0.0
+
+                    BookingItems(
+                        id = id,
+                        name = name,
+                        info = info,
+                        price = price
+                    )
+                }
+                _bookingItemsList.value = itemsList
+            }
+    }
+    fun retrieveCategories() {
+        val companyName = getCompanyName()
+        if (companyName != null) {
+            retrieveCategoriesFromCompany(companyName)
+        } else {
+            // Fallback to existing method
+            val currentUserUid = Firebase.auth.currentUser?.uid
+            if (currentUserUid != null) {
+                db.collection("users")
+                    .document(currentUserUid)
+                    .get()
+                    .addOnSuccessListener { userDoc ->
+                        val docCompanyName = userDoc.getString("companyName")
+                        if (docCompanyName != null) {
+                            retrieveCategoriesFromCompany(docCompanyName)
+                        }
+                    }
+            }
+        }
+    }
+
+
+    // Your existing method with user parameter
+    fun retrieveCategories(user: UserModel) {
+        retrieveCategoriesFromCompany(user.companyName)
+    }
+
+    // Helper method to avoid code duplication
+    private fun retrieveCategoriesFromCompany(companyName: String) {
+        db.collection("companies")
+            .document(companyName)
+            .collection("bookings")
+            .document("categories")
+            .collection("categories")
             .get()
             .addOnSuccessListener { snapshot ->
                 val categoryList = snapshot.documents.mapNotNull { doc ->
@@ -57,8 +173,10 @@ class UserBookingViewModel : ViewModel() {
     }
 
     fun retrieveBookingItems(categoryId: String) {
+        val companyName = getCompanyName() ?: return
+
         db.collection("companies")
-            .document("companyName")
+            .document(companyName)  // Use actual company name instead of hardcoded "companyName"
             .collection("bookings")
             .document("bookingCategories")
             .collection("category")

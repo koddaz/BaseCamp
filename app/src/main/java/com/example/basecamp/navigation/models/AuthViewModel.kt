@@ -3,6 +3,8 @@ package com.example.basecamp.navigation.models
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.basecamp.UserModel
+import com.example.basecamp.UserStatus
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.ktx.database
@@ -14,8 +16,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.net.URL
+import kotlin.text.get
 
 class AuthViewModel : ViewModel() {
+
+    private val _currentUser = MutableStateFlow<UserModel?>(null)
+    val currentUser = _currentUser.asStateFlow()
 
     val database = Firebase.database.reference
     val firestore = Firebase.firestore
@@ -59,6 +66,7 @@ class AuthViewModel : ViewModel() {
         fun login(email: String, password: String) {
             Firebase.auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
                 checklogin()
+                fetchCurrentUserModel()
                 Log.i("LOGINDEBUG", "Checked login")
             }.addOnFailureListener {
                 // fel
@@ -137,7 +145,74 @@ class AuthViewModel : ViewModel() {
             }
         }
 
+    fun fetchCurrentUserModel() {
+        val userId = getCurrentUserUid() ?: return
+        Log.d("AuthViewModel", "Fetching user model for ID: $userId")
 
+        // Try direct company path first
+        firestore.collection("companies")
+            .get()
+            .addOnSuccessListener { companySnapshots ->
+                var userFound = false
+
+                for (companyDoc in companySnapshots.documents) {
+                    val companyId = companyDoc.id
+                    Log.d("AuthViewModel", "Checking company: $companyId")
+
+                    firestore.collection("companies")
+                        .document(companyId)
+                        .collection("users")
+                        .document(userId)
+                        .get()
+                        .addOnSuccessListener { userDoc ->
+                            if (userDoc.exists()) {
+                                userFound = true
+                                Log.d("AuthViewModel", "Found user in company: $companyId")
+
+                                try {
+                                    val email = userDoc.getString("email") ?: ""
+                                    val name = userDoc.getString("name") ?: "No name yet"
+                                    val imageUrlString = userDoc.getString("imageUrl")
+                                    val imageUrl = if (!imageUrlString.isNullOrEmpty()) {
+                                        try { URL(imageUrlString) } catch (e: Exception) { null }
+                                    } else null
+                                    val bio = userDoc.getString("bio") ?: "No bio yet"
+                                    val statusString = userDoc.getString("status")
+
+                                    // Determine user status
+                                    val status = when {
+                                        userDoc.getBoolean("isAdmin") == true -> UserStatus.ADMIN
+                                        statusString == "SUPER_USER" -> UserStatus.SUPER_USER
+                                        else -> UserStatus.USER
+                                    }
+
+                                    val userModel = UserModel(
+                                        email = email,
+                                        name = name,
+                                        imageUrl = imageUrl,
+                                        bio = bio,
+                                        status = status,
+                                        id = userId,
+                                        companyName = companyId
+                                    )
+
+                                    _currentUser.value = userModel
+                                    Log.d("AuthViewModel", "User model created: $userModel")
+                                } catch (e: Exception) {
+                                    Log.e("AuthViewModel", "Error creating UserModel", e)
+                                }
+                            }
+                        }
+                }
+
+                if (!userFound) {
+                    Log.e("AuthViewModel", "User not found in any company")
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("AuthViewModel", "Failed to fetch companies", e)
+            }
+    }
         fun getCurrentUserUid(): String? {
             return Firebase.auth.currentUser?.uid
         }

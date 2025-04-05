@@ -20,7 +20,6 @@ data class CompanyModel(
     val ownerUID : String,
     val bio : String = "No bio yet",
     val imageUrl : URL?
-
 )
 
 enum class UserStatus {

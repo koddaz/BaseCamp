@@ -22,6 +22,7 @@ data class UserBooking(
     val bookingItem: BookingItems?,
     val extraItems: List<ExtraItems>,
     val timestamp: Date?,
+    val timeRange: String,
     val totalPrice: Double,
     val userId: String
 )
