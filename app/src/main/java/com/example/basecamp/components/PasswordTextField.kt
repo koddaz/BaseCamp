@@ -62,9 +62,9 @@ fun PasswordTextField(password : String, onValueChange : (String) -> Unit, label
             .border(
                 1.dp,
                 when{
-                    state.text.isEmpty() -> Color.LightGray
                     isPasswordValid -> Color.Green
-                    else -> Color.Red
+                    hasPasswordError && state.text.toString() == password -> Color.Red
+                    else -> Color.LightGray
                 }
             )
             .padding(6.dp),
@@ -103,6 +103,9 @@ fun PasswordTextField(password : String, onValueChange : (String) -> Unit, label
     LaunchedEffect(state.text) {
         onValueChange(state.text.toString())
         authViewModel.validatePasswordLive(state.text.toString())
+        if(hasPasswordError && state.text.toString() != password) {
+            authViewModel.clearPasswordErrors()
+        }
     }
 }
 

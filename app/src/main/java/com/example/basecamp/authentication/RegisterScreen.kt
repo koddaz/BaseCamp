@@ -1,5 +1,6 @@
 package com.basecampers.Authentication
 
+import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -34,8 +35,7 @@ fun RegisterScreen(authViewModel : AuthViewModel, goLogin : () -> Unit, userView
     val emailErrors = errorMessage.filter { error ->
         error in listOf(
             RegisterErrors.EMAIL_EMPTY,
-            RegisterErrors.EMAIL_NO_AT,
-            RegisterErrors.EMAIL_NO_DOT
+            RegisterErrors.EMAIL_NOT_VALID
         )
     }
 
@@ -72,42 +72,30 @@ fun RegisterScreen(authViewModel : AuthViewModel, goLogin : () -> Unit, userView
                     .border(1.dp ,Color.Transparent)
             )
         }
-        if(errorMessage.isNotEmpty()) {
-            emailErrors.forEach { error ->
-                Text(
-                    text = authViewModel.errorMessages[error] ?: "Unknown error",
-                    fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                    color = Color.Red)
-            }
-        }
             TextField(
                 label = { Text("Email") },
                 value = email,
                 onValueChange = {
+                    if (hasEmailError && it != email) {
+                        authViewModel.clearEmailErrors()
+                    }
                     email = it
-                    authViewModel.validateEmailLive(it)},
+                    authViewModel.validateEmailLive(it)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .border(
                         1.dp,
-                        when{
-                            email.isEmpty() -> Color.Transparent
+                        when {
                             isEmailValid -> Color.Green
-                            else -> Color.Red
-                    }
+                            hasEmailError && email.isNotEmpty() -> Color.Red
+                            else -> Color.LightGray
+                        }
                 )
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-        if(errorMessage.isNotEmpty()) {
-            passwordError.forEach { error ->
-                Text(
-                    text = authViewModel.errorMessages[error] ?: "Unknown error",
-                    fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                    color = Color.Red)
-            }
-        }
         Row(verticalAlignment = Alignment.CenterVertically) {
             PasswordTextField(
                 password = password,
@@ -122,14 +110,6 @@ fun RegisterScreen(authViewModel : AuthViewModel, goLogin : () -> Unit, userView
         }
         PasswordPolicyInfo(visible = showPasswordPolicy)
 
-        if(errorMessage.isNotEmpty()) {
-            confirmPasswordError.forEach { error ->
-                Text(
-                    text = authViewModel.errorMessages[error] ?: "Unknown error",
-                    fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                    color = Color.Red)
-            }
-        }
             ConfirmPasswordTextField(
                 password = password,
                 onValueChange = { confirmPassword = it },

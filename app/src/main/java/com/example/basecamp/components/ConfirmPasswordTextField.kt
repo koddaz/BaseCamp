@@ -59,9 +59,9 @@ fun ConfirmPasswordTextField(password : String, onValueChange : (String) -> Unit
             .border(
                 1.dp,
                 when{
-                    state.text.isEmpty() -> Color.LightGray
-                    isConfirmPasswordValid && !hasConfirmPasswordError -> Color.Green
-                    else -> Color.Red
+                    isConfirmPasswordValid -> Color.Green
+                    hasConfirmPasswordError -> Color.Red
+                    else -> Color.LightGray
                 }
             )
             .padding(6.dp),
@@ -100,6 +100,9 @@ fun ConfirmPasswordTextField(password : String, onValueChange : (String) -> Unit
     LaunchedEffect(state.text, password) {
         onValueChange(state.text.toString())
         authViewModel.validateConfirmPasswordLive(password, state.text.toString())
+        if(hasConfirmPasswordError && state.text.toString() != password) {
+            authViewModel.clearConfirmPasswordErrors()
+        }
     }
 }
 

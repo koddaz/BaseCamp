@@ -42,14 +42,12 @@ class AuthViewModel : ViewModel() {
     val hasEmailError = registerErrorMessage.map { errors ->
     errors.any { it in listOf(
         RegisterErrors.EMAIL_EMPTY,
-        RegisterErrors.EMAIL_NO_AT,
-        RegisterErrors.EMAIL_NO_DOT)
+        RegisterErrors.EMAIL_NOT_VALID)
     } }.stateIn(viewModelScope, SharingStarted.Lazily, false)
 
     var errorMessages = mapOf(
         RegisterErrors.EMAIL_EMPTY to "Email cannot be empty",
-        RegisterErrors.EMAIL_NO_AT to "Email must contain @",
-        RegisterErrors.EMAIL_NO_DOT to "Email must contain .",
+        RegisterErrors.EMAIL_NOT_VALID to "Email is not valid",
         RegisterErrors.PASSWORD_EMPTY to "Password cannot be empty",
         RegisterErrors.PASSWORD_TOO_SHORT to "Password must be at least 6 characters long",
         RegisterErrors.PASSWORD_NO_SPECIAL_CHAR to "Password must contain at least one special character",
@@ -144,8 +142,6 @@ class AuthViewModel : ViewModel() {
             addAll(validatePassword(password))
             addAll(validateConfirmPassword(password, confirmPassword))
         }
-
-
         _registerErrorMessage.value = checkError
 
         if(checkError.isEmpty()) {
@@ -259,20 +255,55 @@ class AuthViewModel : ViewModel() {
         if(email.isEmpty()) {
             checkError.add(RegisterErrors.EMAIL_EMPTY)
         }
-        if(!email.contains("@")) {
-            checkError.add(RegisterErrors.EMAIL_NO_AT)
-        }
-        if(!email.contains(".")) {
-            checkError.add(RegisterErrors.EMAIL_NO_DOT)
+        if(!isEmailValid(email)) {
+            checkError.add(RegisterErrors.EMAIL_NOT_VALID)
         }
         return checkError
     }
 
-/*
-    fun isEmailValid(email: String): Boolean {
-        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    fun clearPasswordErrors() {
+        val currentErrors = registerErrorMessage.value.toMutableList()
+        currentErrors.removeAll { it in listOf(
+            RegisterErrors.PASSWORD_EMPTY,
+            RegisterErrors.PASSWORD_TOO_SHORT,
+            RegisterErrors.PASSWORD_NO_SPECIAL_CHAR,
+            RegisterErrors.PASSWORD_NO_UPPERCASE,
+            RegisterErrors.PASSWORD_NO_NUMBER,
+        )}
+        _registerErrorMessage.value = currentErrors
     }
-*/
+
+    fun clearConfirmPasswordErrors() {
+        val currentErrors = registerErrorMessage.value.toMutableList()
+        currentErrors.removeAll { it in listOf(
+            RegisterErrors.CONFIRM_PASSWORD_EMPTY,
+            RegisterErrors.CONFIRM_PASSWORD_MISMATCH
+        )}
+        _registerErrorMessage.value = currentErrors
+    }
+
+    fun clearEmailErrors() {
+        val currentErrors = registerErrorMessage.value.toMutableList()
+        currentErrors.removeAll { it in listOf(
+            RegisterErrors.EMAIL_EMPTY,
+            RegisterErrors.EMAIL_NOT_VALID
+        )}
+        _registerErrorMessage.value = currentErrors
+    }
+
+    fun isEmailValid(email: String): Boolean {
+        // Basic pattern check
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            return false
+        }
+
+        // Additional TLD validation
+        val tld = email.substringAfterLast(".")
+        val validTlds = listOf("com", "org", "net", "edu", "gov", "se", "co", "io", "co.uk") // Extend as needed
+        return tld.length >= 2 &&
+                (validTlds.contains(tld.lowercase()) || tld.all { it.isLetter() })
+    }
+
 }
 
 enum class RegisterErrors {
@@ -284,6 +315,5 @@ enum class RegisterErrors {
     CONFIRM_PASSWORD_EMPTY,
     CONFIRM_PASSWORD_MISMATCH,
     EMAIL_EMPTY,
-    EMAIL_NO_AT,
-    EMAIL_NO_DOT
+    EMAIL_NOT_VALID
 }
