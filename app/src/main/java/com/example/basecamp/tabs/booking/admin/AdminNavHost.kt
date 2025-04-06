@@ -21,7 +21,7 @@ object AdminRoutes {
     const val CATEGORY = "admin_category"
     const val EXTRA = "admin_extra"
     const val BOOKING_WITH_CATEGORY = "admin_booking/{categoryId}"
-    const val EXTRA_WITH_BOOKING = "admin_extra/{categoryId}/{bookingName}/{bookingInfo}/{bookingPrice}"
+    const val EXTRA_WITH_BOOKING = "admin_extra/{categoryId}/{bookingName}/{bookingInfo}/{bookingPrice}/{bookingId}"
 }
 
 @Composable
@@ -61,8 +61,8 @@ fun AdminNavHost(authViewModel: AuthViewModel = viewModel()) {
                     adminBookingViewModel = adminBookingViewModel,
                     userInfo = userInfo,
                     goBack = { navController.popBackStack() },
-                    navigateToExtra = { categoryId, bookingName, bookingInfo, bookingPrice ->
-                        navController.navigate("admin_extra/$categoryId/$bookingName/$bookingInfo/$bookingPrice")
+                    navigateToExtra = { categoryId, bookingName, bookingInfo, bookingPrice, bookingId ->
+                        navController.navigate("admin_extra/$categoryId/$bookingName/$bookingInfo/$bookingPrice/$bookingId")
                     }
                 )
             }
@@ -90,8 +90,8 @@ fun AdminNavHost(authViewModel: AuthViewModel = viewModel()) {
                     adminBookingViewModel = adminBookingViewModel,
                     userInfo = userInfo,
                     goBack = { navController.popBackStack() },
-                    navigateToExtra = { categoryId, bookingName, bookingInfo, bookingPrice ->
-                        navController.navigate("admin_extra/$categoryId/$bookingName/$bookingInfo/$bookingPrice")
+                    navigateToExtra = { categoryId, bookingName, bookingInfo, bookingPrice, bookingId ->
+                        navController.navigate("admin_extra/$categoryId/$bookingName/$bookingInfo/$bookingPrice/$bookingId")
                     },
                     categoryId = categoryId
                 )
@@ -102,6 +102,8 @@ fun AdminNavHost(authViewModel: AuthViewModel = viewModel()) {
                 val bookingName = backStackEntry.arguments?.getString("bookingName") ?: ""
                 val bookingInfo = backStackEntry.arguments?.getString("bookingInfo") ?: ""
                 val bookingPrice = backStackEntry.arguments?.getString("bookingPrice") ?: ""
+                val bookingId = backStackEntry.arguments?.getString("bookingId") ?: ""
+
                 AdminExtrasView(
                     adminBookingViewModel = adminBookingViewModel,
                     userInfo = userInfo,
@@ -109,7 +111,9 @@ fun AdminNavHost(authViewModel: AuthViewModel = viewModel()) {
                     categoryId = categoryId,
                     bookingName = bookingName,
                     bookingInfo = bookingInfo,
-                    bookingPrice = bookingPrice
+                    bookingPrice = bookingPrice,
+                    bookingId = bookingId
+
                 )
             }
         }

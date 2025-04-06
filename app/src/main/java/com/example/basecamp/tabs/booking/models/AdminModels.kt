@@ -1,24 +1,24 @@
 package com.example.basecamp.tabs.booking.models
 
-class BookingCategories(
+data class BookingCategories(
     val id: String,
     val name: String,
     val info: String,
     val createdBy: String = "",
     )
 
-class BookingItem(
+data class BookingItem(
     val id: String,
-    val pricePerDay: Double,
+    val pricePerDay: String,
     val name: String,
     val info: String,
-    val quantity: Int = 1,
+    val quantity: String,
     val createdBy: String = "",
     )
 
-class BookingExtra(
+data class BookingExtra(
     val id: String,
-    val price: Double,
+    val price: String,
     val name: String,
     val info: String,
 )
