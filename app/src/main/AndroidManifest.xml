@@ -16,7 +16,7 @@
         android:theme="@style/Theme.BaseCamp"
         tools:targetApi="31">
         <activity
-            android:name="com.example.basecamp.MainActivity"
+            android:name="com.basecampers.basecamp.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.BaseCamp">
             <intent-filter>
