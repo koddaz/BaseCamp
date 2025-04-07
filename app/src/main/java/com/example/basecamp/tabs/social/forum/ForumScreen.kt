@@ -9,45 +9,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.basecamp.tabs.social.navHost.SocialMenu
-import com.example.basecamp.tabs.social.navHost.SocialTab
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ForumScreen(
-	onNavigateToQnA: () -> Unit,
-	onNavigateToForum: () -> Unit,
-	onNavigateToMessages: () -> Unit,
-	unreadCount: Int,
 	isSuper: Boolean,
 	onToggleSuperUser: () -> Unit
 ) {
-	Scaffold(
-		topBar = {
-			SocialMenu(
-				selectedTab = SocialTab.FORUM,
-				unreadCount = unreadCount,
-				isSuper = isSuper,
-				onTabSelected = { tab ->
-					when (tab) {
-						SocialTab.QNA -> onNavigateToQnA()
-						SocialTab.FORUM -> onNavigateToForum()
-						SocialTab.MESSAGES -> onNavigateToMessages()
-					}
-				},
-				onToggleSuperUser = onToggleSuperUser
-			)
-		},
-		floatingActionButton = {
-			FloatingActionButton(onClick = { /* TODO: Implement create post */ }) {
-				Icon(Icons.Default.Add, contentDescription = "Create Post")
-			}
-		}
-	) { paddingValues ->
+	Box(modifier = Modifier.fillMaxSize()) {
 		Column(
 			modifier = Modifier
-				.padding(paddingValues)
 				.fillMaxSize()
+				.padding(horizontal = 16.dp)
 		) {
 			// Search and filter section
 			OutlinedTextField(
@@ -55,7 +28,7 @@ fun ForumScreen(
 				onValueChange = { /* TODO: Implement search */ },
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(16.dp),
+					.padding(top = 16.dp, bottom = 16.dp),
 				placeholder = { Text("Search in forum...") },
 				leadingIcon = {
 					Icon(
@@ -66,12 +39,43 @@ fun ForumScreen(
 				singleLine = true
 			)
 			
+			// Super user toggle (for testing purposes)
+			if (isSuper) {
+				TextButton(
+					onClick = onToggleSuperUser,
+					modifier = Modifier.align(Alignment.End)
+				) {
+					Text("Switch to User Mode")
+				}
+			} else {
+				TextButton(
+					onClick = onToggleSuperUser,
+					modifier = Modifier.align(Alignment.End)
+				) {
+					Text("Switch to Super User Mode")
+				}
+			}
+			
 			// Placeholder forum content
 			Box(
-				modifier = Modifier.fillMaxSize(),
+				modifier = Modifier
+					.fillMaxSize()
+					.weight(1f),
 				contentAlignment = Alignment.Center
 			) {
 				Text("Forum Screen - To be implemented")
+			}
+		}
+		
+		// Add post button (only visible to Super Users)
+		if (isSuper) {
+			FloatingActionButton(
+				onClick = { /* TODO: Implement create post */ },
+				modifier = Modifier
+					.align(Alignment.BottomEnd)
+					.padding(16.dp)
+			) {
+				Icon(Icons.Default.Add, contentDescription = "Create Post")
 			}
 		}
 	}

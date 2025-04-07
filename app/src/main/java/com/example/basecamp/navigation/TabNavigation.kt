@@ -37,19 +37,33 @@ import com.example.basecamp.navigation.models.AuthViewModel
 import com.example.basecamp.tabs.booking.BookingNavHost
 import com.example.basecamp.tabs.home.HomeNavHost
 import com.example.basecamp.tabs.profile.ProfileNavHost
+import com.example.basecamp.tabs.social.SocialViewModel
 import com.example.basecamp.tabs.social.navHost.SocialNavHost
-
 
 @Composable
 fun TabNavigation(authViewModel : AuthViewModel) {
-    var selectedTabIndex by remember { mutableIntStateOf(0) }
-
+    
+    // Main tab state
+    var selectedTabIndex by remember { mutableIntStateOf(AppState.selectedMainTabIndex) }
+    
+    // Social tab state
+    var selectedSocialTabIndex by remember { mutableIntStateOf(AppState.selectedSocialTabIndex) }
+    
+    // Create a shared SocialViewModel for the Social tab
+    val socialViewModel: SocialViewModel = viewModel()
+    
     Column(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.weight(1f)) {
             when (selectedTabIndex) {
                 0 -> HomeNavHost(authViewModel)
                 1 -> BookingNavHost()
-                2 -> SocialNavHost()
+                2 -> SocialNavHost(
+                    socialViewModel = socialViewModel,
+                    selectedSocialTabIndex = selectedSocialTabIndex
+                ) { newIndex ->
+                    selectedSocialTabIndex = newIndex
+                    AppState.selectedSocialTabIndex = newIndex
+                }
                 3 -> ProfileNavHost(authViewModel)
                 else -> Text("Error: Tab not found")
             }
@@ -72,7 +86,10 @@ fun TabNavigation(authViewModel : AuthViewModel) {
                     },
                     label = { Text(tab.label) },
                     selected = selectedTabIndex == index,
-                    onClick = { selectedTabIndex = index }
+                    onClick = {
+                        selectedTabIndex = index
+                        AppState.selectedMainTabIndex = index
+                    }
                 )
             }
         }
