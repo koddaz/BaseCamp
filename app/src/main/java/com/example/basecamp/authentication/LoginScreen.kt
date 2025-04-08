@@ -1,14 +1,19 @@
 package com.basecampers.Authentication
 
+import androidx.compose.foundation.border
 import com.google.firebase.auth.ktx.auth
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.basecamp.components.PasswordTextField
+import com.example.basecamp.components.PasswordTextFieldLogin
 import com.example.basecamp.navigation.models.AuthViewModel
+import com.example.basecamp.navigation.models.LoginErrors
 import com.google.firebase.ktx.Firebase
 
 @Composable
@@ -16,6 +21,7 @@ fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotP
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val isLoggedIn by authViewModel.loggedin.collectAsState()
+    val loginErrorMessage by authViewModel.loginErrorMessage.collectAsState()
     
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
@@ -28,21 +34,48 @@ fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotP
     
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Authentication", style = MaterialTheme.typography.headlineMedium)
-        
+
+        if (loginErrorMessage.contains(LoginErrors.EMAIL_NOT_VALID) &&
+                loginErrorMessage.contains(LoginErrors.PASSWORD_NOT_VALID)) {
+            Text(
+                text = "Incorrect email or password",
+                color = Color.Red,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 4.dp)
+            )
+        }
         TextField(
             label = { Text("Email") },
             value = email,
-            onValueChange = { email = it },
-            modifier = Modifier.fillMaxWidth()
+            onValueChange = {
+                email = it
+                if(loginErrorMessage.isNotEmpty())   {
+                    authViewModel.clearLoginErrors()
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(
+                    1.dp,
+                    when{
+                        loginErrorMessage.contains(LoginErrors.EMAIL_NOT_VALID) -> Color.Red
+                        else -> Color.LightGray
+                    }
+                )
         )
-        
         Spacer(modifier = Modifier.height(8.dp))
-        
-        TextField(
-            label = { Text("Password") },
-            value = password,
-            onValueChange = { password = it },
-            modifier = Modifier.fillMaxWidth()
+
+        PasswordTextFieldLogin(
+            password = password,
+            onValueChange = {
+                password = it
+                if(loginErrorMessage.isNotEmpty()) {
+                    authViewModel.clearLoginErrors()
+                } },
+
+            label = "Password",
+            modifier = Modifier,
+            authViewModel,
         )
         
         Spacer(modifier = Modifier.height(16.dp))

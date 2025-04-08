@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.basecamp.navigation.models.AuthViewModel
+import com.example.basecamp.navigation.models.LoginErrors
 import com.example.basecamp.navigation.models.RegisterErrors
 
 
@@ -38,14 +39,16 @@ fun PasswordTextField(password : String, onValueChange : (String) -> Unit, label
     val state = remember { TextFieldState() }
     var showPassword by remember { mutableStateOf(false) }
     val errorMessage by authViewModel.registerErrorMessage.collectAsState()
+    val loginErrorMessage by authViewModel.loginErrorMessage.collectAsState()
     val isPasswordValid by authViewModel.passwordValid.collectAsState()
 
-    val hasPasswordError = errorMessage.any { it in listOf(
+    val hasPasswordError = errorMessage.any  { it in listOf(
         RegisterErrors.PASSWORD_EMPTY,
         RegisterErrors.PASSWORD_TOO_SHORT,
         RegisterErrors.PASSWORD_NO_SPECIAL_CHAR,
         RegisterErrors.PASSWORD_NO_UPPERCASE,
         RegisterErrors.PASSWORD_NO_NUMBER
+
     ) }
 
     BasicSecureTextField(
@@ -104,6 +107,79 @@ fun PasswordTextField(password : String, onValueChange : (String) -> Unit, label
         onValueChange(state.text.toString())
         authViewModel.validatePasswordLive(state.text.toString())
         if(hasPasswordError && state.text.toString() != password) {
+            authViewModel.clearPasswordErrors()
+        }
+    }
+}
+
+@Composable
+fun PasswordTextFieldLogin(
+    password : String,
+    onValueChange : (String) -> Unit,
+    label : String,
+    modifier : Modifier,
+    authViewModel : AuthViewModel
+) {
+
+    val state = remember { TextFieldState() }
+    var showPassword by remember { mutableStateOf(false) }
+    val loginErrorMessage by authViewModel.loginErrorMessage.collectAsState()
+
+
+    BasicSecureTextField(
+        state = state,
+        textObfuscationMode =
+            if (showPassword) {
+                TextObfuscationMode.Visible
+            } else {
+                TextObfuscationMode.RevealLastTyped
+            },
+        modifier = Modifier
+            .width(360.dp)
+            .padding(6.dp)
+            .border(
+                1.dp,
+                when{
+                    loginErrorMessage.contains(LoginErrors.PASSWORD_NOT_VALID) -> Color.Red
+                    else -> Color.LightGray
+                }
+            )
+            .padding(6.dp),
+        decorator = { innerTextField ->
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Box(
+                    modifier = Modifier
+                        .align(alignment = Alignment.CenterStart)
+                        .padding(start = 16.dp, end = 48.dp)
+                ) {
+                    if (state.text.isEmpty()) {
+                        Text(
+                            text = label,
+                            color = Color.Gray,
+                            modifier = Modifier.align(alignment = Alignment.CenterStart)
+                        )
+                    }
+                    innerTextField()
+                }
+                Icon(
+                    if (showPassword) {
+                        Icons.Filled.Visibility
+                    } else {
+                        Icons.Filled.VisibilityOff
+                    },
+                    contentDescription = "Toggle password visibility",
+                    modifier = Modifier
+                        .align(alignment = Alignment.CenterEnd)
+                        .requiredSize(48.dp).padding(16.dp)
+                        .clickable { showPassword = !showPassword }
+                )
+            }
+        }
+    )
+
+    LaunchedEffect(state.text) {
+        onValueChange(state.text.toString())
+        if(loginErrorMessage.contains(LoginErrors.PASSWORD_NOT_VALID) && state.text.toString() != password) {
             authViewModel.clearPasswordErrors()
         }
     }

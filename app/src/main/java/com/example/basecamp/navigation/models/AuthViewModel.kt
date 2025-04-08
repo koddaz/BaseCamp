@@ -10,7 +10,6 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -29,6 +28,9 @@ class AuthViewModel : ViewModel() {
 
     private val _registerErrorMessage = MutableStateFlow(listOf<RegisterErrors>())
     val registerErrorMessage = _registerErrorMessage.asStateFlow()
+
+    private val _loginErrorMessage = MutableStateFlow(listOf<LoginErrors>())
+    val loginErrorMessage = _loginErrorMessage.asStateFlow()
 
     private val _emailValid = MutableStateFlow(false)
     val emailValid = _emailValid.asStateFlow()
@@ -54,7 +56,9 @@ class AuthViewModel : ViewModel() {
         RegisterErrors.PASSWORD_NO_UPPERCASE to "Password must contain at least one uppercase letter",
         RegisterErrors.PASSWORD_NO_NUMBER to "Password must contain at least one number",
         RegisterErrors.CONFIRM_PASSWORD_EMPTY to "Confirm password cannot be empty",
-        RegisterErrors.CONFIRM_PASSWORD_MISMATCH to "Passwords do not match"
+        RegisterErrors.CONFIRM_PASSWORD_MISMATCH to "Passwords do not match",
+        LoginErrors.EMAIL_NOT_VALID to "Email not found or invalid",
+        LoginErrors.PASSWORD_NOT_VALID to "Password is incorrect"
     )
 
 
@@ -92,9 +96,27 @@ class AuthViewModel : ViewModel() {
     fun login(email: String, password: String) {
         Firebase.auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
             checklogin()
+            clearLoginErrors()
             Log.i("LOGINDEBUG", "Checked login")
-        }.addOnFailureListener {
-            println(tag + "Login failed ${it.message}")
+        }.addOnFailureListener { exception ->
+            val errors = mutableListOf<LoginErrors>()
+            Log.d(tag, "Firebase error message: ${exception.message}")
+            when (exception.message) {
+                "The email address is badly formatted." -> {
+                    // Only email is invalid due to syntax
+                    errors.add(LoginErrors.EMAIL_NOT_VALID)
+                    Log.d(tag, "Added EMAIL_NOT_VALID for badly formatted email")
+                }
+                else -> {
+                    // All other cases (wrong password, non-existent email, etc.) -> both errors
+                    errors.add(LoginErrors.EMAIL_NOT_VALID)
+                    errors.add(LoginErrors.PASSWORD_NOT_VALID)
+                    Log.d(tag, "Added EMAIL_NOT_VALID and PASSWORD_NOT_VALID for invalid email or password")
+                }
+            }
+            Log.d(tag, "Final errors list before setting value: $errors")
+            _loginErrorMessage.value = errors
+            println(tag + "Login failed ${exception.message}")
         }
     }
 
@@ -261,6 +283,10 @@ class AuthViewModel : ViewModel() {
         return checkError
     }
 
+    fun clearLoginErrors() {
+        _loginErrorMessage.value = emptyList()
+    }
+
     fun clearPasswordErrors() {
         val currentErrors = registerErrorMessage.value.toMutableList()
         currentErrors.removeAll { it in listOf(
@@ -296,14 +322,12 @@ class AuthViewModel : ViewModel() {
         if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             return false
         }
-
-        // Additional TLD validation
+        // Additional TLD validation. TLD = Top-level domain
         val tld = email.substringAfterLast(".")
         val validTlds = listOf("com", "org", "net", "edu", "gov", "se", "co", "io", "co.uk") // Extend as needed
         return tld.length >= 2 &&
                 (validTlds.contains(tld.lowercase()) || tld.all { it.isLetter() })
     }
-
 }
 
 enum class RegisterErrors {
@@ -316,4 +340,9 @@ enum class RegisterErrors {
     CONFIRM_PASSWORD_MISMATCH,
     EMAIL_EMPTY,
     EMAIL_NOT_VALID
+}
+
+enum class LoginErrors {
+    EMAIL_NOT_VALID,
+    PASSWORD_NOT_VALID
 }
