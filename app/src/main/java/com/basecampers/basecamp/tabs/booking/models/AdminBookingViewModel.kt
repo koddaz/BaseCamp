@@ -41,26 +41,7 @@ class AdminBookingViewModel : ViewModel() {
         retrieveCategories()
     }
 
-    private val _currentBookingData = MutableStateFlow<Map<String, String>?>(null)
-    val currentBookingData = _currentBookingData.asStateFlow()
 
-    fun setCurrentBookingData(
-        categoryId: String,
-        bookingName: String,
-        bookingInfo: String,
-        bookingPrice: String,
-        bookingId: String
-    ) {
-        _currentBookingData.value = mapOf(
-            "categoryId" to categoryId,
-            "bookingName" to bookingName,
-            "bookingInfo" to bookingInfo,
-            "bookingPrice" to bookingPrice,
-            "bookingId" to bookingId
-        )
-        // Retrieve items for this category
-        retrieveBookingItems(categoryId)
-    }
 
     private fun getCompanyName(): String? {
         return _user.value?.companyName

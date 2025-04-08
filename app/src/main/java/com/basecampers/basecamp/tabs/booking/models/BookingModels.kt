@@ -7,7 +7,7 @@ data class BookingItems(
     val name: String,
     val info: String,
     val price: Double,
-
+    val categoryId: String // Add this field
 )
 
 data class ExtraItems(

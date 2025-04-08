@@ -40,12 +40,7 @@ fun BookingNavHost(authViewModel: AuthViewModel) {
 
     NavHost(navController = navController, startDestination = bookingRoutes.ADMIN) {
         composable(bookingRoutes.MAIN) {
-            BookingView(
-                userInfo = userInfo,
-                authViewModel = authViewModel,
-                bookingViewModel = bookingViewModel,
-                onClick = { navController.navigate(bookingRoutes.ADMIN) },
-            )
+
         }
         composable(bookingRoutes.ADMIN) {
             AdminNavHost(

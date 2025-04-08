@@ -26,7 +26,7 @@ fun BookingCornfirmation(
     val selectedExtraItems = bookingViewModel.seleectedExtraItems.collectAsState().value
     val formattedDateRange = bookingViewModel.formattedDateRange.collectAsState().value
 
-    val totalPrice = selectedBookingItem?.price?.plus(selectedExtraItems.sumOf { it.price }) ?: 0.0
+    val totalPrice = selectedBookingItem?.pricePerDay?.plus(selectedExtraItems.sumOf { it.price }) ?: 0.0
 
 
     Column(modifier.fillMaxSize()) {
