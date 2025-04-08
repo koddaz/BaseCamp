@@ -15,7 +15,10 @@ interface ProfileDao {
 
     @Query("DELETE FROM profile_table")
     suspend fun deleteAll()
-    
+
     @Query("SELECT COUNT(*) FROM profile_table")
-    suspend fun getProfileCount(): Int
+    fun getProfileCount(): Flow<Int> // Remove the static modifier and make it an instance method
+
+   // @Query("SELECT COUNT(*) FROM profile_table")
+    //suspend fun getProfileCount(): Int
 }

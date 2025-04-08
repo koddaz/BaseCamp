@@ -19,10 +19,15 @@ class ProfileRepository(private val profileDao: ProfileDao) {
         return profileDao.getProfileByUid(uid)
     }
     
-    suspend fun getProfileCount(): Int {
-        return profileDao.getProfileCount()
+    //suspend fun getProfileCount(): Int {
+     //   return profileDao.getProfileCount()
+    //}
+
+    fun getProfileCount(): Flow<Int> {
+        return profileDao.getProfileCount() // Access the instance method
     }
-    
+
+
     suspend fun refreshProfileFromFirestore(uid: String) {
         try {
             Log.d("ProfileRepo", "Fetching profile for UID: $uid")
