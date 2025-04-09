@@ -85,12 +85,6 @@ fun BookingScreen(
     }
 }
 
-
-
-
-
-
-
 @Preview(showBackground = true)
 @Composable
 fun BookingsPreview() {

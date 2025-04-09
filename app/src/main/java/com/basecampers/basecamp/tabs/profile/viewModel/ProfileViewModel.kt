@@ -18,26 +18,16 @@ import kotlin.invoke
 
 class ProfileViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: ProfileRepository
-    val profileCount: StateFlow<Int>
+//    val profileCount: StateFlow<Int>
     init {
         val profileDao = ProfileDatabase.getDatabase(application).profileDao()
         repository = ProfileRepository(profileDao)
-
-        profileCount = repository.getProfileCount()
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0) // Set default value 0
-
-
-
+        
+//        profileCount = repository.getProfileCount()
+//            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0) // Set default value 0
+    
     }
-
-
-
-
-
-
-
-
-
+    
     // Observe profile from Room
     fun observeProfile(uid: String): Flow<ProfileModel?> {
         return repository.getProfileByUid(uid)
@@ -49,16 +39,13 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
             repository.refreshProfileFromFirestore(uid)
         }
     }
-
+    
     //suspend fun getProfileCount(): Int {
-      //  return repository.getProfileCount()
+    //  return repository.getProfileCount()
     //}
-
+    
     //Testing getProfileCount function.
-    fun getProfileCount():Int{
-        return profileCount.value
-    }
-
-
-
+//    fun getProfileCount():Int{
+//        return profileCount.value
+//    }
 }

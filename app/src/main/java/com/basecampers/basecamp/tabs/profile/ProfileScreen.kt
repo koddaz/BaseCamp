@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.flowOf
 fun ProfileScreen(authViewModel: AuthViewModel, profileViewModel: ProfileViewModel = viewModel()) {
 
 
-    val profileCount by profileViewModel.profileCount.collectAsState()
+//    val profileCount by profileViewModel.profileCount.collectAsState()
 
 
     val userInfo by authViewModel.userInfo.collectAsState()
@@ -30,7 +30,7 @@ fun ProfileScreen(authViewModel: AuthViewModel, profileViewModel: ProfileViewMod
     var isRefreshing by remember { mutableStateOf(false) }
     
     //var profileCount by remember { mutableStateOf(0) }
-    Log.d("ProfileScreen", "Current profileCount: $profileCount")
+//    Log.d("ProfileScreen", "Current profileCount: $profileCount")
 
 
    // LaunchedEffect(Unit) {
@@ -67,7 +67,7 @@ fun ProfileScreen(authViewModel: AuthViewModel, profileViewModel: ProfileViewMod
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Profile", style = MaterialTheme.typography.headlineMedium)
         
-        Text("Profiles in database: $profileCount")
+//        Text("Profiles in database: $profileCount")
         
         // Data source indicator
         Text(
@@ -93,7 +93,7 @@ fun ProfileScreen(authViewModel: AuthViewModel, profileViewModel: ProfileViewMod
                 Text("Bio: ${userInfo?.bio ?: "N/A"}")
                 Text("Status: ${userInfo?.status ?: "N/A"}")
                 Text("Company: ${userInfo?.companyName ?: "N/A"}")
-                Text("Profiles in database: $profileCount")
+//                Text("Profiles in database: $profileCount")
                 profile?.let {
                     if (it.bio.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(8.dp))

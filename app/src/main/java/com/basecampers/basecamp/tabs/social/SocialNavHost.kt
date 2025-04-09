@@ -5,8 +5,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.basecampers.basecamp.navigation.models.AuthViewModel
-import com.basecampers.basecamp.tabs.profile.ProfileScreen
+import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.tabs.social.models.socialRoutes
 
 

@@ -4,9 +4,12 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import com.basecampers.basecamp.tabs.profile.models.ProfileModel
+import com.basecampers.basecamp.tabs.profile.models.UserStatusConverter
 
 @Database(entities = [ProfileModel::class], version = 1, exportSchema = false)
+@TypeConverters(UserStatusConverter::class)
 abstract class ProfileDatabase : RoomDatabase() {
     abstract fun profileDao(): ProfileDao
 

@@ -23,8 +23,6 @@ fun NavButton(
     }
 }
 
-
-
 @Preview(showBackground = true)
 @Composable
 fun NavButtonPreview() {

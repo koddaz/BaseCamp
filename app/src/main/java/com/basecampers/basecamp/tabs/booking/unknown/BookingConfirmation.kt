@@ -21,16 +21,16 @@ fun BookingCornfirmation(
     bookingViewModel: UserBookingViewModel = viewModel(),
     modifier: Modifier = Modifier,
 ) {
-
+    
     val selectedBookingItem = bookingViewModel.selectedBookingItem.collectAsState().value
     val selectedExtraItems = bookingViewModel.seleectedExtraItems.collectAsState().value
     val formattedDateRange = bookingViewModel.formattedDateRange.collectAsState().value
-
+    
     val totalPrice = selectedBookingItem?.price?.plus(selectedExtraItems.sumOf { it.price }) ?: 0.0
-
-
+    
+    
     Column(modifier.fillMaxSize()) {
-
+        
         Column(modifier.weight(1f).padding(16.dp)) {
             Text(text = "Booking Confirmation")
             Text(text = "Selected Date Range: ${formattedDateRange}")
@@ -41,7 +41,7 @@ fun BookingCornfirmation(
             }
             Text(text = "Total Price: $${totalPrice}")
         }
-
+        
         Row(modifier.fillMaxWidth().padding(16.dp)) {
             Column(modifier.weight(1f)) {
                 NavButton(
@@ -54,12 +54,9 @@ fun BookingCornfirmation(
                     title = "Complete",
                     onClick = {
                         onComplete()
-                              },
+                    },
                 )
             }
         }
-
-
     }
-
 }

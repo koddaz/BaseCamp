@@ -2,14 +2,9 @@ package com.basecampers.basecamp.tabs.profile
 
 import android.util.Log
 import com.basecampers.basecamp.tabs.profile.models.ProfileModel
-
-
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
-
-
-
 
 class ProfileRepository(private val profileDao: ProfileDao) {
 

@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import com.basecampers.ui.theme.BaseCampTheme
 import com.basecampers.basecamp.aRootFolder.Root
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
-import com.basecampers.basecamp.navigation.models.AuthViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,7 +21,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             BaseCampTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Root(authViewModel, padding = innerPadding)
+                    Root(authViewModel)
                 }
             }
         }
