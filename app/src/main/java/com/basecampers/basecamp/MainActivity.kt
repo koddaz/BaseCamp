@@ -9,6 +9,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import com.basecampers.ui.theme.BaseCampTheme
 import com.basecampers.basecamp.aRootFolder.Root
+import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.navigation.models.AuthViewModel
 
 class MainActivity : ComponentActivity() {

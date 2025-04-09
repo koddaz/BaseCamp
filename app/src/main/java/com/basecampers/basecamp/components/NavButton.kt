@@ -1,4 +1,5 @@
-package com.basecampers.components
+
+package com.basecampers.basecamp.components
 
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults

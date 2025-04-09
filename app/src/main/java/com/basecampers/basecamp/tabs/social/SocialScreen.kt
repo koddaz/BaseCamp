@@ -1,3 +1,15 @@
+
+package com.basecampers.basecamp.tabs.social
+
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+
+@Composable
+fun SocialScreen() {
+    Text("Social Screen", style = MaterialTheme.typography.titleLarge)
+}
+/* Profile screen var i SocialScreen.kt (sparar om den andra är borta)
 package com.basecampers.basecamp.tabs.profile
 
 import androidx.compose.foundation.layout.*
@@ -73,3 +85,4 @@ fun ProfileScreen(authViewModel: AuthViewModel) {
 fun ProfilePreviewScreen() {
     ProfileScreen(authViewModel = viewModel())
 }
+*/

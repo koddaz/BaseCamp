@@ -1,4 +1,5 @@
-package com.basecampers.Authentication
+
+package com.basecampers.basecamp.authentication
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -16,7 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.basecampers.basecamp.navigation.models.AuthViewModel
+import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 
 @Composable
 fun ForgotPasswordScreen(authViewModel : AuthViewModel) {

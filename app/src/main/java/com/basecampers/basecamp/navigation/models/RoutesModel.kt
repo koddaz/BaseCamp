@@ -1,4 +1,5 @@
-package com.basecampers.navigation.models
+
+package com.basecampers.basecamp.navigation.models
 
 object Routes {
     const val LOADING = "loading"

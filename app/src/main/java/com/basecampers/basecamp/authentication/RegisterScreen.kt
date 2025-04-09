@@ -1,4 +1,5 @@
-package com.basecampers.Authentication
+
+package com.basecampers.basecamp.authentication
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*

@@ -89,8 +89,6 @@ fun BookingNavHost(authViewModel: AuthViewModel) {
                     }
                 }
             )
-
         }
     }
-
 }

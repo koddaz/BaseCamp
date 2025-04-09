@@ -18,9 +18,7 @@ fun SocialNavHost(
 
     NavHost(navController = navController, startDestination = socialRoutes.MAIN) {
         composable(socialRoutes.MAIN) {
-            ProfileScreen(
-                authViewModel = authViewModel
-            )
+            SocialScreen()
         }
     }
 

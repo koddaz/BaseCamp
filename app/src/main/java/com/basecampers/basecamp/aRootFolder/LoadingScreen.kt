@@ -19,7 +19,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun LoadingScreen() {
+fun LoadingScreen(tempFunction: () -> Unit, isLoggedIn: Boolean = false) {
+
     
     val progress = remember { Animatable(0f) }
     
@@ -28,8 +29,8 @@ fun LoadingScreen() {
             targetValue = 1f,
             animationSpec = tween(durationMillis = 2000)
         )
+        tempFunction()
     }
-    
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -40,7 +41,6 @@ fun LoadingScreen() {
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.padding(bottom = 16.dp)
         )
-        
         LinearProgressIndicator(
             progress = {progress.value},
             modifier = Modifier.fillMaxWidth(0.7f).height(8.dp),
@@ -53,5 +53,5 @@ fun LoadingScreen() {
 @Preview(showBackground = true)
 @Composable
 fun LoadingScreenPreview() {
-    LoadingScreen()
+    LoadingScreen(tempFunction = {})
 }
