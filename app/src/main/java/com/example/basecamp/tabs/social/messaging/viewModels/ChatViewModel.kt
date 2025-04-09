@@ -8,125 +8,95 @@ import kotlinx.coroutines.flow.flow
 import java.util.*
 
 class ChatViewModel : ViewModel() {
-	// Mock current user
-	private val currentUserId = "user_1"
-	private val currentUserName = "John Doe"
+	private val currentUserId = "current-user-123"
 	
-	// Mock super users
-	private val superUsers = mapOf(
-		"bb_1" to "Sarah (BaseBuddy)",
-		"bb_2" to "Mike (BaseBuddy)"
-	)
+	// Mock data for chat info
+	fun getChatInfo(chatId: String): Flow<ChatInfo?> = flow {
+		// Mock chat data
+		val chatInfo = ChatInfo(
+			id = chatId,
+			title = "Support Chat #$chatId",
+			isActive = true
+		)
+		emit(chatInfo)
+		
+		// Later: Firebase implementation
+		// db.collection("chats").document(chatId).get()
+	}
 	
-	// Mock chat data
-	private val chatInfoMap = mutableMapOf(
-		"chat1" to ChatInfo("chat1", "Chat with Sarah (BaseBuddy)"),
-		"chat2" to ChatInfo("chat2", "Chat with Support"),
-		"chat3" to ChatInfo("chat3", "Previous Support Chat"),
-		"pending1" to ChatInfo("pending1", "Chat with John"),
-		"pending2" to ChatInfo("pending2", "Chat with Emily"),
-		"pending3" to ChatInfo("pending3", "Chat with Michael"),
-		"active1" to ChatInfo("active1", "Chat with Lisa"),
-		"active2" to ChatInfo("active2", "Chat with Robert")
-	)
-	
-	// Mock messages data
-	private val messagesMap = mutableMapOf<String, MutableStateFlow<List<Message>>>()
-	
-	init {
-		// Initialize with some mock messages
-		val defaultMessages = listOf(
+	// Mock data for messages
+	fun getMessages(chatId: String): Flow<List<Message>> = flow {
+		// Generate some mock messages
+		val messages = listOf(
 			Message(
-				id = "msg1",
-				senderId = "bb_1",
-				senderName = "Sarah (BaseBuddy)",
-				receiverId = currentUserId,
-				content = "Hello! How can I help you today?",
-				timestamp = System.currentTimeMillis() - 600000, // 10 minutes ago
-				isBaseBuddyMessage = true
+				id = UUID.randomUUID().toString(),
+				chatId = chatId,
+				content = "Hello, how can I help you today?",
+				senderId = "support-agent-123",
+				senderName = "Support Agent",
+				timestamp = System.currentTimeMillis() - 60 * 60 * 1000
 			),
 			Message(
-				id = "msg2",
+				id = UUID.randomUUID().toString(),
+				chatId = chatId,
+				content = "I have a question about my booking.",
 				senderId = currentUserId,
-				senderName = currentUserName,
-				receiverId = "bb_1",
-				content = "I'm having trouble with booking a session.",
-				timestamp = System.currentTimeMillis() - 540000 // 9 minutes ago
+				senderName = "You",
+				timestamp = System.currentTimeMillis() - 55 * 60 * 1000
+			),
+			Message(
+				id = UUID.randomUUID().toString(),
+				chatId = chatId,
+				content = "Sure, I'd be happy to help with that. What's the issue you're experiencing?",
+				senderId = "support-agent-123",
+				senderName = "Support Agent",
+				timestamp = System.currentTimeMillis() - 50 * 60 * 1000
 			)
 		)
+		emit(messages)
 		
-		// Set default messages for all chats for demo purposes
-		chatInfoMap.keys.forEach { chatId ->
-			messagesMap[chatId] = MutableStateFlow(defaultMessages)
-		}
+		// Later: Firebase implementation
+		// db.collection("chats").document(chatId).collection("messages")
+		//   .orderBy("timestamp", Query.Direction.DESCENDING)
+		//   .limit(50)
+		//   .get()
 	}
 	
-	// Get current user ID
 	fun getCurrentUserId(): String {
 		return currentUserId
+		// Later: Get from Firebase Auth or user session
 	}
 	
-	// Get chat information
-	fun getChatInfo(chatId: String): Flow<ChatInfo?> {
-		return flow {
-			emit(chatInfoMap[chatId])
-		}
-	}
-	
-	// Get messages for a specific chat
-	fun getMessages(chatId: String): Flow<List<Message>> {
-		// Create a flow with messages if it doesn't exist
-		if (!messagesMap.containsKey(chatId)) {
-			messagesMap[chatId] = MutableStateFlow(emptyList())
-		}
-		return messagesMap[chatId]!!
-	}
-	
-	// Send a message
 	fun sendMessage(chatId: String, content: String) {
-		if (content.isBlank()) return
-		
-		val messages = messagesMap[chatId] ?: MutableStateFlow(emptyList())
-		
-		// Determine the receiver ID (in a real app this would be more sophisticated)
-		val receiverId = "bb_1" // Default to first BaseBuddy for demo
-		
-		val newMessage = Message(
-			id = UUID.randomUUID().toString(),
-			senderId = currentUserId,
-			senderName = currentUserName,
-			receiverId = receiverId,
-			content = content,
-			timestamp = System.currentTimeMillis()
-		)
-		
-		messages.value = messages.value + newMessage
-		
-		// In a real app, this would also send the message to a backend
-		
-		// For demo, add an automatic reply after a short delay
-		val chatInfo = chatInfoMap[chatId]
-		if (chatInfo != null) {
-			// In a real app, this would be handled by the backend
-			// This is just for demo purposes
-			val autoReply = Message(
-				id = UUID.randomUUID().toString(),
-				senderId = receiverId,
-				senderName = superUsers[receiverId] ?: "BaseBuddy",
-				receiverId = currentUserId,
-				content = "Thanks for your message. I'll help you with that shortly.",
-				timestamp = System.currentTimeMillis() + 1000, // 1 second later
-				isBaseBuddyMessage = true
-			)
-			
-			// Add auto-reply (in a real app this would come from the server)
-			messages.value = messages.value + autoReply
-		}
+		// Mock sending a message
+		// Later: Add to Firestore
+		// db.collection("chats").document(chatId).collection("messages").add(message)
 	}
 	
-	// Data class for chat info
-	data class ChatInfo(
-		val id: String,
-		val title: String
-	)
+	fun closeChat(chatId: String) {
+		// Mock closing a chat
+		// Later: Update in Firestore
+		// db.collection("chats").document(chatId).update("isActive", false)
+	}
+	
+	fun deleteChat(chatId: String) {
+		// Mock deleting a chat
+		// Later: Delete from Firestore
+		// db.collection("chats").document(chatId).delete()
+	}
 }
+
+data class ChatInfo(
+	val id: String = UUID.randomUUID().toString(),
+	val title: String = "",
+	val isActive: Boolean = true
+)
+
+data class Message(
+	val id: String = UUID.randomUUID().toString(),
+	val chatId: String = "",
+	val content: String = "",
+	val senderId: String = "",
+	val senderName: String = "",
+	val timestamp: Long = System.currentTimeMillis()
+)

@@ -1,8 +1,6 @@
 package com.example.basecamp.tabs.social.messaging
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
@@ -20,7 +18,6 @@ fun StartChatScreen(
 	onNavigateBack: () -> Unit,
 	viewModel: UserMessagingViewModel = viewModel()
 ) {
-	val superUsers by viewModel.getAvailableSuperUsers().collectAsState(initial = emptyList())
 	var selectedTopic by remember { mutableStateOf("") }
 	var messageText by remember { mutableStateOf("") }
 	
@@ -93,7 +90,7 @@ fun StartChatScreen(
 			Button(
 				onClick = {
 					if (selectedTopic.isNotBlank() && messageText.isNotBlank()) {
-						val chatId = viewModel.startNewChat(selectedTopic, messageText)
+						val chatId = viewModel.createChatRequest(selectedTopic, messageText)
 						onChatStarted(chatId)
 					}
 				},
@@ -105,25 +102,29 @@ fun StartChatScreen(
 			
 			Spacer(modifier = Modifier.height(24.dp))
 			
-			// Available BaseBuddies (just informational, not for selection)
-			if (superUsers.isNotEmpty()) {
-				Text(
-					text = "Available BaseBuddies",
-					style = MaterialTheme.typography.titleSmall
+			// Information about BaseBuddies response
+			Card(
+				modifier = Modifier.fillMaxWidth(),
+				colors = CardDefaults.cardColors(
+					containerColor = MaterialTheme.colorScheme.surfaceVariant
 				)
-				
-				Spacer(modifier = Modifier.height(8.dp))
-				
-				LazyColumn {
-					items(superUsers) { superUser ->
-						ListItem(
-							headlineContent = { Text(superUser.name) },
-							supportingContent = {
-								Text("${superUser.role} • Active Now")
-							}
-						)
-						Divider()
-					}
+			) {
+				Column(
+					modifier = Modifier.padding(16.dp)
+				) {
+					Text(
+						text = "What happens next?",
+						style = MaterialTheme.typography.titleSmall,
+						fontWeight = FontWeight.Bold
+					)
+					
+					Spacer(modifier = Modifier.height(8.dp))
+					
+					Text(
+						"Your message will be sent to our BaseBuddies. " +
+								"The first available BaseBuddy will respond to your request. " +
+								"You'll be notified when someone replies."
+					)
 				}
 			}
 		}

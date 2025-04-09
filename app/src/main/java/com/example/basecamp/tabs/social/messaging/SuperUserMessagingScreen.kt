@@ -16,8 +16,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.basecamp.tabs.social.messaging.viewModels.SuperUserMessagingViewModel
-import com.example.basecamp.tabs.social.messaging.viewModels.SuperUserMessagingViewModel.PendingChat
-import com.example.basecamp.tabs.social.messaging.viewModels.SuperUserMessagingViewModel.ActiveChat
 
 @Composable
 fun SuperUserMessagingScreen(
@@ -56,9 +54,9 @@ fun SuperUserMessagingScreen(
 					Text("No pending requests")
 				} else {
 					LazyColumn {
-						items(pendingChats) { chat ->
+						items(pendingChats) { request ->
 							OutlinedCard(
-								onClick = { onSelectPendingChat(chat.id) },
+								onClick = { onSelectPendingChat(request.id) },
 								modifier = Modifier
 									.fillMaxWidth()
 									.padding(vertical = 4.dp)
@@ -69,29 +67,19 @@ fun SuperUserMessagingScreen(
 										.padding(16.dp),
 									verticalAlignment = Alignment.CenterVertically
 								) {
-									if (!chat.isRead) {
-										Icon(
-											imageVector = Icons.Default.Circle,
-											contentDescription = "Unread",
-											tint = Color.Red,
-											modifier = Modifier.size(12.dp)
-										)
-										Spacer(modifier = Modifier.width(8.dp))
-									}
-									
 									Column(modifier = Modifier.weight(1f)) {
 										Text(
-											text = "Request from ${chat.userName}",
+											text = "Request from ${request.userName}",
 											fontWeight = FontWeight.Bold
 										)
 										Text(
-											text = "Subject: ${chat.subject}",
+											text = "Subject: ${request.subject}",
 											style = MaterialTheme.typography.bodyMedium
 										)
 									}
 									
 									Text(
-										text = chat.timeReceived,
+										text = request.timeReceived,
 										style = MaterialTheme.typography.bodySmall,
 										color = MaterialTheme.colorScheme.outline
 									)

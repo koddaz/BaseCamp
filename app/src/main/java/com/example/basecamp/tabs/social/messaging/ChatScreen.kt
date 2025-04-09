@@ -7,6 +7,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -16,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.basecamp.tabs.social.messaging.components.MessageItem
 import com.example.basecamp.tabs.social.messaging.viewModels.ChatViewModel
 import com.example.basecamp.tabs.social.messaging.models.Message
 import java.text.SimpleDateFormat
@@ -33,6 +36,8 @@ fun ChatScreen(
 	val messages by viewModel.getMessages(chatId).collectAsState(initial = emptyList())
 	
 	var messageText by remember { mutableStateOf("") }
+	var showCloseDialog by remember { mutableStateOf(false) }
+	var showDeleteDialog by remember { mutableStateOf(false) }
 	
 	Scaffold(
 		topBar = {
@@ -46,6 +51,25 @@ fun ChatScreen(
 							imageVector = Icons.Default.ArrowBack,
 							contentDescription = "Back"
 						)
+					}
+				},
+				actions = {
+					if (!isReadOnly) {
+						// Close chat action for active chats
+						IconButton(onClick = { showCloseDialog = true }) {
+							Icon(
+								imageVector = Icons.Default.Close,
+								contentDescription = "Close Chat"
+							)
+						}
+					} else {
+						// Delete chat action for closed chats
+						IconButton(onClick = { showDeleteDialog = true }) {
+							Icon(
+								imageVector = Icons.Default.Delete,
+								contentDescription = "Delete Chat"
+							)
+						}
 					}
 				}
 			)
@@ -138,69 +162,55 @@ fun ChatScreen(
 				}
 			}
 		}
-	}
-}
-
-@Composable
-fun MessageItem(
-	message: Message,
-	isFromCurrentUser: Boolean
-) {
-	Column(
-		modifier = Modifier.fillMaxWidth(),
-		horizontalAlignment = if (isFromCurrentUser) Alignment.End else Alignment.Start
-	) {
-		Column(
-			modifier = Modifier
-				.widthIn(max = 300.dp)
-				.clip(
-					RoundedCornerShape(
-						topStart = 16.dp,
-						topEnd = 16.dp,
-						bottomStart = if (isFromCurrentUser) 16.dp else 4.dp,
-						bottomEnd = if (isFromCurrentUser) 4.dp else 16.dp
-					)
-				)
-				.background(
-					if (isFromCurrentUser)
-						MaterialTheme.colorScheme.primary
-					else
-						MaterialTheme.colorScheme.surfaceVariant
-				)
-				.padding(12.dp)
-		) {
-			Text(
-				text = message.content,
-				color = if (isFromCurrentUser)
-					MaterialTheme.colorScheme.onPrimary
-				else
-					MaterialTheme.colorScheme.onSurfaceVariant
-			)
-			
-			Spacer(modifier = Modifier.height(4.dp))
-			
-			Text(
-				text = message.senderName,
-				style = MaterialTheme.typography.labelSmall,
-				fontWeight = FontWeight.Bold,
-				color = if (isFromCurrentUser)
-					MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
-				else
-					MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+		
+		// Close Chat Dialog
+		if (showCloseDialog) {
+			AlertDialog(
+				onDismissRequest = { showCloseDialog = false },
+				title = { Text("Close Chat") },
+				text = { Text("Are you sure you want to close this chat? You won't be able to send new messages.") },
+				confirmButton = {
+					TextButton(
+						onClick = {
+							viewModel.closeChat(chatId)
+							showCloseDialog = false
+							onNavigateBack()
+						}
+					) {
+						Text("Close Chat")
+					}
+				},
+				dismissButton = {
+					TextButton(onClick = { showCloseDialog = false }) {
+						Text("Cancel")
+					}
+				}
 			)
 		}
 		
-		Spacer(modifier = Modifier.height(2.dp))
-		
-		Text(
-			text = timeString(message.timestamp),
-			style = MaterialTheme.typography.labelSmall,
-			color = MaterialTheme.colorScheme.outline
-		)
+		// Delete Chat Dialog
+		if (showDeleteDialog) {
+			AlertDialog(
+				onDismissRequest = { showDeleteDialog = false },
+				title = { Text("Delete Chat") },
+				text = { Text("Are you sure you want to delete this chat? This action cannot be undone.") },
+				confirmButton = {
+					TextButton(
+						onClick = {
+							viewModel.deleteChat(chatId)
+							showDeleteDialog = false
+							onNavigateBack()
+						}
+					) {
+						Text("Delete")
+					}
+				},
+				dismissButton = {
+					TextButton(onClick = { showDeleteDialog = false }) {
+						Text("Cancel")
+					}
+				}
+			)
+		}
 	}
-}
-
-private fun timeString(timestamp: Long): String {
-	val dateFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
-	return dateFormat.format(Date(timestamp))
 }

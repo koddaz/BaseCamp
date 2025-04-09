@@ -1,81 +1,102 @@
 package com.example.basecamp.tabs.social.messaging.viewModels
 
 import androidx.lifecycle.ViewModel
+import com.example.basecamp.tabs.social.messaging.models.Chat
 import com.example.basecamp.tabs.social.models.User
 import com.example.basecamp.tabs.social.models.UserRole
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import java.util.*
 
 class UserMessagingViewModel : ViewModel() {
-	// Mock current user
-	private val currentUserId = "user_1"
-	
-	// Mock data for user's chats
-	private val _chats = MutableStateFlow<List<UserChat>>(
+	// Mock data for testing
+	private val _chats = MutableStateFlow<List<Chat>>(
 		listOf(
-			UserChat(
-				id = "chat1",
+			Chat(
+				title = "Support Chat",
 				isActive = true,
-				lastMessageTime = "10 minutes ago"
+				lastMessageText = "Thanks for your help!",
+				lastMessageTime = System.currentTimeMillis() - 30 * 60 * 1000, // 30 min ago
+				unreadCount = 2
 			),
-			UserChat(
-				id = "chat2",
+			Chat(
+				title = "Booking Issue",
 				isActive = false,
-				lastMessageTime = "Yesterday"
+				lastMessageText = "Issue has been resolved.",
+				lastMessageTime = System.currentTimeMillis() - 24 * 60 * 60 * 1000, // 1 day ago
 			),
-			UserChat(
-				id = "chat3",
+			Chat(
+				title = "Facility Question",
 				isActive = false,
-				lastMessageTime = "2 days ago"
+				lastMessageText = "Thank you for using our service.",
+				lastMessageTime = System.currentTimeMillis() - 48 * 60 * 60 * 1000, // 2 days ago
 			)
 		)
 	)
-	val chats: StateFlow<List<UserChat>> = _chats.asStateFlow()
+	val chats = _chats.asStateFlow()
 	
-	// Mock list of available super users
-	private val _superUsers = MutableStateFlow<List<User>>(
-		listOf(
-			User(id = "bb_1", name = "Sarah (BaseBuddy)", role = UserRole.SUPER_USER),
-			User(id = "bb_2", name = "Mike (BaseBuddy)", role = UserRole.SUPER_USER),
-			User(id = "admin_1", name = "Admin", role = UserRole.ADMIN)
-		)
-	)
-	
-	// Get list of available super users
-	fun getAvailableSuperUsers(): StateFlow<List<User>> {
-		return _superUsers.asStateFlow()
-	}
-	
-	// Start a new chat
-	fun startNewChat(topic: String, initialMessage: String): String {
-		// In a real app, this would create a new chat request and assign it to available BaseBuddies
+	// User function
+	fun createChatRequest(topic: String, message: String): String {
 		val chatId = UUID.randomUUID().toString()
 		
-		// Add to active chats (in a real app, it would be pending until accepted)
-		val newChat = UserChat(
+		// In a real implementation, this would create a ChatRequest document in Firestore
+		// For now, we'll simulate by creating a Chat directly
+		val newChat = Chat(
 			id = chatId,
+			title = topic,
 			isActive = true,
-			lastMessageTime = "Just now"
+			lastMessageText = message,
+			lastMessageTime = System.currentTimeMillis()
 		)
 		
-		_chats.value = listOf(newChat) + _chats.value.filter { !it.isActive }
+		_chats.update { currentChats ->
+			listOf(newChat) + currentChats
+		}
 		
 		return chatId
 	}
 	
-	// Mark chat as closed
-	fun closeChat(chatId: String) {
-		_chats.value = _chats.value.map {
-			if (it.id == chatId) it.copy(isActive = false) else it
-		}
+	// Will be replaced with Firebase implementation
+	fun loadChats() {
+		// Already loaded with mock data for now
+		// Later: db.collection("chats").whereArrayContains("participantIds", currentUserId)
 	}
 	
-	// Data class for user chats
-	data class UserChat(
-		val id: String,
-		val isActive: Boolean,
-		val lastMessageTime: String
-	)
+	fun startNewChat(topic: String, message: String): String {
+		val chatId = UUID.randomUUID().toString()
+		val newChat = Chat(
+			id = chatId,
+			title = topic,
+			isActive = true,
+			lastMessageText = message,
+			lastMessageTime = System.currentTimeMillis()
+		)
+		
+		_chats.update { currentChats ->
+			listOf(newChat) + currentChats
+		}
+		
+		// Later: Create in Firestore
+		return chatId
+	}
+	
+	fun closeChat(chatId: String) {
+		_chats.update { currentChats ->
+			currentChats.map { chat ->
+				if (chat.id == chatId) chat.copy(isActive = false) else chat
+			}
+		}
+		
+		// Later: Update in Firestore
+	}
+	
+	fun deleteChat(chatId: String) {
+		_chats.update { currentChats ->
+			currentChats.filter { it.id != chatId }
+		}
+		
+		// Later: Delete from Firestore
+	}
 }
