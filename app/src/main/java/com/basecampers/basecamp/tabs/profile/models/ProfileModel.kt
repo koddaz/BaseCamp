@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "profile_table")
+//HÄR!!!
 data class ProfileModel(
     @PrimaryKey val id: String = "",
     val email : String,

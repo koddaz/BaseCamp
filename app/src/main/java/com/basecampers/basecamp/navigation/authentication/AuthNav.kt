@@ -4,11 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.basecampers.Authentication.ForgotPasswordScreen
-import com.basecampers.Authentication.LoginScreen
-import com.basecampers.Authentication.RegisterScreen
-
-import com.basecampers.basecamp.navigation.models.AuthViewModel
+import com.basecampers.basecamp.authentication.ForgotPasswordScreen
+import com.basecampers.basecamp.authentication.LoginScreen
+import com.basecampers.basecamp.authentication.RegisterScreen
+import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 
 @Composable
 fun AuthNav(authViewModel : AuthViewModel) {

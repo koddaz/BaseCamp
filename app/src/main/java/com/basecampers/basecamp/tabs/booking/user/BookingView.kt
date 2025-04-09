@@ -27,9 +27,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.basecamp.UserModel
+import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.components.CustomButton
 import com.basecampers.basecamp.components.CustomColumn
-import com.basecampers.basecamp.navigation.models.AuthViewModel
 import com.basecampers.basecamp.tabs.booking.models.BookingCategories
 import com.basecampers.basecamp.tabs.booking.models.BookingItems
 import com.basecampers.basecamp.tabs.booking.models.UserBookingViewModel
@@ -140,6 +140,7 @@ fun BookingView(
     }
 }
 
+//HÄR!!!
 @Composable
 fun FIREBASETESTSTUFF(
     authViewModel: AuthViewModel = viewModel()

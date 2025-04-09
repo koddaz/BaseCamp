@@ -51,7 +51,7 @@ private suspend fun initializeAppSession(
     authViewModel: AuthViewModel,
     onComplete: () -> Unit
 ) {
-    authViewModel.checklogin()
+    authViewModel.checkLoggedin()
 
     if (authViewModel.loggedin.value) {
         val userId = authViewModel.getCurrentUserUid()
@@ -72,5 +72,5 @@ private suspend fun initializeAppSession(
 @Preview(showBackground = true)
 @Composable
 fun RootPreview() {
-    Root(authViewModel = viewModel(), padding = PaddingValues())
+    Root(authViewModel = viewModel())
 }
