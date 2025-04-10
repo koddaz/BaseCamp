@@ -12,13 +12,18 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.net.URL
 
 class AuthViewModel : ViewModel() {
+    
+    private val tag = this::class.java.simpleName
     
     val database = Firebase.database.reference
     val firestore = Firebase.firestore
@@ -31,6 +36,164 @@ class AuthViewModel : ViewModel() {
     
     private val _currentUser = MutableStateFlow<UserModel?>(null)
     val currentUser = _currentUser.asStateFlow()
+    
+    //VALIDATION
+    private val _registerErrorMessage = MutableStateFlow(listOf<RegisterErrors>())
+    val registerErrorMessage = _registerErrorMessage.asStateFlow()
+    
+    private val _loginErrorMessage = MutableStateFlow(listOf<LoginErrors>())
+    val loginErrorMessage = _loginErrorMessage.asStateFlow()
+    
+    private val _emailValid = MutableStateFlow(false)
+    val emailValid = _emailValid.asStateFlow()
+    
+    private val _passwordValid = MutableStateFlow(false)
+    val passwordValid = _passwordValid.asStateFlow()
+    
+    private val _confirmPasswordValid = MutableStateFlow(false)
+    val confirmPasswordValid = _confirmPasswordValid.asStateFlow()
+    
+    val hasEmailError = registerErrorMessage.map { errors ->
+        errors.any { it in listOf(
+            RegisterErrors.EMAIL_EMPTY,
+            RegisterErrors.EMAIL_NOT_VALID)
+        } }.stateIn(viewModelScope, SharingStarted.Lazily, false)
+    
+    var errorMessages = mapOf(
+        RegisterErrors.EMAIL_EMPTY to "Email cannot be empty",
+        RegisterErrors.EMAIL_NOT_VALID to "Email is not valid",
+        RegisterErrors.PASSWORD_EMPTY to "Password cannot be empty",
+        RegisterErrors.PASSWORD_TOO_SHORT to "Password must be at least 6 characters long",
+        RegisterErrors.PASSWORD_NO_SPECIAL_CHAR to "Password must contain at least one special character",
+        RegisterErrors.PASSWORD_NO_UPPERCASE to "Password must contain at least one uppercase letter",
+        RegisterErrors.PASSWORD_NO_NUMBER to "Password must contain at least one number",
+        RegisterErrors.CONFIRM_PASSWORD_EMPTY to "Confirm password cannot be empty",
+        RegisterErrors.CONFIRM_PASSWORD_MISMATCH to "Passwords do not match",
+        LoginErrors.EMAIL_NOT_VALID to "Email not found or invalid",
+        LoginErrors.PASSWORD_NOT_VALID to "Password is incorrect"
+    )
+    
+    enum class RegisterErrors {
+        PASSWORD_EMPTY,
+        PASSWORD_TOO_SHORT,
+        PASSWORD_NO_SPECIAL_CHAR,
+        PASSWORD_NO_UPPERCASE,
+        PASSWORD_NO_NUMBER,
+        CONFIRM_PASSWORD_EMPTY,
+        CONFIRM_PASSWORD_MISMATCH,
+        EMAIL_EMPTY,
+        EMAIL_NOT_VALID
+    }
+    
+    enum class LoginErrors {
+        EMAIL_NOT_VALID,
+        PASSWORD_NOT_VALID
+    }
+    
+    fun validateEmailLive(email: String) {
+        _emailValid.value = validateEmail(email).isEmpty()
+    }
+    
+    fun validatePasswordLive(password: String) {
+        _passwordValid.value = validatePassword(password).isEmpty()
+    }
+    
+    fun validateConfirmPasswordLive(password: String, confirmPassword: String) {
+        _confirmPasswordValid.value = validateConfirmPassword(password, confirmPassword).isEmpty()
+    }
+    
+    fun validatePassword(password: String) : List<RegisterErrors> {
+        val checkError = mutableListOf<RegisterErrors>()
+        val specialCharPattern = Regex("[!@#\$%^&*()\\-+=\\[\\]{}|;:,.<>?/]")
+        val uppercaseRegex = Regex("[A-Z]")
+        val digitRegex = Regex("[0-9]")
+        
+        if(password.isEmpty()) {
+            checkError.add(RegisterErrors.PASSWORD_EMPTY)
+        }
+        if(password.length < 6) {
+            checkError.add(RegisterErrors.PASSWORD_TOO_SHORT)
+        }
+        if(!password.contains((specialCharPattern))) {
+            checkError.add(RegisterErrors.PASSWORD_NO_SPECIAL_CHAR)
+        }
+        if(!password.contains(uppercaseRegex)) {
+            checkError.add(RegisterErrors.PASSWORD_NO_UPPERCASE)
+        }
+        if(!password.contains(digitRegex)) {
+            checkError.add(RegisterErrors.PASSWORD_NO_NUMBER)
+        }
+        return checkError
+    }
+    
+    fun validateConfirmPassword(password: String, confirmPassword: String) : List<RegisterErrors> {
+        val checkError = mutableListOf<RegisterErrors>()
+        
+        if(confirmPassword != password) {
+            checkError.add(RegisterErrors.CONFIRM_PASSWORD_MISMATCH)
+        }
+        if(confirmPassword.isEmpty()) {
+            checkError.add(RegisterErrors.CONFIRM_PASSWORD_EMPTY)
+        }
+        return checkError
+    }
+    
+    fun validateEmail(email: String) : List<RegisterErrors> {
+        val checkError = mutableListOf<RegisterErrors>()
+        
+        if(email.isEmpty()) {
+            checkError.add(RegisterErrors.EMAIL_EMPTY)
+        }
+        if(!isEmailValid(email)) {
+            checkError.add(RegisterErrors.EMAIL_NOT_VALID)
+        }
+        return checkError
+    }
+    
+    fun clearLoginErrors() {
+        _loginErrorMessage.value = emptyList()
+    }
+    
+    fun clearPasswordErrors() {
+        val currentErrors = registerErrorMessage.value.toMutableList()
+        currentErrors.removeAll { it in listOf(
+            RegisterErrors.PASSWORD_EMPTY,
+            RegisterErrors.PASSWORD_TOO_SHORT,
+            RegisterErrors.PASSWORD_NO_SPECIAL_CHAR,
+            RegisterErrors.PASSWORD_NO_UPPERCASE,
+            RegisterErrors.PASSWORD_NO_NUMBER,
+        )}
+        _registerErrorMessage.value = currentErrors
+    }
+    
+    fun clearConfirmPasswordErrors() {
+        val currentErrors = registerErrorMessage.value.toMutableList()
+        currentErrors.removeAll { it in listOf(
+            RegisterErrors.CONFIRM_PASSWORD_EMPTY,
+            RegisterErrors.CONFIRM_PASSWORD_MISMATCH
+        )}
+        _registerErrorMessage.value = currentErrors
+    }
+    
+    fun clearEmailErrors() {
+        val currentErrors = registerErrorMessage.value.toMutableList()
+        currentErrors.removeAll { it in listOf(
+            RegisterErrors.EMAIL_EMPTY,
+            RegisterErrors.EMAIL_NOT_VALID
+        )}
+        _registerErrorMessage.value = currentErrors
+    }
+    
+    fun isEmailValid(email: String): Boolean {
+        // Basic pattern check
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            return false
+        }
+        // Additional TLD validation. TLD = Top-level domain
+        val tld = email.substringAfterLast(".")
+        return tld.length >= 2
+    }
+    //VALIDATION
     
     data class ProfileInfo(
         val email: String = "",
@@ -46,27 +209,6 @@ class AuthViewModel : ViewModel() {
     }
     
     // TAGET FRÅN DEN ANDRA!!!
-    
-    
-    //GAMMAL
-//
-//    fun checklogin() {
-//        val user = Firebase.auth.currentUser
-//        _loggedin.value = user != null
-//
-//        if (user != null) {
-//            fetchUserInfoFromFirestore(user.uid)
-//            if (Firebase.auth.currentUser == null) {
-//                _loggedin.value = false
-//                Log.i("CHECKLOGINDEBUG", "Logged in = ${loggedin.value}")
-//            } else {
-//                _userInfo.value = Pair(null, null)
-//                _loggedin.value = true
-//                Log.i("CHECKLOGINDEBUG", "Logged in = ${loggedin.value}")
-//            }
-//        }
-//    }
-    //Fixad så den använder rätt funktion
     fun register(email: String, password: String) {
         Firebase.auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
             checkLoggedin()
@@ -74,30 +216,6 @@ class AuthViewModel : ViewModel() {
             // fel
         }
     }
-//    Gammal
-
-//    fun registerAndCreateUserInFirestore(email: String, password: String) {
-//        Firebase.auth.createUserWithEmailAndPassword(email, password)
-//            .addOnSuccessListener { authResult ->
-//                val userId = authResult.user?.uid
-//                if (userId != null) {
-//                    val user = mapOf(
-//                        "email" to email,
-//                        "username" to email.substringBefore("@") // user before at sign
-//                    )
-//
-//                    firestore.collection("users").document(userId).set(user)
-//                        .addOnSuccessListener {
-//                            checklogin()
-//                        }
-//                        .addOnFailureListener {
-//                            //  Firestore fel
-//                        }
-//                }
-//            }.addOnFailureListener {
-//                //  Auth fel
-//            }
-//    }
     
     fun fetchCurrentUserModel() {
         val userId = getCurrentUserUid() ?: return
@@ -168,20 +286,6 @@ class AuthViewModel : ViewModel() {
             }
     }
     
-//    Gammal
-//    fun fetchUserInfoFromFirestore(userId: String) {
-//        firestore.collection("users").document(userId).get()
-//            .addOnSuccessListener { document ->
-//                if (document.exists()) {
-//                    val username = document.getString("username")
-//                    val email = document.getString("email")
-//                    _userInfo.value = Pair(username, email)
-//                }
-//            }
-//            .addOnFailureListener {
-//                _userInfo.value = Pair(null, null) // firestore fel
-//            }
-//    }
     //TAGET FRÅN DEN ANDRA!!!
     
     //----------------------------------------------------------------------------
@@ -242,15 +346,37 @@ class AuthViewModel : ViewModel() {
     fun login(email: String, password: String) {
         Firebase.auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
             checkLoggedin()
-            // Ensure profile is complete when logging in
+            clearLoginErrors()
             ensureCompleteUserProfile(Firebase.auth.currentUser?.uid)
             Log.i("LOGINDEBUG", "Checked login")
-        }.addOnFailureListener {
-            // fel
+        }.addOnFailureListener { exception ->
+            val errors = mutableListOf<LoginErrors>()
+            Log.d(tag, "Firebase error message: ${exception.message}")
+            when (exception.message) {
+                "The email address is badly formatted." -> {
+                    // Only email is invalid due to syntax
+                    errors.add(LoginErrors.EMAIL_NOT_VALID)
+                    Log.d(tag, "Added EMAIL_NOT_VALID for badly formatted email")
+                }
+                else -> {
+                    if (!email.contains("@")) {
+                        errors.add(LoginErrors.EMAIL_NOT_VALID)
+                        Log.d(tag, "Added EMAIL_NOT_VALID for badly formatted email")
+                    } else {
+                        // All other cases (wrong password, non-existent email, etc.)
+                        errors.add(LoginErrors.EMAIL_NOT_VALID)
+                        errors.add(LoginErrors.PASSWORD_NOT_VALID)
+                        Log.d(tag, "Added EMAIL_NOT_VALID and PASSWORD_NOT_VALID for invalid email or password")
+                    }
+                }
+            }
+            Log.d(tag, "Final errors list before setting value: $errors")
+            _loginErrorMessage.value = errors
+            println(tag + "Login failed ${exception.message}")
         }
     }
     
-    // Suggested rename: signInTestUser1
+    // This user will be a normal User
     fun loginUser1() {
         val email = "1@hotmail.com"
         val password = "test1234"
@@ -263,9 +389,22 @@ class AuthViewModel : ViewModel() {
         }
     }
     
-    // Suggested rename: signInTestUser2
+    // This user will be a SuperUser
     fun loginUser2() {
         val email = "2@hotmail.com"
+        val password = "test123"
+        Firebase.auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
+            checkLoggedin()
+            // Ensure profile is complete when logging in
+            ensureCompleteUserProfile(Firebase.auth.currentUser?.uid)
+        }.addOnFailureListener {
+            // FEL
+        }
+    }
+    
+    // This user will be an Admin
+    fun loginUser3() {
+        val email = "3@hotmail.com"
         val password = "test123"
         Firebase.auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
             checkLoggedin()
@@ -285,19 +424,18 @@ class AuthViewModel : ViewModel() {
             }
     }
     
-    // Suggested rename: createAccount
-//    fun register(email: String, password: String) {
-//        Firebase.auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
-//            checkLoggedin()
-//        }.addOnFailureListener {
-//            // fel
-//        }
-//    }
-    
     // Suggested rename: createAccountWithProfile
-    fun registerAndCreateUserInFirestore(email: String, password: String) {
-        Firebase.auth.createUserWithEmailAndPassword(email, password)
-            .addOnSuccessListener { authResult ->
+    fun registerAndCreateUserInFirestore(email: String, password: String, confirmPassword: String, companyName : String?) {
+        
+        val checkError = mutableListOf<RegisterErrors>().apply {
+            addAll(validateEmail(email))
+            addAll(validatePassword(password))
+            addAll(validateConfirmPassword(password, confirmPassword))
+        }
+        _registerErrorMessage.value = checkError
+        
+        if(checkError.isEmpty()) {
+            Firebase.auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener { authResult ->
                 val userId = authResult.user?.uid
                 if (userId != null) {
                     // Basic user data
@@ -311,21 +449,20 @@ class AuthViewModel : ViewModel() {
                     )
                     
                     // Create full profile document right away
-                    firestore.collection("users").document(userId).set(user)
-                        .addOnSuccessListener {
-                            // Update login state
-                            checkLoggedin()
-                            // No need to call ensureCompleteUserProfile since we're creating a complete profile
-                        }
-                        .addOnFailureListener {
-                            // Firestore error
-                            Log.e("AuthViewModel", "Failed to create user profile in Firestore")
-                        }
+                    firestore.collection("users").document(userId).set(user).addOnSuccessListener {
+                        // Update login state
+                        checkLoggedin()
+                        // No need to call ensureCompleteUserProfile since we're creating a complete profile
+                    }.addOnFailureListener {
+                        // Firestore error
+                        Log.e("AuthViewModel", "Failed to create user profile in Firestore")
+                    }
                 }
             }.addOnFailureListener {
                 // Auth error
                 Log.e("AuthViewModel", "Failed to create user account")
             }
+        }
     }
     
     fun logout() {
@@ -410,7 +547,6 @@ class AuthViewModel : ViewModel() {
                     }
                 }
             }
-        
     }
     
     // New function to get complete profile data
