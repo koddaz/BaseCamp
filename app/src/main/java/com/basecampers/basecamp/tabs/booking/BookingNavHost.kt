@@ -55,34 +55,7 @@ fun BookingNavHost(authViewModel: AuthViewModel) {
                 }
             )
         }
-        composable(bookingRoutes.CONFIRMATION) {
-            BookingCornfirmation(
-                bookingViewModel = bookingViewModel,
-                onBack = { navController.popBackStack() },
-                onComplete = {
-                    if (isLoggedIn) {
-                        bookingViewModel.createBooking(
-                            onSuccess = {
-                                Toast.makeText(
-                                    navController.context,
-                                    "Booking confirmed!",
-                                    Toast.LENGTH_LONG
-                                ).show()
-                                navController.navigate(bookingRoutes.MAIN)
-                            },
-                            onFailure = { error ->
-                                Toast.makeText(
-                                    navController.context,
-                                    "Error: ${error.message}",
-                                    Toast.LENGTH_LONG
-                                ).show()
-                            }
-                        )
-                    } else {
-                        navController.navigate(bookingRoutes.REGISTER)
-                    }
-                }
-            )
-        }
+
     }
+
 }

@@ -1,5 +1,4 @@
-
-package com.basecampers.basecamp.authentication
+package com.basecampers.Authentication
 
 import androidx.compose.foundation.border
 import com.google.firebase.auth.ktx.auth
@@ -14,6 +13,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
+import com.basecampers.basecamp.components.CustomButton
+import com.basecampers.basecamp.tabs.booking.user.FIREBASETESTSTUFF
 import com.basecampers.basecamp.components.PasswordTextFieldLogin
 import com.google.firebase.ktx.Firebase
 
@@ -23,7 +24,7 @@ fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotP
     var password by remember { mutableStateOf("") }
     val isLoggedIn by authViewModel.loggedin.collectAsState()
     val loginErrorMessage by authViewModel.loginErrorMessage.collectAsState()
-    
+
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
             val currentUser = Firebase.auth.currentUser
@@ -31,7 +32,7 @@ fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotP
             
         }
     }
-    
+
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Login", style = MaterialTheme.typography.headlineMedium)
         
@@ -72,7 +73,7 @@ fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotP
                 if(loginErrorMessage.isNotEmpty()) {
                     authViewModel.clearLoginErrors()
                 } },
-            
+
             label = "Password",
             authViewModel = authViewModel,
             modifier = Modifier
@@ -114,13 +115,35 @@ fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotP
         }) {
             Text("User 2 (SuperUser)")
         }
-        
+
+        Row() {
+            CustomButton(text = "CREATE ADMIN", onClick = {
+                authViewModel.registerAsCompany(
+                    email = "firstAdmin@admin.se",
+                    password = "123456",
+                    companyName = "TestCompany",
+                    firstName = "Abbe",
+                    lastName = "Babbe"
+                )
+            })
+            CustomButton(text = "CREATE USER", onClick = {
+                authViewModel.registerUserToCompany(
+                    email = "firstUser@user.se",
+                    password = "123456",
+                    firstName = "Abbe",
+                    lastName = "Babbe",
+                    companyName = "TestCompany"
+                )
+            })
+        }
+
+
         Button(onClick = {
             authViewModel.loginUser3()
         }) {
             Text("User 3 (Admin)")
         }
-        
+
         Spacer(modifier = Modifier.weight(1f))
         
         Button(

@@ -222,7 +222,8 @@ fun BookingItemForm(
 fun AdminBookingViewPreview() {
     AdminBookingView(
         userInfo = UserModel(
-            name = "",
+            firstName = "",
+            lastName = "",
             email = "",
             imageUrl = null,
             bio = "",

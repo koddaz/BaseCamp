@@ -7,24 +7,27 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.collections.addAll
-import kotlin.text.format
-import kotlin.text.get
-import kotlin.text.toInt
+
 
 class UserBookingViewModel : ViewModel() {
 
     val db = Firebase.firestore
-
+    private val _selectedItemId = MutableStateFlow("")
     private val _selectedDateRange = MutableStateFlow<Pair<Long?, Long?>>(Pair(null, null))
     private val _startDate = MutableStateFlow<Long?>(null)
     private val _endDate = MutableStateFlow<Long?>(null)
 
+    val selectedItemId : StateFlow<String> = _selectedItemId.asStateFlow()
+
     private val _bookingItemsList = MutableStateFlow<List<BookingItem>>(emptyList())
     val bookingItemsList: StateFlow<List<BookingItem>> = _bookingItemsList
+
+    private val _bookingExtraList = MutableStateFlow<List<BookingExtra>>(emptyList())
+    val bookingExtraList: StateFlow<List<BookingExtra>> = _bookingExtraList
 
     private val _categories = MutableStateFlow<List<BookingCategories>>(emptyList())
     val categories: StateFlow<List<BookingCategories>> = _categories
@@ -35,8 +38,8 @@ class UserBookingViewModel : ViewModel() {
     private val _selectedBookingItem = MutableStateFlow<BookingItem?>(null)
     val selectedBookingItem: StateFlow<BookingItem?> = _selectedBookingItem
 
-    private val _selectedExtraItems = MutableStateFlow<List<ExtraItems>>(emptyList())
-    val seleectedExtraItems: StateFlow<List<ExtraItems>> = _selectedExtraItems
+    private val _selectedExtraItems = MutableStateFlow<List<BookingExtra>>(emptyList())
+    val seleectedExtraItems: StateFlow<List<BookingExtra>> = _selectedExtraItems
 
     private val _amountOfDays = MutableStateFlow<Int>(0)
     val amountOfDays: StateFlow<Int> = _amountOfDays
@@ -116,17 +119,29 @@ class UserBookingViewModel : ViewModel() {
     }
 
     fun retrieveExtraItems(
-        selectedCategory: String,
-        bookingItem: BookingItem,
-        bookingExtra: BookingExtra
+        categoryId: String,
+        itemId: String,
     ) {
         val companyName = getCompanyName() ?: return
         db.collection("companies").document(companyName)
             .collection("bookings").document("categories")
-            .collection("items").document(selectedCategory)
-            .collection("items").document(bookingItem.id)
-            .collection("extras").document(bookingExtra.id).get().addOnSuccessListener { snapshot ->
+            .collection("items").document(categoryId)
+            .collection("items").document(itemId)
+            .collection("extras").get().addOnSuccessListener { snapshot ->
+                val extras = snapshot.documents.mapNotNull { doc ->
+                    val id = doc.id
+                    val name = doc.getString("name") ?: ""
+                    val info = doc.getString("info") ?: ""
+                    val price = doc.getString("price") ?: "0.0"
+                    BookingExtra(id, name, info, price)
+                }
+                val currentExtrasMap =  _bookingExtraList.value.associateBy { it.id }.toMutableMap()
 
+                extras.forEach { item ->
+                    currentExtrasMap[item.id] = item
+                }
+
+                _bookingExtraList.value = currentExtrasMap.values.toList()
 
             }
 
@@ -134,47 +149,31 @@ class UserBookingViewModel : ViewModel() {
 
 
 
-    fun addExtraItem(item: ExtraItems) {
+    fun addExtraItem(item: BookingExtra) {
         _selectedExtraItems.value = _selectedExtraItems.value + item
     }
 
-    fun removeExtraItem(item: ExtraItems) {
+    fun removeExtraItem(item: BookingExtra) {
         _selectedExtraItems.value = _selectedExtraItems.value - item
     }
 
-    fun setSelection(item: BookingItem, startDate: Long?, endDate: Long?) {
-        _selectedBookingItem.value = item
-        updateDateRange(startDate, endDate)
-    }
+    fun setSelection(
+        itemId: String,
+        item: BookingItem? = null,
+        ) {
+        _selectedItemId.value = itemId
+        if (item != null) {
+            _selectedBookingItem.value = item
 
-    fun updateDateRange(startDate: Long?, endDate: Long?) {
-        // Update all date states
-        _startDate.value = startDate
-        _endDate.value = endDate
-        _selectedDateRange.value = Pair(startDate, endDate)
-
-        // Format the date display string
-        _formattedDateRange.value = formatDateString(startDate, endDate)
-
-        // Calculate number of days
-        _amountOfDays.value = if (startDate != null && endDate != null) {
-            calculateDaysBetween(startDate, endDate)
-        } else {
-            0
         }
     }
-    private fun formatDateString(startDate: Long?, endDate: Long?): String {
-        val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
 
-        val startStr = startDate?.let { dateFormat.format(Date(it)) } ?: "No start date"
-        val endStr = endDate?.let { dateFormat.format(Date(it)) } ?: "No end date"
-
-        return "$startStr - $endStr"
-    }
-
-    private fun calculateDaysBetween(startDate: Long, endDate: Long): Int {
-        val millisecondsPerDay = 24 * 60 * 60 * 1000L
-        return ((endDate - startDate) / millisecondsPerDay).toInt() + 1
+    fun calculateDays(startDate: Long?, endDate: Long?) {
+        if (startDate != null && endDate != null) {
+            val diff = endDate - startDate
+            val days = diff / (1000 * 60 * 60 * 24)
+            _amountOfDays.value = days.toInt()
+        }
     }
 
     fun updateSelectedDateRange(start: Long?, end: Long?) {
@@ -193,6 +192,7 @@ class UserBookingViewModel : ViewModel() {
             SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(it))
         } ?: "No end date"
 
+        calculateDays(startDate, endDate)
         _formattedDateRange.value = "$startFormatted - $endFormatted"
     }
 
@@ -205,68 +205,4 @@ class UserBookingViewModel : ViewModel() {
         _selectedBookingItem.value = null
     }
 
-    fun createBooking(onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-        val currentUserUid = Firebase.auth.currentUser?.uid
-        if (currentUserUid == null) {
-            onFailure(Exception("User not logged in"))
-            return
-        }
-
-        val selectedItem = selectedBookingItem.value
-        if (selectedItem == null) {
-            onFailure(Exception("No booking item selected"))
-            return
-        }
-
-        val booking = hashMapOf(
-            "bookingItem" to mapOf(
-                "id" to selectedItem.id,
-                "name" to selectedItem.name,
-                "price" to selectedItem.pricePerDay,
-
-                ),
-            "extraItems" to seleectedExtraItems.value.map { item ->
-                mapOf(
-                    "id" to item.id,
-                    "name" to item.name,
-                    "price" to item.price
-                )
-            },
-            "timestamp" to com.google.firebase.Timestamp.now(),
-            "totalPrice" to (selectedItem.pricePerDay + seleectedExtraItems.value.sumOf { it.price }),
-            "userId" to currentUserUid // Add user reference
-        )
-
-        // Add to company bookings
-        val companyBookingRef = db.collection("companies")
-            .document("companyName")
-            .collection("bookings")
-            .document("currentBookings")
-            .collection("bookings")
-
-        // Add to user bookings
-        val userBookingRef = db.collection("companies")
-            .document("companyName")
-            .collection("users")
-            .document(currentUserUid)
-            .collection("bookings")
-
-        // Use a batch write to ensure both operations complete together
-        val batch = db.batch()
-
-        // Create document references with the same ID
-        val newBookingRef = companyBookingRef.document()
-        val bookingId = newBookingRef.id
-
-        batch.set(newBookingRef, booking)
-        batch.set(userBookingRef.document(bookingId), booking)
-
-        batch.commit()
-            .addOnSuccessListener {
-                onSuccess()
-            }
-            .addOnFailureListener { e ->
-                onFailure(e)
-            }
-    }
 }

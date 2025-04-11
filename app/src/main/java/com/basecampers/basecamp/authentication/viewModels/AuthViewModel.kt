@@ -3,6 +3,7 @@ package com.basecampers.basecamp.authentication.viewModels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.basecampers.basecamp.CompanyModel
 import com.basecampers.basecamp.UserModel
 import com.basecampers.basecamp.UserStatus
 import com.google.firebase.auth.FirebaseAuth
@@ -243,7 +244,8 @@ class AuthViewModel : ViewModel() {
                                 
                                 try {
                                     val email = userDoc.getString("email") ?: ""
-                                    val name = userDoc.getString("name") ?: "No name yet"
+                                    val lastName = userDoc.getString("name") ?: "No name yet"
+                                    val firstName = userDoc.getString("firstName") ?: "No first name yet"
                                     val imageUrlString = userDoc.getString("imageUrl")
                                     val imageUrl = if (!imageUrlString.isNullOrEmpty()) {
                                         try { URL(imageUrlString) } catch (e: Exception) { null }
@@ -260,12 +262,15 @@ class AuthViewModel : ViewModel() {
                                     
                                     val userModel = UserModel(
                                         email = email,
-                                        name = name,
+                                        firstName = firstName,
+                                        lastName = lastName,
+
                                         imageUrl = imageUrl,
                                         bio = bio,
                                         status = status,
                                         id = userId,
-                                        companyName = companyId
+                                        companyName = companyId,
+                                        companyId = companyId
                                     )
                                     
                                     _currentUser.value = userModel
@@ -285,7 +290,80 @@ class AuthViewModel : ViewModel() {
                 Log.e("AuthViewModel", "Failed to fetch companies", e)
             }
     }
-    
+
+    fun registerAsCompany(
+        email: String,
+        password: String,
+        companyName: String,
+        firstName: String,
+        lastName: String
+    ) {
+        Firebase.auth.createUserWithEmailAndPassword(email, password)
+            .addOnSuccessListener { authResult ->
+                val userId = authResult.user?.uid
+                if (userId != null) {
+
+                    val companyInfo = CompanyModel(
+                        companyName = companyName,
+                        ownerUID = userId,
+                        bio = "",
+                        imageUrl = null // ADD IMAGE
+                    )
+
+                    val companyAdmin = UserModel(
+                        email = email,
+                        firstName = firstName,
+                        lastName = lastName,
+                        imageUrl = null, // ADD IMAGE!
+                        bio = "",
+                        status = UserStatus.ADMIN,
+                        id = userId,
+                        companyName = companyName
+                    )
+                    val userRef =
+                        firestore.collection("companies").document(companyAdmin.companyName)
+                            .collection("users").document(userId)
+
+                    val companyRef =
+                        firestore.collection("companies").document(companyInfo.companyName)
+
+                    companyRef.set(companyRef).addOnSuccessListener {
+                        Log.d("AuthViewModel", "Company created: $companyInfo")
+                    }
+
+                    userRef.set(companyAdmin).addOnSuccessListener {
+                        checkLoggedin()
+                    }
+
+
+                }
+            }
+    }
+
+    fun registerUserToCompany(email: String, password: String, firstName: String, lastName: String, companyName: String) {
+
+            val userId = Firebase.auth.currentUser?.uid
+            if (userId != null) {
+                val user = UserModel(
+                    email = email,
+                    firstName = firstName,
+                    lastName = lastName,
+                    imageUrl = null, // ADD IMAGE!
+                    bio = "",
+                    status = UserStatus.USER,
+                    id = userId,
+                    companyName = companyName
+                )
+                val userRef = firestore
+                    .collection("companies")
+                    .document(user.companyName)
+                    .collection("users").document(userId)
+                userRef.set(user).addOnSuccessListener {
+                    checkLoggedin()
+                }
+            }
+        }
+
     //TAGET FRÅN DEN ANDRA!!!
     
     //----------------------------------------------------------------------------
