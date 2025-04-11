@@ -1,4 +1,4 @@
-package com.basecampers.Authentication
+package com.basecampers.basecamp.authentication
 
 import androidx.compose.foundation.border
 import com.google.firebase.auth.ktx.auth
@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.components.CustomButton
-import com.basecampers.basecamp.tabs.booking.user.FIREBASETESTSTUFF
 import com.basecampers.basecamp.components.PasswordTextFieldLogin
 import com.google.firebase.ktx.Firebase
 
@@ -29,13 +28,13 @@ fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotP
         if (isLoggedIn) {
             val currentUser = Firebase.auth.currentUser
             println("Logged in user: ${currentUser?.email ?: "No user logged in"}")
-            
+
         }
     }
 
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Login", style = MaterialTheme.typography.headlineMedium)
-        
+
         if (loginErrorMessage.contains(AuthViewModel.LoginErrors.EMAIL_NOT_VALID) &&
             loginErrorMessage.contains(AuthViewModel.LoginErrors.PASSWORD_NOT_VALID)) {
             Text(
@@ -65,7 +64,7 @@ fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotP
                 )
         )
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         PasswordTextFieldLogin(
             password = password,
             onValueChange = {
@@ -78,9 +77,9 @@ fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotP
             authViewModel = authViewModel,
             modifier = Modifier
         )
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         Button(
             onClick = { authViewModel.login(email, password) },
             modifier = Modifier.fillMaxWidth(),
@@ -88,54 +87,45 @@ fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotP
         ) {
             Text("Login")
         }
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
+
+        Button(onClick = {
+            authViewModel.login(email = "admin@admin.se", password = "Test123!")
+        }) {
+            Text("admin@admin.se & Test123!")
+        }
+
+        Button(onClick = {
+            authViewModel.login(email = "user4605@example.com", password = "Test123!")
+        }) {
+            Text("user4605@example.com & Test123!")
+        }
         Button(
             onClick = { goForgotPass() },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Forgot Password")
         }
-        
+
         Button(onClick = {
             authViewModel.isLoggedInTrue()
         }) {
             Text("Change isLoggedIn to True")
         }
-        
+
         Button(onClick = {
             authViewModel.loginUser1()
         }) {
             Text("User 1 (User)")
         }
-        
+
         Button(onClick = {
             authViewModel.loginUser2()
         }) {
             Text("User 2 (SuperUser)")
         }
 
-        Row() {
-            CustomButton(text = "CREATE ADMIN", onClick = {
-                authViewModel.registerAsCompany(
-                    email = "firstAdmin@admin.se",
-                    password = "123456",
-                    companyName = "TestCompany",
-                    firstName = "Abbe",
-                    lastName = "Babbe"
-                )
-            })
-            CustomButton(text = "CREATE USER", onClick = {
-                authViewModel.registerUserToCompany(
-                    email = "firstUser@user.se",
-                    password = "123456",
-                    firstName = "Abbe",
-                    lastName = "Babbe",
-                    companyName = "TestCompany"
-                )
-            })
-        }
 
 
         Button(onClick = {
@@ -145,7 +135,7 @@ fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotP
         }
 
         Spacer(modifier = Modifier.weight(1f))
-        
+
         Button(
             onClick = { goRegister() }
         ) {
@@ -154,6 +144,7 @@ fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotP
         Spacer(modifier = Modifier.height(50.dp))
     }
 }
+
 @Preview(showBackground = true)
 @Composable
 fun PreviewLoginScreen() {

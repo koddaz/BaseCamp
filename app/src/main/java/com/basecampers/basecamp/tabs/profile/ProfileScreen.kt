@@ -87,12 +87,17 @@ fun ProfileScreen(authViewModel: AuthViewModel, profileViewModel: ProfileViewMod
                 
                 Text("Profile Info", style = MaterialTheme.typography.titleMedium)
                 Spacer(modifier = Modifier.height(8.dp))
-                
-                Text("Username: ${userInfo?.userName ?: "N/A"}")
+
+
+                /*
+                Text("First Name: ${userInfo?.firstName ?: "N/A"}")
+                Text("Last Name: ${userInfo?.lastName ?: "N/A"}")
                 Text("Email: ${userInfo?.email ?: "N/A"}")
                 Text("Bio: ${userInfo?.bio ?: "N/A"}")
                 Text("Status: ${userInfo?.status ?: "N/A"}")
                 Text("Company: ${userInfo?.companyName ?: "N/A"}")
+
+                 */
 //                Text("Profiles in database: $profileCount")
                 profile?.let {
                     if (it.bio.isNotEmpty()) {

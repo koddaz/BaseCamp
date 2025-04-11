@@ -8,9 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import com.basecampers.basecamp.authentication.models.authRoutes
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 
-import com.basecampers.basecamp.authentication.ForgotPasswordScreen
-import com.basecampers.basecamp.authentication.LoginScreen
-import com.basecampers.basecamp.authentication.RegisterScreen
+
 
 @Composable
 fun AuthNavHost(authViewModel : AuthViewModel) {
