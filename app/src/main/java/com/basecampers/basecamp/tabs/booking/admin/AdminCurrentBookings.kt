@@ -17,7 +17,6 @@ import java.util.Locale
 
 @Composable
 fun AdminCurrentBookings(adminModel : AdminBookingViewModel = viewModel()) {
-
 }
 
 @Composable

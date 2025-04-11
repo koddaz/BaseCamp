@@ -17,10 +17,7 @@ import kotlin.text.toInt
 
 class UserBookingViewModel : ViewModel() {
 
-
-
     val db = Firebase.firestore
-
 
     private val _selectedDateRange = MutableStateFlow<Pair<Long?, Long?>>(Pair(null, null))
     private val _startDate = MutableStateFlow<Long?>(null)
@@ -134,15 +131,6 @@ class UserBookingViewModel : ViewModel() {
             }
 
     }
-
-
-
-
-
-
-
-
-
 
 
 

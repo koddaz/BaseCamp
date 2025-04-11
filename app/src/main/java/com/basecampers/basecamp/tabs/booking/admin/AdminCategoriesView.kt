@@ -25,9 +25,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.basecamp.UserModel
 import com.basecampers.basecamp.UserStatus
+import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.components.CustomButton
 import com.basecampers.basecamp.components.CustomColumn
-import com.basecampers.basecamp.navigation.models.AuthViewModel
 import com.basecampers.basecamp.tabs.booking.models.AdminBookingViewModel
 import com.basecampers.basecamp.tabs.booking.models.BookingCategories
 import com.basecampers.basecamp.tabs.booking.models.BookingItem
@@ -41,15 +41,15 @@ fun AdminCategoriesView(
     goBack: () -> Unit,
     navigateToBooking: (String) -> Unit
 ) {
-
+    
     var category by remember { mutableStateOf("") }
     val categories by adminBookingViewModel?.categories?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
     val bookingItems by adminBookingViewModel?.bookingItems?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
     var info by remember { mutableStateOf("") }
     var error by remember { mutableStateOf("") }
     var isAddVisible by remember { mutableStateOf(false) }
-
-
+    
+    
     Column(modifier.fillMaxSize().padding(16.dp)) {
         CustomButton(text = "Back", onClick = goBack)
         CustomColumn(
@@ -57,7 +57,7 @@ fun AdminCategoriesView(
             onClick = { isAddVisible = !isAddVisible },
             imageVector = Icons.AutoMirrored.Filled.NoteAdd)
         {
-
+            
             Column(modifier.padding(start = 16.dp)) {
                 if (categories.isNotEmpty()) {
                     categories.forEach { category ->
@@ -66,7 +66,7 @@ fun AdminCategoriesView(
                             onClick = {
                                 adminBookingViewModel?.setSelectedCategory(category.id)
                                 navigateToBooking(category.id)
-                                      },
+                            },
                             title = category.name,
                             info = category.info,
                             itemList = categoryItems,
@@ -77,8 +77,8 @@ fun AdminCategoriesView(
                     Text(text = "No categories found")
                 }
             }
-
-
+            
+            
             if (isAddVisible) {
                 OutlinedTextField(
                     label = { Text("Category") },
@@ -95,8 +95,8 @@ fun AdminCategoriesView(
                         // Generate a unique ID using current timestamp + random suffix
                         val categoryId = "${System.currentTimeMillis()}_${(1000..9999).random()}"
                         val createdBy = authViewModel?.getCurrentUserUid() ?: ""
-
-
+                        
+                        
                         userInfo?.let { user ->
                             adminBookingViewModel?.addBookingCategory(
                                 bookingCategory = BookingCategories(
@@ -107,8 +107,8 @@ fun AdminCategoriesView(
                                 )
                             )
                         }
-
-
+                        
+                        
                         // Reset fields after successful add
                         category = ""
                         info = ""
@@ -139,7 +139,7 @@ fun CategoriesCard(
         Column(modifier = modifier.padding(16.dp)) {
             Text(text = title)
             Text(text = info)
-
+            
             if (itemList != null) {
                 Text("Items in this category:", style = typography.labelLarge)
                 itemList.forEach { item ->
@@ -178,5 +178,5 @@ fun CategoriesViewPreview() {
         goBack = {},
         navigateToBooking = {}
     )
-
+    
 }

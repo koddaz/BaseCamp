@@ -1,24 +1,24 @@
 package com.basecampers.basecamp.tabs.booking.admin
 
-        import androidx.compose.foundation.layout.Column
-        import androidx.compose.foundation.layout.Row
-        import androidx.compose.foundation.layout.Spacer
-        import androidx.compose.foundation.layout.fillMaxSize
-        import androidx.compose.foundation.layout.height
-        import androidx.compose.foundation.layout.padding
-        import androidx.compose.material3.Card
-        import androidx.compose.material3.Text
-        import androidx.compose.runtime.Composable
-        import androidx.compose.runtime.LaunchedEffect
-        import androidx.compose.runtime.collectAsState
-        import androidx.compose.runtime.getValue
-        import androidx.compose.ui.Modifier
-        import androidx.compose.ui.text.font.FontWeight
-        import androidx.compose.ui.unit.dp
-        import com.basecampers.basecamp.UserModel
-        import com.basecampers.basecamp.components.CustomButton
-        import com.basecampers.basecamp.components.CustomColumn
-        import com.basecampers.basecamp.tabs.booking.models.AdminBookingViewModel
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.basecampers.basecamp.UserModel
+import com.basecampers.basecamp.components.CustomButton
+import com.basecampers.basecamp.components.CustomColumn
+import com.basecampers.basecamp.tabs.booking.models.AdminBookingViewModel
 
 @Composable
 fun AdminMainView(
@@ -31,7 +31,7 @@ fun AdminMainView(
 ) {
     val categories by adminBookingViewModel.categories.collectAsState()
     val categoryItems by adminBookingViewModel.categoryItems.collectAsState()
-
+    
     Column(modifier.fillMaxSize().padding(16.dp)) {
         Column(modifier.weight(1f)) {
             if (categories.isNotEmpty()) {
@@ -40,7 +40,7 @@ fun AdminMainView(
                     LaunchedEffect(category.id) {
                         adminBookingViewModel.retrieveBookingItems(category.id)
                     }
-
+                    
                     CustomColumn(
                         title = category.name,
                     ) {
@@ -48,17 +48,17 @@ fun AdminMainView(
                             text = category.info,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
-
+                        
                         // Display items for this specific category
                         val items = categoryItems[category.id] ?: emptyList()
-
+                        
                         if (items.isNotEmpty()) {
                             Text(
                                 text = "Items:",
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
                             )
-
+                            
                             items.forEach { item ->
                                 Card(
                                     modifier = Modifier
@@ -94,10 +94,10 @@ fun AdminMainView(
                 onClick = {navigateExtra()},
                 text = "Add Extra"
             )
-
+            
         }
     }
-
-
-
+    
+    
+    
 }

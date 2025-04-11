@@ -9,15 +9,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.basecampers.Authentication.RegisterScreen
-import com.basecampers.basecamp.navigation.models.AuthViewModel
+import com.basecampers.basecamp.authentication.RegisterScreen
+import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.tabs.booking.admin.AdminNavHost
 import com.basecampers.basecamp.tabs.booking.models.AdminBookingViewModel
 import com.basecampers.basecamp.tabs.booking.models.UserBookingViewModel
 import com.basecampers.basecamp.tabs.booking.models.bookingRoutes
 import com.basecampers.basecamp.tabs.booking.unknown.BookingCornfirmation
 import com.basecampers.basecamp.tabs.booking.user.BookingView
-
 
 @Composable
 fun BookingNavHost(authViewModel: AuthViewModel) {
@@ -29,7 +28,7 @@ fun BookingNavHost(authViewModel: AuthViewModel) {
     val isLoggedIn = authViewModel.loggedin.collectAsState().value
 
     LaunchedEffect(isLoggedIn) {
-        authViewModel.checklogin()
+        authViewModel.checkLoggedin()
     }
 
     LaunchedEffect(userInfo) {
@@ -84,8 +83,6 @@ fun BookingNavHost(authViewModel: AuthViewModel) {
                     }
                 }
             )
-
         }
     }
-
 }

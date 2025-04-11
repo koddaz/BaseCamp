@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.basecamp.tabs.booking.models.UserBookingViewModel
-import com.basecampers.components.NavButton
+import com.basecampers.basecamp.components.NavButton
 
 @Composable
 fun BookingCornfirmation(
@@ -58,8 +58,5 @@ fun BookingCornfirmation(
                 )
             }
         }
-
-
     }
-
 }

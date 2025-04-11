@@ -25,8 +25,8 @@ fun CustomColumn(
     imageVector: ImageVector? = null,
     title: String = "",
     content: @Composable () -> Unit,
-
-) {
+    
+    ) {
     Column(
         modifier = modifier
             .fillMaxWidth()

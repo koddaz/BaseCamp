@@ -23,9 +23,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.basecampers.basecamp.UserModel
 import com.basecampers.basecamp.UserStatus
+import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.components.CustomButton
 import com.basecampers.basecamp.components.CustomColumn
-import com.basecampers.basecamp.navigation.models.AuthViewModel
 import com.basecampers.basecamp.tabs.booking.models.AdminBookingViewModel
 import com.basecampers.basecamp.tabs.booking.models.BookingCategories
 import com.basecampers.basecamp.tabs.booking.models.BookingItem

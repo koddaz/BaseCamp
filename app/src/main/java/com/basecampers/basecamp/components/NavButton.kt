@@ -1,4 +1,5 @@
-package com.basecampers.components
+
+package com.basecampers.basecamp.components
 
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -11,18 +12,16 @@ import androidx.compose.ui.tooling.preview.Preview
 fun NavButton(
     onClick: () -> Unit,
     title: String,
-
-) {
-        Button(onClick = onClick,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = colorScheme.primaryContainer,
-                contentColor = colorScheme.onPrimaryContainer
-            )) {
-            Text(title)
-        }
+    
+    ) {
+    Button(onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = colorScheme.primaryContainer,
+            contentColor = colorScheme.onPrimaryContainer
+        )) {
+        Text(title)
+    }
 }
-
-
 
 @Preview(showBackground = true)
 @Composable

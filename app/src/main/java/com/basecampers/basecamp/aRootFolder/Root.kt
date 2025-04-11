@@ -14,14 +14,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.basecampers.basecamp.authentication.AuthNavHost
 import com.basecampers.basecamp.navigation.TabNavigation
-import com.basecampers.basecamp.navigation.models.AuthViewModel
+import com.basecampers.basecamp.authentication.AuthNavHost
+import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import kotlinx.coroutines.delay
 
 @Composable
-fun Root(authViewModel : AuthViewModel = viewModel(), padding: PaddingValues) {
+fun Root(authViewModel : AuthViewModel = viewModel()) {
     var isLoading by remember { mutableStateOf(true) }
+    val tempFunction = { isLoading = false }
+
     val isLoggedIn by authViewModel.loggedin.collectAsState()
 
     LaunchedEffect(Unit) {
@@ -30,11 +32,14 @@ fun Root(authViewModel : AuthViewModel = viewModel(), padding: PaddingValues) {
             onComplete = { isLoading = false }
         )
     }
-
-    Column(Modifier.fillMaxSize().padding(padding)) {
+    
+    Column(Modifier.fillMaxSize()) {
         if (isLoading) {
-            LoadingScreen()
-        } else if (isLoggedIn) {
+            LoadingScreen(
+                tempFunction = tempFunction,
+                isLoggedIn = isLoggedIn
+            )
+        } else if(isLoggedIn) {
             TabNavigation(authViewModel)
         } else {
             AuthNavHost(authViewModel)
@@ -46,7 +51,7 @@ private suspend fun initializeAppSession(
     authViewModel: AuthViewModel,
     onComplete: () -> Unit
 ) {
-    authViewModel.checklogin()
+    authViewModel.checkLoggedin()
 
     if (authViewModel.loggedin.value) {
         val userId = authViewModel.getCurrentUserUid()
@@ -67,5 +72,5 @@ private suspend fun initializeAppSession(
 @Preview(showBackground = true)
 @Composable
 fun RootPreview() {
-    Root(authViewModel = viewModel(), padding = PaddingValues())
+    Root(authViewModel = viewModel())
 }
