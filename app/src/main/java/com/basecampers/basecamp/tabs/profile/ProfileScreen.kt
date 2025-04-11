@@ -20,6 +20,7 @@ fun ProfileScreen(authViewModel: AuthViewModel, profileViewModel: ProfileViewMod
 
 
     val userInfo by authViewModel.userInfo.collectAsState()
+    val userModel by authViewModel.currentUser.collectAsState()
     val uid = authViewModel.getCurrentUserUid()
     
     // Observe profile from Room
@@ -89,15 +90,14 @@ fun ProfileScreen(authViewModel: AuthViewModel, profileViewModel: ProfileViewMod
                 Spacer(modifier = Modifier.height(8.dp))
 
 
-                /*
+
                 Text("First Name: ${userInfo?.firstName ?: "N/A"}")
                 Text("Last Name: ${userInfo?.lastName ?: "N/A"}")
                 Text("Email: ${userInfo?.email ?: "N/A"}")
-                Text("Bio: ${userInfo?.bio ?: "N/A"}")
-                Text("Status: ${userInfo?.status ?: "N/A"}")
-                Text("Company: ${userInfo?.companyName ?: "N/A"}")
+                Text("Bio: ${userModel?.bio ?: "N/A"}")
+                Text("Status: ${userModel?.status ?: "N/A"}")
+                Text("Company: ${userModel?.companyName ?: "N/A"}")
 
-                 */
 //                Text("Profiles in database: $profileCount")
                 profile?.let {
                     if (it.bio.isNotEmpty()) {

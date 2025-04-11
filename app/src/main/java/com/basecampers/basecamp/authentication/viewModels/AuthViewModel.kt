@@ -40,6 +40,7 @@ class AuthViewModel : ViewModel() {
     private val _userInfo = MutableStateFlow<ProfileInfo?>(null)
     val userInfo = _userInfo.asStateFlow()
 
+
     private val _currentUser = MutableStateFlow<UserModel?>(null)
     val currentUser = _currentUser.asStateFlow()
 
@@ -270,7 +271,7 @@ class AuthViewModel : ViewModel() {
                 try { URL(imageUrlString) } catch (e: Exception) { null }
             } else null
             val bio = userDoc.getString("bio") ?: "No bio yet"
-            val companyName = companyId ?: userDoc.getString("companyName") ?: ""
+            val companyName = userDoc.getString("companyName") ?: ""
 
             // Determine user status
             val status = when {
