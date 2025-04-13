@@ -356,11 +356,13 @@ class AuthViewModel : ViewModel() {
                 "The email address is badly formatted." -> {
                     // Only email is invalid due to syntax
                     errors.add(LoginErrors.EMAIL_NOT_VALID)
+                    errors.add(LoginErrors.PASSWORD_NOT_VALID)
                     Log.d(tag, "Added EMAIL_NOT_VALID for badly formatted email")
                 }
                 else -> {
                     if (!email.contains("@")) {
                         errors.add(LoginErrors.EMAIL_NOT_VALID)
+                        errors.add(LoginErrors.PASSWORD_NOT_VALID)
                         Log.d(tag, "Added EMAIL_NOT_VALID for badly formatted email")
                     } else {
                         // All other cases (wrong password, non-existent email, etc.)
