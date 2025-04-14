@@ -4,10 +4,10 @@ import android.util.Log
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.basecampers.basecamp.CompanyModel
-import com.basecampers.basecamp.ProfileModel
-import com.basecampers.basecamp.CompanyProfileModel
-import com.basecampers.basecamp.UserStatus
+import com.basecampers.basecamp.tabs.profile.models.CompanyModel
+import com.basecampers.basecamp.tabs.profile.models.CompanyProfileModel
+import com.basecampers.basecamp.tabs.profile.models.ProfileModel
+import com.basecampers.basecamp.tabs.profile.models.UserStatus
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.ktx.database
 import com.google.firebase.firestore.DocumentSnapshot
@@ -32,12 +32,12 @@ class AuthViewModel : ViewModel() {
     private val _loggedin = MutableStateFlow(false)
     val loggedin = _loggedin.asStateFlow()
 
-    private val _userInfo = MutableStateFlow<ProfileModel?>(null)
-    val userInfo = _userInfo.asStateFlow()
+    private val _profile = MutableStateFlow<ProfileModel?>(null)
+    val profile = _profile.asStateFlow()
 
 
-    private val _currentUser = MutableStateFlow<CompanyProfileModel?>(null)
-    val currentUser = _currentUser.asStateFlow()
+    private val _companyProfile = MutableStateFlow<CompanyProfileModel?>(null)
+    val companyProfile = _companyProfile.asStateFlow()
 
     //VALIDATION
     private val _registerErrorMessage = MutableStateFlow(listOf<RegisterErrors>())
@@ -235,21 +235,21 @@ class AuthViewModel : ViewModel() {
                         val profileModel = ProfileModel(
                             email = document.getString("email") ?: "",
                         )
-                        _userInfo.value = profileModel
+                        _profile.value = profileModel
                         _loggedin.value = true
                         Log.i("CHECKLOGINDEBUG", "Logged in = ${loggedin.value}")
                     } else {
-                        _userInfo.value = null
+                        _profile.value = null
                         Log.i("CHECKLOGINDEBUG", "User document not found")
                     }
                 }
                 .addOnFailureListener {
-                    _userInfo.value = null
+                    _profile.value = null
                     _loggedin.value = false
                     Log.e("CHECKLOGINDEBUG", "Failed to fetch user info", it)
                 }
         } else {
-            _userInfo.value = null
+            _profile.value = null
         }
     }
 
@@ -320,7 +320,7 @@ class AuthViewModel : ViewModel() {
                 companyId = companyId ?: companyName
             )
 
-            _currentUser.value = companyProfileModel
+            _companyProfile.value = companyProfileModel
             Log.d("AuthViewModel", "User model created: $companyProfileModel")
         } catch (e: Exception) {
             Log.e("AuthViewModel", "Error creating UserModel", e)
@@ -513,7 +513,7 @@ class AuthViewModel : ViewModel() {
                         userId = userId,
                         companyList = emptyList()
                     )
-                    _userInfo.value = profileModel
+                    _profile.value = profileModel
 
                     // Create full profile document right away
                     firestore.collection("users").document(userId).set(profileModel).addOnSuccessListener {
@@ -728,15 +728,15 @@ class AuthViewModel : ViewModel() {
                         userId = userId
                     )
 
-                    _userInfo.value = profileModel
+                    _profile.value = profileModel
                     Log.d("ProfileFetch", "Successfully fetched profile for $userId")
                 } else {
-                    _userInfo.value = null
+                    _profile.value = null
                     Log.d("ProfileFetch", "No profile document exists for $userId")
                 }
             }
             .addOnFailureListener { e ->
-                _userInfo.value = null
+                _profile.value = null
                 Log.e("ProfileFetch", "Failed to fetch profile", e)
             }
     }

@@ -9,11 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
-import com.google.firebase.ktx.Firebase
 
 @Composable
 fun HomeScreen(authViewModel: AuthViewModel) {
-    val userInfo by authViewModel.currentUser.collectAsState()
+    val userInfo by authViewModel.companyProfile.collectAsState()
 
 
     Column(verticalArrangement = Arrangement.Center) {

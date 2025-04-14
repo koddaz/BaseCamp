@@ -26,7 +26,6 @@ import com.basecampers.basecamp.tabs.booking.models.BookingCategories
 import com.basecampers.basecamp.tabs.booking.models.BookingItem
 
 import com.basecampers.basecamp.tabs.booking.models.UserBookingViewModel
-import java.util.Locale
 
 @Composable
 fun UserBookingNavHost(authViewModel: AuthViewModel) {
@@ -34,7 +33,7 @@ fun UserBookingNavHost(authViewModel: AuthViewModel) {
     val bookingViewModel: UserBookingViewModel = viewModel()
 
     val categoryList by bookingViewModel.categories.collectAsState()
-    val currentUser by authViewModel.currentUser.collectAsState()
+    val currentUser by authViewModel.companyProfile.collectAsState()
     val itemList: List<BookingItem> by bookingViewModel.bookingItemsList.collectAsState()
 
     var isAdmin by remember { mutableStateOf(false) }

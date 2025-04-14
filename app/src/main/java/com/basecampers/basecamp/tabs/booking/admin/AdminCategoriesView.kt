@@ -23,8 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.basecampers.basecamp.CompanyProfileModel
-import com.basecampers.basecamp.UserStatus
+import com.basecampers.basecamp.tabs.profile.models.CompanyProfileModel
+import com.basecampers.basecamp.tabs.profile.models.UserStatus
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.components.CustomButton
 import com.basecampers.basecamp.components.CustomColumn

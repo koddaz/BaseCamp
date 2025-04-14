@@ -1,22 +1,13 @@
-package com.basecampers.basecamp
+package com.basecampers.basecamp.tabs.profile.models
 
 import java.net.URL
 
-data class ProfileModel(
-    val userId: String = "",
-    val email: String = "",
-    val firstName: String = "",
-    val lastName: String = "",
-    val companyList: List<String> = emptyList(),
-)
 
 data class CompanyProfileModel(
-    val email : String = "No email",
     val imageUrl : URL? = null,
     val bio : String = "No bio yet",
     val status : UserStatus = UserStatus.USER,
-    val id : String = "No id",
-    val companyName : String = "No name yet",
+    val id : String = "",
     val companyId: String = ""
 )
 

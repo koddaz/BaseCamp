@@ -2,9 +2,9 @@ package com.basecampers.basecamp.navigation.models
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.basecampers.basecamp.CompanyModel
-import com.basecampers.basecamp.CompanyProfileModel
-import com.basecampers.basecamp.UserStatus
+import com.basecampers.basecamp.tabs.profile.models.CompanyModel
+import com.basecampers.basecamp.tabs.profile.models.CompanyProfileModel
+import com.basecampers.basecamp.tabs.profile.models.UserStatus
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.ktx.database
 import com.google.firebase.firestore.ktx.firestore

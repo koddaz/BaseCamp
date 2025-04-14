@@ -15,7 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.basecampers.basecamp.CompanyProfileModel
+import com.basecampers.basecamp.tabs.profile.models.CompanyProfileModel
 import com.basecampers.basecamp.components.CustomButton
 import com.basecampers.basecamp.components.CustomColumn
 import com.basecampers.basecamp.tabs.booking.models.AdminBookingViewModel

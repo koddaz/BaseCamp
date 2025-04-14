@@ -1,16 +1,12 @@
 package com.basecampers.basecamp.tabs.booking.admin
 
 
-import android.net.Uri
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -30,7 +26,7 @@ object AdminRoutes {
 fun AdminNavHost(authViewModel: AuthViewModel = viewModel(), changeView: () -> Unit) {
     val adminBookingViewModel = viewModel<AdminBookingViewModel>()
     val navController = rememberNavController()
-    val userInfo by authViewModel.currentUser.collectAsState()
+    val userInfo by authViewModel.companyProfile.collectAsState()
     val categories by adminBookingViewModel.categories.collectAsState()
     val selectedItemId by adminBookingViewModel.selectedItemId.collectAsState()
 
