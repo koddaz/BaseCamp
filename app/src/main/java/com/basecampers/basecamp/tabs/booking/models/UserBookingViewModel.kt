@@ -2,7 +2,7 @@ package com.basecampers.basecamp.tabs.booking.models
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.basecampers.basecamp.UserModel
+import com.basecampers.basecamp.CompanyProfileModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -48,12 +48,12 @@ class UserBookingViewModel : ViewModel() {
     val _finalPrice = MutableStateFlow<Double>(0.0)
     val finalPrice: StateFlow<Double> = _finalPrice
 
-    private val _user = MutableStateFlow<UserModel?>(null)
-    val user: StateFlow<UserModel?> = _user
+    private val _user = MutableStateFlow<CompanyProfileModel?>(null)
+    val user: StateFlow<CompanyProfileModel?> = _user
 
 
-    fun setUser(userModel: UserModel) {
-        _user.value = userModel
+    fun setUser(companyProfileModel: CompanyProfileModel) {
+        _user.value = companyProfileModel
         retrieveCategories()
     }
 

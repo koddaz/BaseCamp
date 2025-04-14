@@ -56,7 +56,7 @@ private suspend fun initializeAppSession(
     if (authViewModel.loggedin.value) {
         val userId = authViewModel.getCurrentUserUid()
         userId?.let {
-            authViewModel.fetchUserInfoFromFirestore(it)
+            authViewModel.fetchProfileFirestore(it)
             authViewModel.fetchCurrentUserModel()
             // Check status of user in company (admin? SuperUser?)
             // load company specific data (Categories, Items)

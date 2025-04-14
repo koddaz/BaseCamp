@@ -146,8 +146,10 @@ fun RegisterScreen(authViewModel : AuthViewModel, goLogin : () -> Unit) {
 
         Button(onClick = {
 
-            authViewModel.testRegToCompany(
-                companyId = "66a2bdbb-7218-48a3-ab86-4d1bd2de0728",
+            authViewModel.registerAsUser(
+                email = "user${(1000..9999).random()}@example.com",
+                password = "Test123!",
+                confirmPassword = "Test123!",
             )
         }) {
             Text("Create Random User")
@@ -155,14 +157,11 @@ fun RegisterScreen(authViewModel : AuthViewModel, goLogin : () -> Unit) {
 
         Button(
             onClick = {
-                /* authViewModel.registerAndCreateUserInFirestore(
-                    email, password,
+                authViewModel.registerAsUser(
+                    email = email,
+                    password = password,
                     confirmPassword = confirmPassword,
-                    companyName = companyName,
-
-
-
-                ) */
+                )
             },
             modifier = Modifier.fillMaxWidth(),
             enabled = email.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank()
