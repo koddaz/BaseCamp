@@ -109,6 +109,17 @@ class AuthViewModel : ViewModel() {
         _confirmPasswordValid.value = validateConfirmPassword(password, confirmPassword).isEmpty()
     }
 
+
+    fun validateAll(email: String, password: String, confirmPassword: String) : List<RegisterErrors> {
+        val checkError = mutableListOf<RegisterErrors>().apply {
+            addAll(validateEmail(email))
+            addAll(validatePassword(password))
+            addAll(validateConfirmPassword(password, confirmPassword))
+        }
+        _registerErrorMessage.value = checkError
+        return checkError
+    }
+
     fun validatePassword(password: String) : List<RegisterErrors> {
         val checkError = mutableListOf<RegisterErrors>()
         val specialCharPattern = Regex("[!@#\$%^&*()\\-+=\\[\\]{}|;:,.<>?/]")
@@ -613,11 +624,13 @@ class AuthViewModel : ViewModel() {
                 "The email address is badly formatted." -> {
                     // Only email is invalid due to syntax
                     errors.add(LoginErrors.EMAIL_NOT_VALID)
+                    errors.add(LoginErrors.PASSWORD_NOT_VALID)
                     Log.d(tag, "Added EMAIL_NOT_VALID for badly formatted email")
                 }
                 else -> {
                     if (!email.contains("@")) {
                         errors.add(LoginErrors.EMAIL_NOT_VALID)
+                        errors.add(LoginErrors.PASSWORD_NOT_VALID)
                         Log.d(tag, "Added EMAIL_NOT_VALID for badly formatted email")
                     } else {
                         // All other cases (wrong password, non-existent email, etc.)
