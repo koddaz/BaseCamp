@@ -16,6 +16,8 @@ fun ProfileScreen(authViewModel: AuthViewModel) {
 
     val (username, userEmail) = userInfo
     val uid = authViewModel.getCurrentUserUid() // Get UID from Firebase Auth
+    
+    var showDeleteConfirmation by remember { mutableStateOf(false) } // Warning before delete
 
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Profile", style = MaterialTheme.typography.headlineMedium)
@@ -31,13 +33,39 @@ fun ProfileScreen(authViewModel: AuthViewModel) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { authViewModel.deleteUser() },
+            onClick = { showDeleteConfirmation = true },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error)
         ) {
             Text("Delete Account")
         }
     }
+    
+    if (showDeleteConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirmation = false },
+            title = { Text("Delete Account") },
+            text = { Text("Are you sure you want to permanently delete your account? This action cannot be undone.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        authViewModel.deleteUser()
+                        showDeleteConfirmation = false
+                    }
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDeleteConfirmation = false }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+    
 }
 
 @Preview(showBackground = true)
