@@ -31,7 +31,7 @@ fun CustomColumn(
         modifier = modifier
             .fillMaxWidth()
             .border(1.dp, Color.Black)
-            .padding(16.dp)
+            .padding(8.dp)
     ) {
         if (title.isNotEmpty()) {
             Row(modifier.fillMaxWidth(),

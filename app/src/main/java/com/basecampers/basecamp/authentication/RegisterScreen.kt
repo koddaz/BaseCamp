@@ -1,6 +1,7 @@
 
 package com.basecampers.basecamp.authentication
 
+import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -17,6 +18,7 @@ import com.basecampers.basecamp.components.ConfirmPasswordTextField
 import com.basecampers.basecamp.components.PasswordInfoButton
 import com.basecampers.basecamp.components.PasswordPolicyInfo
 import com.basecampers.basecamp.components.PasswordTextField
+import java.util.UUID
 
 @Composable
 fun RegisterScreen(authViewModel : AuthViewModel, goLogin : () -> Unit) {
@@ -126,6 +128,77 @@ fun RegisterScreen(authViewModel : AuthViewModel, goLogin : () -> Unit) {
                 modifier = Modifier
             )
 
+            Spacer(modifier = Modifier.width(8.dp))
+            
+            PasswordInfoButton(onInfoClick = { showPasswordPolicy = !showPasswordPolicy })
+        }
+        PasswordPolicyInfo(visible = showPasswordPolicy)
+        
+        ConfirmPasswordTextField(
+            password = confirmPassword,
+            onValueChange = { confirmPassword = it },
+            label = "Confirm Password",
+            authViewModel = authViewModel,
+            modifier = Modifier
+        )
+        
+        Spacer(modifier = Modifier.height(16.dp))
+
+
+        Button(onClick = {
+            val randomSuffix = (1000..9999).random()
+            val randomEmail = "company${randomSuffix}@example.com"
+            val randomCompanyName = "Company${randomSuffix}"
+            val companyId = UUID.randomUUID().toString()
+
+            authViewModel.registerAsCompany(
+                email = randomEmail,
+                password = "Test123!", // Password that meets all requirements
+                companyName = randomCompanyName,
+                firstName = "Test",
+                lastName = "Testsson",
+                confirmPassword = "Test123!",
+                companyId = companyId,
+                onSuccess = {},
+                onError = {}
+            )
+        }) {
+            Text("Create Random Company")
+        }
+
+        Button(onClick = {
+
+            authViewModel.testRegToCompany(
+                companyId = "66a2bdbb-7218-48a3-ab86-4d1bd2de0728",
+            )
+        }) {
+            Text("Create Random User")
+        }
+
+        Button(
+            onClick = {
+                /* authViewModel.registerAndCreateUserInFirestore(
+                    email, password,
+                    confirmPassword = confirmPassword,
+                    companyName = companyName,
+
+
+
+                ) */
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = email.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank()
+        ) {
+            Text("Register")
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        
+        Button(onClick = {
+            goLogin()
+        }) {
+            Text("Go to Login")
+
+
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
@@ -149,6 +222,7 @@ fun RegisterScreen(authViewModel : AuthViewModel, goLogin : () -> Unit) {
                 Text("Go to Login")
             }
             Spacer(modifier = Modifier.height(50.dp))
+
         }
     }
 }

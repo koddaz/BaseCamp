@@ -169,7 +169,7 @@ fun CategoriesViewPreview() {
         adminBookingViewModel = null,
         authViewModel = null,
         userInfo = UserModel(
-            name = "asd",
+
             email = "asd",
             status = UserStatus.ADMIN,
             imageUrl = null,

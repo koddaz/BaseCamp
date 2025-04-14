@@ -39,11 +39,12 @@ fun AdminBookingView(
     adminBookingViewModel: AdminBookingViewModel?,
     goBack: () -> Unit,
     categoryId: String = "",
-    navigateToExtra: (String, String, String, String, String) -> Unit = { _, _, _, _, _ -> }
+    navigateToExtra: (String) -> Unit = {},
 ) {
     var expanded by remember { mutableStateOf(false) }
     val selectedCategoryIdFromVM by adminBookingViewModel?.selectedCategoryId?.collectAsState() ?: remember { mutableStateOf("") }
     var selectedCategoryId by remember { mutableStateOf(categoryId.ifEmpty { selectedCategoryIdFromVM }) }
+    val selectedBookingId by adminBookingViewModel?.selectedItemId?.collectAsState() ?: remember { mutableStateOf("") }
     var selectedCategoryName by remember { mutableStateOf("") }
 
     val categories by adminBookingViewModel?.categories?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
@@ -105,16 +106,13 @@ fun AdminBookingView(
                     pricePerDay = ""
                     selectedCategoryName = ""
                     selectedCategoryId = ""
+                    quantity = ""
                 }
             },
             onAddExtrasClick = {
-                navigateToExtra(
-                    selectedCategoryId,  // categoryId (1st parameter)
-                    name,                // bookingName (2nd parameter)
-                    info,                // bookingInfo (3rd parameter)
-                    pricePerDay,         // bookingPrice (4th parameter)
-                    bookingId            // bookingId (5th parameter)
-                )
+                adminBookingViewModel?.setSelectedCategory(selectedCategoryId)
+                adminBookingViewModel?.setItems(name = name, info = info, price = pricePerDay, quantity = quantity)
+                navigateToExtra(selectedBookingId)
             }
         )
     }
@@ -222,7 +220,6 @@ fun BookingItemForm(
 fun AdminBookingViewPreview() {
     AdminBookingView(
         userInfo = UserModel(
-            name = "",
             email = "",
             imageUrl = null,
             bio = "",

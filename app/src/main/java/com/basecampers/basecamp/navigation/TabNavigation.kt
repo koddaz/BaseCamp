@@ -34,7 +34,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.basecampers.ui.theme.BaseCampTheme
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
-import com.basecampers.basecamp.tabs.booking.BookingNavHost
+import com.basecampers.basecamp.tabs.booking.user.UserBookingNavHost
 import com.basecampers.basecamp.tabs.home.HomeNavHost
 import com.basecampers.basecamp.tabs.profile.ProfileNavHost
 import com.basecampers.basecamp.tabs.social.SocialNavHost
@@ -48,7 +48,7 @@ fun TabNavigation(authViewModel : AuthViewModel) {
         Column(modifier = Modifier.weight(1f)) {
             when (selectedTabIndex) {
                 0 -> HomeNavHost(authViewModel)
-                1 -> BookingNavHost(authViewModel)
+                1 -> UserBookingNavHost(authViewModel)
                 2 -> SocialNavHost()
                 3 -> ProfileNavHost(authViewModel)
                 else -> Text("Error: Tab not found")
