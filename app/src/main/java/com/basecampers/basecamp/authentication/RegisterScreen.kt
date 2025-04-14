@@ -119,7 +119,7 @@ fun RegisterScreen(authViewModel : AuthViewModel, goLogin : () -> Unit) {
             }
 
             ConfirmPasswordTextField(
-                password = confirmPassword,
+                password = password,
                 onValueChange = { confirmPassword = it },
                 label = "Confirm Password",
                 authViewModel = authViewModel,
