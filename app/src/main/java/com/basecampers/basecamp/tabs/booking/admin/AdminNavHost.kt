@@ -9,6 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -22,16 +24,15 @@ object AdminRoutes {
     const val BOOKING = "admin_booking"
     const val CATEGORY = "admin_category"
     const val EXTRA = "admin_extra"
-    const val BOOKING_WITH_CATEGORY = "admin_booking/{categoryId}"
-    const val EXTRA_WITH_BOOKING = "admin_extra/{categoryId}/{bookingName}/{bookingInfo}/{bookingPrice}/{bookingId}"
 }
 
 @Composable
-fun AdminNavHost(authViewModel: AuthViewModel = viewModel()) {
+fun AdminNavHost(authViewModel: AuthViewModel = viewModel(), changeView: () -> Unit) {
     val adminBookingViewModel = viewModel<AdminBookingViewModel>()
     val navController = rememberNavController()
     val userInfo by authViewModel.currentUser.collectAsState()
     val categories by adminBookingViewModel.categories.collectAsState()
+    val selectedItemId by adminBookingViewModel.selectedItemId.collectAsState()
 
 
 
@@ -65,10 +66,9 @@ fun AdminNavHost(authViewModel: AuthViewModel = viewModel()) {
                     adminBookingViewModel = adminBookingViewModel,
                     userInfo = userInfo,
                     goBack = { navController.popBackStack() },
-                    navigateToExtra = { categoryId, bookingName, bookingInfo, bookingPrice, bookingId ->
-                        navController.navigate("admin_extra/${Uri.encode(categoryId)}/${Uri.encode(bookingName)}/${Uri.encode(bookingInfo)}/${Uri.encode(bookingPrice)}/${Uri.encode(bookingId)}")
-                    }
-                )
+                    navigateToExtra = { itemId ->
+                        navController.navigate(AdminRoutes.EXTRA) }
+            )
             }
             composable(AdminRoutes.EXTRA) {
                 AdminExtrasView(
@@ -83,42 +83,8 @@ fun AdminNavHost(authViewModel: AuthViewModel = viewModel()) {
                     userInfo = userInfo,
                     goBack = { navController.popBackStack() },
                     navigateToBooking = { categoryId ->
-                        navController.navigate("admin_booking/$categoryId")
+                        navController.navigate(AdminRoutes.BOOKING)
                     }
-                )
-            }
-            composable(AdminRoutes.BOOKING_WITH_CATEGORY) { backStackEntry ->
-                val categoryId = backStackEntry.arguments?.getString("categoryId") ?: ""
-                AdminBookingView(
-                    authViewModel = authViewModel,
-                    adminBookingViewModel = adminBookingViewModel,
-                    userInfo = userInfo,
-                    goBack = { navController.popBackStack() },
-                    navigateToExtra = { categoryId, bookingName, bookingInfo, bookingPrice, bookingId ->
-                        Log.d("AdminNavHost", "Navigating with categoryId: $categoryId")
-                        navController.navigate("admin_extra/$categoryId/$bookingName/$bookingInfo/$bookingPrice/$bookingId")
-                    },
-                    categoryId = categoryId
-                )
-            }
-
-            composable(AdminRoutes.EXTRA_WITH_BOOKING) { backStackEntry ->
-                val categoryId = backStackEntry.arguments?.getString("categoryId") ?: ""
-                val bookingName = backStackEntry.arguments?.getString("bookingName") ?: ""
-                val bookingInfo = backStackEntry.arguments?.getString("bookingInfo") ?: ""
-                val bookingPrice = backStackEntry.arguments?.getString("bookingPrice") ?: ""
-                val bookingId = backStackEntry.arguments?.getString("bookingId") ?: ""
-
-                AdminExtrasView(
-                    adminBookingViewModel = adminBookingViewModel,
-                    userInfo = userInfo,
-                    goBack = { navController.popBackStack() },
-                    categoryId = categoryId,
-                    bookingName = bookingName,
-                    bookingInfo = bookingInfo,
-                    bookingPrice = bookingPrice,
-                    bookingId = bookingId
-
                 )
             }
         }

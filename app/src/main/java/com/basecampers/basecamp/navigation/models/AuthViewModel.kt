@@ -133,8 +133,6 @@ class AuthViewModel : ViewModel() {
 
                     val companyAdmin = UserModel(
                         email = email,
-                        firstName = firstName,
-                        lastName = lastName,
                         imageUrl = null, // ADD IMAGE!
                         bio = "",
                         status = UserStatus.ADMIN,
@@ -169,8 +167,6 @@ class AuthViewModel : ViewModel() {
             if (userId != null) {
                 val user = UserModel(
                     email = email,
-                    firstName = firstName,
-                    lastName = lastName,
                     imageUrl = null, // ADD IMAGE!
                     bio = "",
                     status = UserStatus.USER,
@@ -265,8 +261,6 @@ class AuthViewModel : ViewModel() {
 
                                     val userModel = UserModel(
                                         email = email,
-                                        firstName = name,
-                                        lastName = name,
                                         imageUrl = imageUrl,
                                         bio = bio,
                                         status = status,

@@ -3,22 +3,26 @@ package com.basecampers.basecamp.tabs.booking.user
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.basecampers.basecamp.components.CustomButton
 import com.basecampers.basecamp.components.CustomColumn
-import com.basecampers.basecamp.tabs.booking.components.BookingCard
 import com.basecampers.basecamp.tabs.booking.models.BookingExtra
 import com.basecampers.basecamp.tabs.booking.models.BookingItem
 import com.basecampers.basecamp.tabs.booking.models.UserBookingViewModel
@@ -26,13 +30,22 @@ import java.util.Locale
 
 @Composable
 fun SelectExtraView(
+    navConfirmation: () -> Unit,
     bookingViewModel: UserBookingViewModel?,
     modifier: Modifier = Modifier) {
 
+    val selectedExtraItems by bookingViewModel?.selectedExtraItems?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
     val selectedBookingItem by bookingViewModel?.selectedBookingItem?.collectAsState() ?: remember { mutableStateOf<BookingItem?>(null) }
     val formattedDateRange by bookingViewModel?.formattedDateRange?.collectAsState() ?: remember { mutableStateOf("") }
-    val amountOfDays by bookingViewModel?.amountOfDays?.collectAsState() ?: remember { mutableStateOf(0) }
+    val amountOfDays by bookingViewModel?.amountOfDays?.collectAsState() ?: remember { mutableIntStateOf(0) }
     val extraItems by bookingViewModel?.bookingExtraList?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
+    val totalPrice by bookingViewModel?.finalPrice?.collectAsState() ?: remember { mutableDoubleStateOf(0.0) }
+
+    LaunchedEffect(selectedExtraItems, selectedBookingItem, amountOfDays) {
+        selectedBookingItem?.let { item ->
+            bookingViewModel?.calculateTotalPrice(item = item, extras = selectedExtraItems)
+        }
+    }
 
     Column(modifier = modifier.fillMaxSize()) {
         CustomColumn(title = "Booking Summary") {
@@ -40,19 +53,22 @@ fun SelectExtraView(
                 Text(text = "Selected Item: ${item.name}")
                 Text(text = "Date Range: $formattedDateRange")
                 Text(text = "Total Days: $amountOfDays")
-                val totalPrice = selectedBookingItem?.let { item ->
-                    if (amountOfDays > 0) {
-                        val pricePerDay = item.pricePerDay.toDoubleOrNull() ?: 0.0
-                        "€${String.format(Locale.getDefault(), "%.2f", pricePerDay * amountOfDays)}"
-                    } else "FREE!"
-                } ?: "FREE!"
+                if (totalPrice > 0) {
+                    "€${String.format(Locale.getDefault(), "%.2f", totalPrice)}"
+                } else "FREE!"
                 Text(
                     text = "Total price: $totalPrice",
                     style = typography.bodyLarge,
                     modifier = Modifier.padding(vertical = 4.dp)
                 )
             }
+            Spacer(modifier = Modifier.height(8.dp))
+            selectedExtraItems.forEach { extra ->
+                Text(text = "Selected Extra: ${extra.name}")
+                Text(text = "Price: ${extra.price}")
+            }
         }
+        Spacer(modifier = Modifier.height(8.dp))
         CustomColumn(title = "Extra Items") {
             if (extraItems.isNotEmpty()) {
 
@@ -60,15 +76,31 @@ fun SelectExtraView(
                     ExtrasCard(
                         extra = extra,
                         onClick = {
-                            bookingViewModel?.addExtraItem(
-                                BookingExtra(
-                                    extra.id, extra.name, extra.price, extra.info
-                                )
-                            )
+                            if (selectedExtraItems.contains(extra)) {
+                                bookingViewModel?.removeExtraItem(extra)
+                            } else {
+                                bookingViewModel?.addExtraItem(extra)
+                                bookingViewModel?.calculateExtra(extraItems)
+                            }
                         }
                     )
                 }
             }
+        }
+
+        Row() {
+            CustomButton(
+                text = "Back",
+                onClick = {
+                    bookingViewModel?.clearSelectedExtras()
+                }
+            )
+            CustomButton(
+                text = "Confirm",
+                onClick = {
+                    navConfirmation()
+                }
+            )
         }
     }
 }
@@ -97,7 +129,7 @@ fun ExtrasCard(
                 modifier = Modifier.padding(vertical = 4.dp)
             )
             Text(
-                text = "Price: €${extra.price}",
+                text = extra.price,
                 style = typography.bodyLarge
             )
         }

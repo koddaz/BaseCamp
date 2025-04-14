@@ -5,6 +5,7 @@ import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.basecampers.basecamp.CompanyModel
+import com.basecampers.basecamp.ProfileInfo
 import com.basecampers.basecamp.UserModel
 import com.basecampers.basecamp.UserStatus
 import com.google.firebase.auth.FirebaseAuth
@@ -200,23 +201,8 @@ class AuthViewModel : ViewModel() {
         val tld = email.substringAfterLast(".")
         return tld.length >= 2
     }
-    //VALIDATION
-    data class ProfileInfo(
-        val userId: String = "",
-        val email: String = "",
-        val firstName: String = "",
-        val lastName: String = "",
-        val companyList: List<String> = emptyList(),
-        val companyId: String = "",
-    )
-    data class ProfileInfoOLD(
-        val email: String = "",
-        val userName: String = "",
-        val imageUrl: String? = null,
-        val bio: String = "",
-        val status: String = "",
-        val companyName: String = ""
-    )
+
+
 
     init {
         checkLoggedin()
@@ -282,8 +268,6 @@ class AuthViewModel : ViewModel() {
 
             val userModel = UserModel(
                 email = email,
-                firstName = firstName,
-                lastName = lastName,
                 imageUrl = imageUrl,
                 bio = bio,
                 status = status,
@@ -402,8 +386,6 @@ class AuthViewModel : ViewModel() {
 
                     val companyAdmin = UserModel(
                         email = email,
-                        firstName = firstName,
-                        lastName = lastName,
                         imageUrl = null,
                         bio = "",
                         status = UserStatus.ADMIN,
@@ -418,7 +400,6 @@ class AuthViewModel : ViewModel() {
                         firstName = firstName,
                         lastName = lastName,
                         companyList = listOf(companyName),
-                        companyId = companyId  // Set company ID in profile
                     )
 
                     val companyRef = firestore.collection("companies").document(companyId)
@@ -507,8 +488,6 @@ class AuthViewModel : ViewModel() {
                         val user = UserModel(
                             id = userId,
                             email = email,
-                            firstName = firstName,
-                            lastName = lastName,
                             imageUrl = null,
                             bio = "",
                             status = UserStatus.USER,

@@ -10,17 +10,11 @@ data class BookingItems(
     val categoryId: String // Add this field
 )
 
-data class ExtraItems(
-    val id: Int,
-    val name: String,
-    val info: String,
-    val price: Double,
-)
 
 data class UserBooking(
     val id: String,
     val bookingItem: BookingItems?,
-    val extraItems: List<ExtraItems>,
+    val extraItems: List<BookingExtra>,
     val timestamp: Date?,
     val timeRange: String,
     val totalPrice: Double,

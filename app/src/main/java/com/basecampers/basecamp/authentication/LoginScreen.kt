@@ -97,9 +97,9 @@ fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotP
         }
 
         Button(onClick = {
-            authViewModel.login(email = "user4605@example.com", password = "Test123!")
+            authViewModel.login(email = "user9182@example.com", password = "Test123!")
         }) {
-            Text("user4605@example.com & Test123!")
+            Text("user9182@example.com & Test123!")
         }
         Button(
             onClick = { goForgotPass() },

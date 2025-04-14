@@ -13,6 +13,28 @@ import kotlinx.coroutines.flow.asStateFlow
 class AdminBookingViewModel : ViewModel() {
     val db = Firebase.firestore
 
+    // Booking item
+    private val _itemName = MutableStateFlow("")
+    private val _itemInfo = MutableStateFlow("")
+    private val _itemPrice = MutableStateFlow("")
+    private val _itemQuantity = MutableStateFlow("")
+
+    val itemName: StateFlow<String> = _itemName
+    val itemInfo: StateFlow<String> = _itemInfo
+    val itemPrice: StateFlow<String> = _itemPrice
+    val itemQuantity: StateFlow<String> = _itemQuantity
+
+    // Extra item
+    private val _extraName = MutableStateFlow("")
+    private val _extraInfo = MutableStateFlow("")
+    private val _extraPrice = MutableStateFlow("")
+
+    val extraName: StateFlow<String> = _extraName
+    val extraInfo: StateFlow<String> = _extraInfo
+    val extraPrice: StateFlow<String> = _extraPrice
+
+
+
     private val _bookingItems = MutableStateFlow<List<BookingItem>>(emptyList())
     val bookingItems: StateFlow<List<BookingItem>> = _bookingItems
 
@@ -28,11 +50,22 @@ class AdminBookingViewModel : ViewModel() {
     private val _selectedCategoryId = MutableStateFlow<String>("")
     val selectedCategoryId = _selectedCategoryId.asStateFlow()
 
+    private val _selectedItemId = MutableStateFlow<String>("")
+    val selectedItemId = _selectedItemId.asStateFlow()
+
     // Add this function
     fun setSelectedCategory(categoryId: String) {
         _selectedCategoryId.value = categoryId
         // Load items for this category
         retrieveBookingItems(categoryId)
+    }
+
+    fun setSelectedItemId(itemId: String) {
+        _selectedItemId.value = itemId
+    }
+
+    private fun getCompanyId(): String? {
+        return _user.value?.companyId
     }
 
     fun setUser(userModel: UserModel) {
@@ -43,16 +76,34 @@ class AdminBookingViewModel : ViewModel() {
 
 
 
-    private fun getCompanyName(): String? {
-        return _user.value?.companyName
+    fun setItems(
+        name: String = "",
+        info: String = "",
+        price: String = "",
+        quantity: String = "",
+    ) {
+        _itemName.value = name
+        _itemInfo.value = info
+        _itemPrice.value = price
+        _itemQuantity.value = quantity
+    }
+
+    fun setExtras(
+        name: String = "",
+        info: String = "",
+        price: String = "",
+    ) {
+        _extraName.value = name
+        _extraInfo.value = info
+        _extraPrice.value = price
     }
 
     fun addBookingCategory(bookingCategory: BookingCategories) {
-        val companyName = getCompanyName() ?: return
+        val companyId = getCompanyId() ?: return
 
-        val categoryRef = db.collection("companies").document(companyName)
-            .collection("bookings").document("categories")
-            .collection("items").document(bookingCategory.id)
+        val categoryRef = db
+            .collection("companies").document(companyId)
+            .collection("categories").document(bookingCategory.id)
 
         categoryRef.set(bookingCategory)
             .addOnSuccessListener {
@@ -64,7 +115,7 @@ class AdminBookingViewModel : ViewModel() {
     }
 
     fun addBookingItem(bookingItem: BookingItem, selectedCategory: String) {
-        val companyName = getCompanyName() ?: return
+        val companyId = getCompanyId() ?: return
 
         if (selectedCategory.isEmpty()) {
             Log.e("AdminBookingViewModel", "Selected category is empty")
@@ -72,10 +123,11 @@ class AdminBookingViewModel : ViewModel() {
         }
 
         try {
-            val documentRef = db.collection("companies").document(companyName)
-                .collection("bookings").document("categories")
-                .collection("items").document(selectedCategory)
-                .collection("items").document(bookingItem.id)
+            val documentRef = db
+                .collection("companies").document(companyId)
+                .collection("categories").document(selectedCategory)
+                .collection("bookings").document(bookingItem.id)
+
 
             documentRef.set(bookingItem)
                 .addOnSuccessListener {
@@ -92,7 +144,7 @@ class AdminBookingViewModel : ViewModel() {
     }
 
     fun addBookingExtra(bookingItem: BookingItem, bookingExtra: BookingExtra, selectedCategory: String) {
-        val companyName = getCompanyName() ?: return
+        val companyId = getCompanyId() ?: return
 
         if (selectedCategory.isEmpty()) {
             Log.e("AdminBookingViewModel", "Selected category is empty")
@@ -109,10 +161,10 @@ class AdminBookingViewModel : ViewModel() {
         Log.d("AdminBookingViewModel", "BookingExtra ID: ${bookingExtra.id}")
 
         try {
-            val documentRef = db.collection("companies").document(companyName)
-                .collection("bookings").document("categories")
-                .collection("items").document(selectedCategory)
-                .collection("items").document(bookingItem.id)
+            val documentRef = db
+                .collection("companies").document(companyId)
+                .collection("categories").document(selectedCategory)
+                .collection("bookings").document(bookingItem.id)
                 .collection("extras").document(bookingExtra.id)
 
             documentRef.set(bookingExtra)
@@ -128,16 +180,12 @@ class AdminBookingViewModel : ViewModel() {
     }
 
     fun retrieveBookingItems(selectedCategory: String) {
-        val companyName = getCompanyName() ?: return
+        val companyId = getCompanyId() ?: return
 
-        db.collection("companies")
-            .document(companyName)
-            .collection("bookings")
-            .document("categories")
-            .collection("items")
-            .document(selectedCategory)
-            .collection("items")
-            .get()
+        db
+            .collection("companies").document(companyId)
+            .collection("categories").document(selectedCategory)
+            .collection("bookings").get()
             .addOnSuccessListener { snapshot ->
                 val itemList = snapshot.documents.mapNotNull { doc ->
                     val id = doc.id
@@ -166,14 +214,11 @@ class AdminBookingViewModel : ViewModel() {
     }
 
     fun retrieveCategories() {
-        val companyName = getCompanyName() ?: return
+        val companyId = getCompanyId() ?: return
 
-        db.collection("companies")
-            .document(companyName)
-            .collection("bookings")
-            .document("categories")
-            .collection("items")
-            .get()
+        db
+            .collection("companies").document(companyId)
+            .collection("categories").get()
             .addOnSuccessListener { snapshot ->
                 val categoryList = snapshot.documents.mapNotNull { doc ->
                     val id = doc.id

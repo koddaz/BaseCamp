@@ -1,16 +1,17 @@
 package com.basecampers.basecamp.tabs.booking.user
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme.typography
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -20,10 +21,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.components.CustomButton
-import com.basecampers.basecamp.components.CustomColumn
-import com.basecampers.basecamp.tabs.booking.components.BookingCard
+import com.basecampers.basecamp.tabs.booking.admin.AdminNavHost
 import com.basecampers.basecamp.tabs.booking.models.BookingCategories
-import com.basecampers.basecamp.tabs.booking.models.BookingExtra
 import com.basecampers.basecamp.tabs.booking.models.BookingItem
 
 import com.basecampers.basecamp.tabs.booking.models.UserBookingViewModel
@@ -37,6 +36,8 @@ fun UserBookingNavHost(authViewModel: AuthViewModel) {
     val categoryList by bookingViewModel.categories.collectAsState()
     val currentUser by authViewModel.currentUser.collectAsState()
     val itemList: List<BookingItem> by bookingViewModel.bookingItemsList.collectAsState()
+
+    var isAdmin by remember { mutableStateOf(false) }
 
 
 
@@ -61,29 +62,52 @@ fun UserBookingNavHost(authViewModel: AuthViewModel) {
     }
 
 
+    Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
+        if (isAdmin) {
+            Column(modifier = Modifier.weight(1f)) {
+                AdminNavHost(authViewModel = authViewModel, changeView = { isAdmin = false })
+            }
+        } else {
+            NavHost(
+                navController = navController,
+                startDestination = "start",
+                modifier = Modifier.weight(1f)
+            ) {
 
-    NavHost(navController = navController, startDestination = "start") {
-        composable("start") {
-            BookingView(
-                onClick = { navController.navigate("selectCategory") })
+                composable("start") {
+                    BookingView(
+                        onClick = { navController.navigate("selectCategory") },
+                    )
+                }
+                composable("selectCategory") {
+                    SelectBookingView(
+                        categoryList = categoryList,
+                        itemList = itemList,
+                        bookingViewModel = bookingViewModel,
+                        navExtra = { navController.navigate("selectExtra") })
+                }
+                composable("selectExtra") {
+                    SelectExtraView(
+                        bookingViewModel = bookingViewModel,
+                        navConfirmation = { navController.navigate("confirmation")}
+                    )
+                }
+                composable("confirmation") {
+                    ConfirmationView(
+                        bookingViewModel = bookingViewModel,
+                        confirmBooking = {
+                            navController.navigate("start")
+                        }
+                    )
+                }
+            }
         }
-        composable("selectCategory") {
-            SelectBookingView(
-                categoryList = categoryList,
-                itemList = itemList,
-                bookingViewModel = bookingViewModel,
-                navExtra = { navController.navigate("selectExtra") })
-        }
-        composable("selectExtra") {
-            SelectExtraView(bookingViewModel = bookingViewModel)
+        Row(modifier = Modifier.fillMaxWidth()) {
+            CustomButton(text = "Admin", onClick = { isAdmin = !isAdmin })
+            CustomButton(text = "User", onClick = { isAdmin = false })
         }
     }
-}
-@Composable
-fun BookingView(onClick: () -> Unit) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        CustomButton(text = "Book an item", onClick = onClick )
-    }
+
 }
 
 @Composable

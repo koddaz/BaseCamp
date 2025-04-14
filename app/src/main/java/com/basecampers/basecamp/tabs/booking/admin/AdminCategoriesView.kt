@@ -170,8 +170,6 @@ fun CategoriesViewPreview() {
         authViewModel = null,
         userInfo = UserModel(
 
-            firstName = "asd",
-            lastName = "asd",
             email = "asd",
             status = UserStatus.ADMIN,
             imageUrl = null,

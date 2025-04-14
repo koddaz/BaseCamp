@@ -1,5 +1,6 @@
 package com.basecampers.basecamp.tabs.booking.models
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.basecampers.basecamp.UserModel
 import com.google.firebase.auth.ktx.auth
@@ -7,7 +8,6 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -21,7 +21,7 @@ class UserBookingViewModel : ViewModel() {
     private val _startDate = MutableStateFlow<Long?>(null)
     private val _endDate = MutableStateFlow<Long?>(null)
 
-    val selectedItemId : StateFlow<String> = _selectedItemId.asStateFlow()
+    val selectedItemId : StateFlow<String> = _selectedItemId
 
     private val _bookingItemsList = MutableStateFlow<List<BookingItem>>(emptyList())
     val bookingItemsList: StateFlow<List<BookingItem>> = _bookingItemsList
@@ -39,12 +39,14 @@ class UserBookingViewModel : ViewModel() {
     val selectedBookingItem: StateFlow<BookingItem?> = _selectedBookingItem
 
     private val _selectedExtraItems = MutableStateFlow<List<BookingExtra>>(emptyList())
-    val seleectedExtraItems: StateFlow<List<BookingExtra>> = _selectedExtraItems
+    val selectedExtraItems: StateFlow<List<BookingExtra>> = _selectedExtraItems
 
     private val _amountOfDays = MutableStateFlow<Int>(0)
     val amountOfDays: StateFlow<Int> = _amountOfDays
 
     val currentUserId = Firebase.auth.currentUser?.uid
+    val _finalPrice = MutableStateFlow<Double>(0.0)
+    val finalPrice: StateFlow<Double> = _finalPrice
 
     private val _user = MutableStateFlow<UserModel?>(null)
     val user: StateFlow<UserModel?> = _user
@@ -55,21 +57,25 @@ class UserBookingViewModel : ViewModel() {
         retrieveCategories()
     }
 
-    private fun getCompanyName(): String? {
-        return _user.value?.companyName
+
+    private fun getCompanyId(): String? {
+        return _user.value?.companyId
+        Log.d("UserBookingViewModel", "Company ID: ${_user.value?.companyId}")
     }
 
 
 
     fun retrieveCategories() {
-        val companyName = getCompanyName() ?: return
+       val companyId = getCompanyId().toString()
         if (currentUserId != null) {
-            db.collection("companies")
-                .document(companyName)
-                .collection("bookings")
-                .document("categories")
-                .collection("items")
-                .get().addOnSuccessListener { snapshot ->
+            if (companyId.isEmpty()) {
+                Log.d("UserBookingViewModel", "Company ID is empty")
+                return
+            }
+            db
+                .collection("companies").document(companyId)
+                .collection("categories").get()
+                .addOnSuccessListener { snapshot ->
                     val categoryList = snapshot.documents.mapNotNull { doc ->
                         val id = doc.id
                         val name = doc.getString("name") ?: ""
@@ -77,29 +83,25 @@ class UserBookingViewModel : ViewModel() {
                         val createdBy = doc.getString("createdBy") ?: ""
                         BookingCategories(id, name, info, createdBy)
                     }
-
                     _categories.value = categoryList
-                    categoryList.forEach { category ->
-                        retrieveBookingItems(category.id)
-                    }
+                }
+                .addOnFailureListener { e ->
+                    // Log the error
                 }
         }
     }
 
     fun retrieveBookingItems(categoryId: String) {
-        val companyName = getCompanyName() ?: return
+        val companyId = getCompanyId() ?: return
 
-        db.collection("companies")
-            .document(companyName)
+        db
+            .collection("companies").document(companyId)
+            .collection("categories").document(categoryId)
             .collection("bookings")
-            .document("categories")
-            .collection("items")
-            .document(categoryId)
-            .collection("items")
             .get()
             .addOnSuccessListener { snapshot ->
                 val items = snapshot.documents.mapNotNull { doc ->
-                // Changed to create BookingItem objects instead of BookingItems
+
                     val id = doc.id  // Use document ID as string
                     val name = doc.getString("name") ?: ""
                     val info = doc.getString("info") ?: ""
@@ -118,21 +120,33 @@ class UserBookingViewModel : ViewModel() {
             }
     }
 
+    fun calculateExtra(extras: List<BookingExtra>): Double {
+        return extras.sumOf { it.price.toDoubleOrNull() ?: 0.0 }
+    }
+
+    fun calculateTotalPrice(item: BookingItem, extras: List<BookingExtra>) {
+        val pricePerDay = item.pricePerDay.toDoubleOrNull() ?: 0.0
+        val extraPrice = extras.sumOf {it.price.toDoubleOrNull() ?: 0.0}
+        val totalPrice = (pricePerDay * amountOfDays.value) + extraPrice
+
+        _finalPrice.value = totalPrice
+    }
+
     fun retrieveExtraItems(
         categoryId: String,
         itemId: String,
     ) {
-        val companyName = getCompanyName() ?: return
-        db.collection("companies").document(companyName)
-            .collection("bookings").document("categories")
-            .collection("items").document(categoryId)
-            .collection("items").document(itemId)
+        val companyId = getCompanyId() ?: return
+        db.collection("companies").document(companyId)
+            .collection("categories").document(categoryId)
+            .collection("bookings").document(itemId)
             .collection("extras").get().addOnSuccessListener { snapshot ->
                 val extras = snapshot.documents.mapNotNull { doc ->
                     val id = doc.id
                     val name = doc.getString("name") ?: ""
-                    val info = doc.getString("info") ?: ""
                     val price = doc.getString("price") ?: "0.0"
+                    val info = doc.getString("info") ?: ""
+
                     BookingExtra(id, name, info, price)
                 }
                 val currentExtrasMap =  _bookingExtraList.value.associateBy { it.id }.toMutableMap()
@@ -146,8 +160,6 @@ class UserBookingViewModel : ViewModel() {
             }
 
     }
-
-
 
     fun addExtraItem(item: BookingExtra) {
         _selectedExtraItems.value = _selectedExtraItems.value + item
@@ -200,7 +212,9 @@ class UserBookingViewModel : ViewModel() {
         _selectedBookingItem.value = item
 
     }
-
+    fun clearSelectedExtras() {
+        _selectedExtraItems.value = emptyList()
+    }
     fun removeSelectedBookingItem() {
         _selectedBookingItem.value = null
     }

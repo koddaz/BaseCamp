@@ -20,7 +20,7 @@ import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import kotlinx.coroutines.delay
 
 @Composable
-fun Root(authViewModel : AuthViewModel = viewModel()) {
+fun Root(authViewModel : AuthViewModel = viewModel(), innerPadding: PaddingValues) {
     var isLoading by remember { mutableStateOf(true) }
     val tempFunction = { isLoading = false }
 
@@ -33,7 +33,7 @@ fun Root(authViewModel : AuthViewModel = viewModel()) {
         )
     }
     
-    Column(Modifier.fillMaxSize()) {
+    Column(Modifier.fillMaxSize().padding(innerPadding)) {
         if (isLoading) {
             LoadingScreen(
                 tempFunction = tempFunction,
@@ -72,5 +72,5 @@ private suspend fun initializeAppSession(
 @Preview(showBackground = true)
 @Composable
 fun RootPreview() {
-    Root(authViewModel = viewModel())
+    Root(authViewModel = viewModel(), innerPadding = PaddingValues())
 }

@@ -7,6 +7,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,11 +26,6 @@ import com.basecampers.basecamp.tabs.booking.models.BookingItem
 @Composable
 fun AdminExtrasView(
     modifier: Modifier = Modifier,
-    bookingId: String = "",
-    categoryId: String = "",
-    bookingName: String = "",
-    bookingInfo: String = "",
-    bookingPrice: String = "",
     goBack: () -> Unit,
     adminBookingViewModel: AdminBookingViewModel = viewModel(),
     userInfo: UserModel?
@@ -39,6 +35,12 @@ fun AdminExtrasView(
     var extraPrice by remember { mutableStateOf("") }
     var extraQuantity by remember { mutableStateOf("") }
 
+    val bookingId by adminBookingViewModel.selectedItemId.collectAsState()
+    val categoryId by adminBookingViewModel.selectedCategoryId.collectAsState()
+    val bookingName by adminBookingViewModel.itemName.collectAsState()
+    val bookingInfo by adminBookingViewModel.itemInfo.collectAsState()
+    val bookingPrice by adminBookingViewModel.itemPrice.collectAsState()
+
 
     var errorMessage by remember { mutableStateOf("") }
 
@@ -47,7 +49,8 @@ fun AdminExtrasView(
             categoryId,
             bookingName,
             bookingInfo,
-            bookingPrice
+            bookingPrice,
+            errorMessage
         )
         ExtraItemForm(
             name = extraName,
@@ -64,7 +67,20 @@ fun AdminExtrasView(
                     errorMessage = "Extra name and price are required"
                     return@ExtraItemForm
                 }
+                if (extraInfo.length > 300) {
+                    errorMessage = "Extra info cannot exceed 300 characters"
+                    return@ExtraItemForm
+                }
+                if (extraQuantity.isBlank()) {
+                    errorMessage = "Extra quantity is required"
+                    return@ExtraItemForm
+                }
+                if (!extraPrice.all { it.isDigit() }) {
+                    errorMessage = "Price must contain only numbers"
+                    return@ExtraItemForm
+                }
 
+                if (errorMessage.isEmpty()) {
                 // Debug what's happening
                 Log.d("AdminExtrasView", "Adding extra with bookingId: $bookingId")
                 Log.d("AdminExtrasView", "Category: $categoryId")
@@ -121,6 +137,7 @@ fun AdminExtrasView(
                     errorMessage = "Error: ${e.message}"
                 }
             }
+            }
         )
         if (errorMessage.isNotEmpty()) {
             Text(text = errorMessage, color = Color.Red)
@@ -133,8 +150,9 @@ fun AdminExtrasView(
 }
 
 @Composable
-fun DisplayBookingDetails(categoryId: String, bookingName: String, bookingInfo: String, bookingPrice: String) {
+fun DisplayBookingDetails(categoryId: String, bookingName: String, bookingInfo: String, bookingPrice: String, errorMessage: String) {
     Column {
+
         Text(text = "Category ID: $categoryId")
         Text(text = "Booking Name: $bookingName")
         Text(text = "Booking Info: $bookingInfo")
@@ -153,14 +171,16 @@ fun ExtraItemForm(
     onInfoChange: (String) -> Unit,
     price: String,
     onPriceChange: (String) -> Unit,
-    onAddExtraClick: () -> Unit
+    onAddExtraClick: () -> Unit,
 ) {
     Column {
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Name") },
             value = name,
-            onValueChange = onNameChange,
+            onValueChange = {
+                onNameChange(it) // Call the function with the updated value
+            },
             maxLines = 1
         )
         OutlinedTextField(
@@ -169,14 +189,21 @@ fun ExtraItemForm(
             maxLines = 5,
             minLines = 3,
             value = info,
-            onValueChange = { if (it.length <= 300) onInfoChange(it) },
+            onValueChange = {
+
+                if (it.length <= 300) {
+                    onInfoChange(it)
+                }
+                     },
             supportingText = { Text("${info.length}/300 characters") }
         )
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Price") },
             value = price,
-            onValueChange = onPriceChange,
+            onValueChange = {
+                onPriceChange(it)
+            },
             maxLines = 1
         )
         OutlinedTextField(
@@ -188,7 +215,7 @@ fun ExtraItemForm(
         )
         CustomButton(
             onClick = {
-                if (name.isNotBlank() && price.isNotBlank()) {
+                if (name.isNotBlank() && price.isNotBlank() && info.isNotBlank() && quantity.isNotBlank()) {
                     onAddExtraClick()
                 }
             },
