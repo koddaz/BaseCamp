@@ -35,7 +35,9 @@ fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotP
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Login", style = MaterialTheme.typography.headlineMedium)
 
-        if (loginErrorMessage.contains(AuthViewModel.LoginErrors.EMAIL_NOT_VALID) &&
+        
+        if (loginErrorMessage.contains(AuthViewModel.LoginErrors.EMAIL_NOT_VALID) ||
+
             loginErrorMessage.contains(AuthViewModel.LoginErrors.PASSWORD_NOT_VALID)) {
             Text(
                 text = "Incorrect email or password",

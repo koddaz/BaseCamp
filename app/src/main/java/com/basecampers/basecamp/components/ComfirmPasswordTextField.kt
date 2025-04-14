@@ -57,8 +57,8 @@ fun ConfirmPasswordTextField(password : String, onValueChange : (String) -> Unit
 			.border(
 				1.dp,
 				when{
-					isConfirmPasswordValid -> Color.Green
 					hasConfirmPasswordError -> Color.Red
+					isConfirmPasswordValid -> Color.Green
 					else -> Color.LightGray
 				}
 			)

@@ -62,7 +62,7 @@ fun PasswordTextField(password : String, onValueChange : (String) -> Unit, label
                 1.dp,
                 when{
                     isPasswordValid -> Color.Green
-                    hasPasswordError && state.text.toString() == password -> Color.Red
+                    hasPasswordError -> Color.Red // && state.text.toString() == password
                     else -> Color.LightGray
                 }
             )
