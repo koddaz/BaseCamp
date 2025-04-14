@@ -311,12 +311,10 @@ class AuthViewModel : ViewModel() {
             }
 
             val companyProfileModel = CompanyProfileModel(
-                email = email,
                 imageUrl = imageUrl,
                 bio = bio,
                 status = status,
                 id = userId,
-                companyName = companyName,
                 companyId = companyId ?: companyName
             )
 
@@ -430,12 +428,10 @@ class AuthViewModel : ViewModel() {
                     )
 
                     val companyAdmin = CompanyProfileModel(
-                        email = email,
                         imageUrl = null,
                         bio = "",
                         status = UserStatus.ADMIN,
                         id = userId,
-                        companyName = companyName,
                         companyId = companyId  // Important! Set the companyId
                     )
 
@@ -572,11 +568,9 @@ class AuthViewModel : ViewModel() {
                         // Create complete user model
                         val user = CompanyProfileModel(
                             id = userId,
-                            email = email,
                             imageUrl = null,
                             bio = "",
                             status = UserStatus.USER,
-                            companyName = companyName,
                             companyId = companyId
                         )
 

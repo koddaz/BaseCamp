@@ -9,7 +9,7 @@ import com.basecampers.basecamp.tabs.profile.models.ProfileModel
 import com.basecampers.basecamp.tabs.profile.models.UserStatusConverter
 
 @Database(entities = [ProfileModel::class], version = 1, exportSchema = false)
-@TypeConverters(UserStatusConverter::class)
+@TypeConverters(UserStatusConverter::class, StringListConverter::class)
 abstract class ProfileDatabase : RoomDatabase() {
     abstract fun profileDao(): ProfileDao
 

@@ -220,12 +220,10 @@ fun BookingItemForm(
 fun AdminBookingViewPreview() {
     AdminBookingView(
         userInfo = CompanyProfileModel(
-            email = "",
             imageUrl = null,
             bio = "",
             status = UserStatus.ADMIN,
             id = "",
-            companyName = ""
         ),
         authViewModel = null,
         adminBookingViewModel = null,

@@ -96,21 +96,19 @@ fun ProfileScreen(authViewModel: AuthViewModel, profileViewModel: ProfileViewMod
                 Text("Email: ${profile?.email ?: "N/A"}")
                 Text("Bio: ${companyProfile?.bio ?: "N/A"}")
                 Text("Status: ${companyProfile?.status ?: "N/A"}")
-                Text("Company: ${companyProfile?.companyName ?: "N/A"}")
 
 //                Text("Profiles in database: $profileCount")
                 roomProfile?.let {
-                    if (it.bio.isNotEmpty()) {
+
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("Bio: ${it.bio}")
-                    }
-                    
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("Status: ${it.status}")
-                    
-                    if (it.companyName.isNotEmpty()) {
-                        Text("Company: ${it.companyName}")
-                    }
+                    Text("first: ${it.firstName}")
+                    Text("last: ${it.lastName}")
+                    Text("email: ${it.email}")
+
+
+
+
+
                 }
             }
         }
