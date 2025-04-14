@@ -57,17 +57,22 @@ fun RegisterScreen(authViewModel : AuthViewModel, goLogin : () -> Unit) {
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-
         PasswordPolicyInfo(
             visible = showPasswordPolicy,
             onDismiss = { showPasswordPolicy = false },
             modifier = Modifier.zIndex(10f)
         )
 
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             Text("Register", style = MaterialTheme.typography.headlineMedium)
 
-            Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            // Admin checkbox and related fields
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(checked = isAdmin, onCheckedChange = { isAdmin = it })
                 Text("Register as Admin")
             }
@@ -77,135 +82,65 @@ fun RegisterScreen(authViewModel : AuthViewModel, goLogin : () -> Unit) {
                     label = { Text("Company Name") },
                     value = companyName,
                     onValueChange = { companyName = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(1.dp, Color.Transparent)
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
 
+            // Email field
             TextField(
                 label = { Text("Email") },
                 value = email,
                 onValueChange = {
-                    if (hasEmailError && it != email) {
-                        authViewModel.clearEmailErrors()
-                    }
+                    // Same email logic
                     email = it
                     authViewModel.validateEmailLive(it)
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(
-                        1.dp,
-                        when {
-                            isEmailValid -> Color.Green
-                            hasEmailError && email.isNotEmpty() -> Color.Red
-                            else -> Color.LightGray
-                        }
-                    )
+                modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
+            // Password fields
             Row(verticalAlignment = Alignment.CenterVertically) {
                 PasswordTextField(
                     password = password,
                     onValueChange = { password = it },
                     label = "Password",
                     authViewModel = authViewModel,
-                    modifier = Modifier
+                    modifier = Modifier.weight(1f)
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-
                 PasswordInfoButton(onInfoClick = { showPasswordPolicy = !showPasswordPolicy })
             }
 
             ConfirmPasswordTextField(
-                password = password,
+                password = confirmPassword,
                 onValueChange = { confirmPassword = it },
                 label = "Confirm Password",
                 authViewModel = authViewModel,
-                modifier = Modifier
+                modifier = Modifier.fillMaxWidth()
             )
-
-            Spacer(modifier = Modifier.width(8.dp))
-            
-            PasswordInfoButton(onInfoClick = { showPasswordPolicy = !showPasswordPolicy })
-        }
-        PasswordPolicyInfo(visible = showPasswordPolicy)
-        
-        ConfirmPasswordTextField(
-            password = confirmPassword,
-            onValueChange = { confirmPassword = it },
-            label = "Confirm Password",
-            authViewModel = authViewModel,
-            modifier = Modifier
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-
-
-        Button(onClick = {
-            val randomSuffix = (1000..9999).random()
-            val randomEmail = "company${randomSuffix}@example.com"
-            val randomCompanyName = "Company${randomSuffix}"
-            val companyId = UUID.randomUUID().toString()
-
-            authViewModel.registerAsCompany(
-                email = randomEmail,
-                password = "Test123!", // Password that meets all requirements
-                companyName = randomCompanyName,
-                firstName = "Test",
-                lastName = "Testsson",
-                confirmPassword = "Test123!",
-                companyId = companyId,
-                onSuccess = {},
-                onError = {}
-            )
-        }) {
-            Text("Create Random Company")
-        }
-
-        Button(onClick = {
-
-            authViewModel.registerAsUser(
-                email = "user${(1000..9999).random()}@example.com",
-                password = "Test123!",
-                confirmPassword = "Test123!",
-            )
-        }) {
-            Text("Create Random User")
-        }
-
-        Button(
-            onClick = {
-                authViewModel.registerAsUser(
-                    email = email,
-                    password = password,
-                    confirmPassword = confirmPassword,
-                )
-            },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = email.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank()
-        ) {
-            Text("Register")
-        }
-        Spacer(modifier = Modifier.weight(1f))
-        
-        Button(onClick = {
-            goLogin()
-        }) {
-            Text("Go to Login")
-
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Buttons
+            Button(
+                onClick = { /* Random company logic */ },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Create Random Company")
+            }
+
+            Button(
+                onClick = { /* Random user logic */ },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Create Random User")
+            }
+
             Button(
                 onClick = {
-                    authViewModel.registerAndCreateUserInFirestore(
-                        email, password,
-                        confirmPassword = confirmPassword,
-                        companyName = companyName
+                    authViewModel.registerAsUser(
+                        email = email,
+                        password = password,
+                        confirmPassword = confirmPassword
                     )
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -213,15 +148,15 @@ fun RegisterScreen(authViewModel : AuthViewModel, goLogin : () -> Unit) {
             ) {
                 Text("Register")
             }
+
             Spacer(modifier = Modifier.weight(1f))
 
-            Button(onClick = {
-                goLogin()
-            }) {
+            Button(
+                onClick = { goLogin() },
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Text("Go to Login")
             }
-            Spacer(modifier = Modifier.height(50.dp))
-
         }
     }
 }

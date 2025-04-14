@@ -139,11 +139,11 @@ fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotP
         Spacer(modifier = Modifier.weight(1f))
 
         Button(
-            onClick = { goRegister() }
+            onClick = { goRegister() },
+            modifier = Modifier.fillMaxWidth()
         ) {
             Text("Go to Register")
         }
-        Spacer(modifier = Modifier.height(50.dp))
     }
 }
 
