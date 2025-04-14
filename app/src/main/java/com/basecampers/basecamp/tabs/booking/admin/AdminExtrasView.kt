@@ -15,7 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.basecampers.basecamp.UserModel
+import com.basecampers.basecamp.tabs.profile.models.CompanyProfileModel
 import com.basecampers.basecamp.components.CustomButton
 import com.basecampers.basecamp.components.CustomColumn
 import com.basecampers.basecamp.tabs.booking.models.AdminBookingViewModel
@@ -28,7 +28,7 @@ fun AdminExtrasView(
     modifier: Modifier = Modifier,
     goBack: () -> Unit,
     adminBookingViewModel: AdminBookingViewModel = viewModel(),
-    userInfo: UserModel?
+    userInfo: CompanyProfileModel?
 ) {
     var extraName by remember { mutableStateOf("") }
     var extraInfo by remember { mutableStateOf("") }

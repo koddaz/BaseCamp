@@ -2,26 +2,21 @@ package com.basecampers.basecamp.navigation.models
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.basecampers.basecamp.CompanyModel
-import com.basecampers.basecamp.UserModel
-import com.basecampers.basecamp.UserStatus
-import com.google.firebase.auth.FirebaseAuth
+import com.basecampers.basecamp.tabs.profile.models.CompanyModel
+import com.basecampers.basecamp.tabs.profile.models.CompanyProfileModel
+import com.basecampers.basecamp.tabs.profile.models.UserStatus
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.ktx.database
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import java.net.URL
 
 class AuthViewModel : ViewModel() {
 
-    private val _currentUser = MutableStateFlow<UserModel?>(null)
+    private val _currentUser = MutableStateFlow<CompanyProfileModel?>(null)
     val currentUser = _currentUser.asStateFlow()
 
     val database = Firebase.database.reference
@@ -33,8 +28,8 @@ class AuthViewModel : ViewModel() {
     private val _userInfo = MutableStateFlow<Pair<String?, String?>>(Pair(null, null))
     val userInfo = _userInfo.asStateFlow()
 
-    private val _userStatus = MutableStateFlow(UserModel(status = UserStatus.USER))
-    val userStatus : StateFlow<UserModel> = _userStatus
+    private val _userStatus = MutableStateFlow(CompanyProfileModel(status = UserStatus.USER))
+    val userStatus : StateFlow<CompanyProfileModel> = _userStatus
 
     init {
         checklogin()
@@ -50,7 +45,7 @@ class AuthViewModel : ViewModel() {
         Log.i("isLoggedInFalseDEBUG", "Logged out = ${loggedin.value}")
     }
 
-    fun checklogin(companyId: UserModel? = null) {
+    fun checklogin(companyId: CompanyProfileModel? = null) {
         val user = Firebase.auth.currentUser
         _loggedin.value = user != null
 
@@ -131,7 +126,7 @@ class AuthViewModel : ViewModel() {
                         imageUrl = null // ADD IMAGE
                     )
 
-                    val companyAdmin = UserModel(
+                    val companyAdmin = CompanyProfileModel(
                         email = email,
                         imageUrl = null, // ADD IMAGE!
                         bio = "",
@@ -165,7 +160,7 @@ class AuthViewModel : ViewModel() {
             authResult ->
             val userId = authResult.user?.uid
             if (userId != null) {
-                val user = UserModel(
+                val user = CompanyProfileModel(
                     email = email,
                     imageUrl = null, // ADD IMAGE!
                     bio = "",
@@ -259,7 +254,7 @@ class AuthViewModel : ViewModel() {
                                         else -> UserStatus.USER
                                     }
 
-                                    val userModel = UserModel(
+                                    val companyProfileModel = CompanyProfileModel(
                                         email = email,
                                         imageUrl = imageUrl,
                                         bio = bio,
@@ -268,8 +263,8 @@ class AuthViewModel : ViewModel() {
                                         companyName = companyId
                                     )
 
-                                    _currentUser.value = userModel
-                                    Log.d("AuthViewModel", "User model created: $userModel")
+                                    _currentUser.value = companyProfileModel
+                                    Log.d("AuthViewModel", "User model created: $companyProfileModel")
                                 } catch (e: Exception) {
                                     Log.e("AuthViewModel", "Error creating UserModel", e)
                                 }
