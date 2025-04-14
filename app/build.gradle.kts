@@ -37,6 +37,8 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
+        // used to fix kapt issue?
+        languageVersion = "1.9"
     }
     buildFeatures {
         compose = true
@@ -44,37 +46,42 @@ android {
 }
 
 dependencies {
-    // Firebase
+    // Firebase - using BOM pattern for consistent versioning
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
     ///Analytics
     implementation("com.google.firebase:firebase-analytics")
     ///Auth
-    implementation("com.google.firebase:firebase-auth:23.2.0")
+    implementation("com.google.firebase:firebase-auth")
     ///Realtime Database
-    implementation("com.google.firebase:firebase-database:21.0.0")
-    ///Firestore
-    implementation("com.google.firebase:firebase-firestore-ktx:25.0.0")
+    implementation("com.google.firebase:firebase-database")
+    ///FireStore
+    implementation("com.google.firebase:firebase-firestore-ktx")
     
-    // Tab navigation
+    // Navigation & UI Components
     implementation("com.arkivanov.decompose:decompose:1.0.0")
     implementation("com.arkivanov.decompose:extensions-compose-jetpack:1.0.0")
     
-    // Room dependencies
-    implementation("androidx.room:room-runtime:2.6.0")
-    implementation("androidx.room:room-ktx:2.6.0")
-    
-    // Kotlin annotation processing
-    kapt("androidx.room:room-compiler:2.6.0")
-    
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
+    // Jetpack Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
+    implementation("androidx.compose.material:material-icons-extended")
+    
+    // Core Android & Lifecycle
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")//2.6.2||2.8.7?
+    
+    
+    // Room Database
+    implementation("androidx.room:room-runtime:2.6.0")
+    implementation("androidx.room:room-ktx:2.6.0")
+    // Annotation processor for Room
+    kapt("androidx.room:room-compiler:2.6.0")
     
     // Test dependencies
     testImplementation(libs.junit)
@@ -85,5 +92,4 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation("androidx.compose.material:material-icons-extended:")
 }
