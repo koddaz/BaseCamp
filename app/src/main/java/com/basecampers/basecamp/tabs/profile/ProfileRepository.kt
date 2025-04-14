@@ -1,10 +1,13 @@
 package com.basecampers.basecamp.tabs.profile
 
 import android.util.Log
+import androidx.room.TypeConverter
 import com.basecampers.basecamp.tabs.profile.models.ProfileModel
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 class ProfileRepository(private val profileDao: ProfileDao) {
 
@@ -36,7 +39,7 @@ class ProfileRepository(private val profileDao: ProfileDao) {
             
             val profile = document.toObject(ProfileModel::class.java)
             Log.d("ProfileRepo", "Fetched profile: $profile")
-            
+
             profile?.let {
                 // Ensure ID is set correctly
                 val profileWithId = it.copy(id = uid)
@@ -49,4 +52,17 @@ class ProfileRepository(private val profileDao: ProfileDao) {
     }
     
     
+}
+
+class StringListConverter {
+    @TypeConverter
+    fun fromString(value: String): List<String> {
+        val listType = object : TypeToken<List<String>>() {}.type
+        return Gson().fromJson(value, listType) ?: emptyList()
+    }
+
+    @TypeConverter
+    fun fromList(list: List<String>): String {
+        return Gson().toJson(list)
+    }
 }

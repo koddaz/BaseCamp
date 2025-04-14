@@ -50,7 +50,7 @@ class AuthViewModel : ViewModel() {
         _loggedin.value = user != null
 
         if (user != null) {
-            fetchUserInfoFromFirestore(userId = user.uid, companyId = companyId?.companyName ?: "")
+            fetchUserInfoFromFirestore(userId = user.uid, companyId = companyId?.companyId ?: "")
             if (Firebase.auth.currentUser == null) {
                 _loggedin.value = false
                 Log.i("CHECKLOGINDEBUG", "Logged in = ${loggedin.value}")
@@ -127,15 +127,13 @@ class AuthViewModel : ViewModel() {
                     )
 
                     val companyAdmin = CompanyProfileModel(
-                        email = email,
                         imageUrl = null, // ADD IMAGE!
                         bio = "",
                         status = UserStatus.ADMIN,
                         id = userId,
-                        companyName = companyName
                     )
                     val userRef =
-                        firestore.collection("companies").document(companyAdmin.companyName)
+                        firestore.collection("companies").document(companyAdmin.companyId)
                             .collection("users").document(userId)
 
                     val companyRef =
@@ -161,16 +159,14 @@ class AuthViewModel : ViewModel() {
             val userId = authResult.user?.uid
             if (userId != null) {
                 val user = CompanyProfileModel(
-                    email = email,
                     imageUrl = null, // ADD IMAGE!
                     bio = "",
                     status = UserStatus.USER,
                     id = userId,
-                    companyName = companyName
                 )
                 val userRef = firestore
                     .collection("companies")
-                    .document(user.companyName)
+                    .document(user.companyId)
                     .collection("users").document(userId)
                 userRef.set(user).addOnSuccessListener {
                     checklogin()
@@ -255,12 +251,10 @@ class AuthViewModel : ViewModel() {
                                     }
 
                                     val companyProfileModel = CompanyProfileModel(
-                                        email = email,
                                         imageUrl = imageUrl,
                                         bio = bio,
                                         status = status,
                                         id = userId,
-                                        companyName = companyId
                                     )
 
                                     _currentUser.value = companyProfileModel
