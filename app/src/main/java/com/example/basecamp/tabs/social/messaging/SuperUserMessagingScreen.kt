@@ -1,89 +1,113 @@
 package com.example.basecamp.tabs.social.messaging
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Circle
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.basecamp.tabs.social.messaging.components.formatTime
+import com.example.basecamp.tabs.social.messaging.models.room.ChatInfo
 import com.example.basecamp.tabs.social.messaging.viewModels.SuperUserMessagingViewModel
 
 @Composable
 fun SuperUserMessagingScreen(
 	onSelectPendingChat: (String) -> Unit,
-	onSelectActiveChat: (String) -> Unit,
-	viewModel: SuperUserMessagingViewModel = viewModel()
+	onSelectActiveChat: (String) -> Unit
 ) {
-	val pendingChats by viewModel.pendingChats.collectAsState()
-	val activeChats by viewModel.activeChats.collectAsState()
+	val context = LocalContext.current
+	val viewModel: SuperUserMessagingViewModel = viewModel(
+		factory = SuperUserMessagingViewModel.Factory(context)
+	)
+	
+	val pendingChats by viewModel.getPendingChats().collectAsState(initial = emptyList())
+	val activeChats by viewModel.getAssignedChats().collectAsState(initial = emptyList())
+	var expandPendingSection by remember { mutableStateOf(false) }
 	
 	Column(modifier = Modifier.fillMaxSize()) {
+		// Header
 		Text(
-			text = "BaseBuddy Messaging Console",
-			style = MaterialTheme.typography.titleLarge,
+			text = "BaseBuddy Message Center",
+			style = MaterialTheme.typography.headlineSmall,
 			modifier = Modifier.padding(16.dp)
 		)
 		
-		// Pending Chat Requests
+		// Pending Chats Section
 		Card(
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(16.dp)
+				.padding(horizontal = 16.dp, vertical = 8.dp)
 		) {
-			Column(
-				modifier = Modifier.padding(16.dp)
-			) {
-				Text(
-					text = "Pending Chat Requests",
-					style = MaterialTheme.typography.titleMedium,
-					fontWeight = FontWeight.Bold
-				)
+			Column(modifier = Modifier.padding(16.dp)) {
+				// Collapsible header
+				Row(
+					modifier = Modifier
+						.fillMaxWidth()
+						.clickable { expandPendingSection = !expandPendingSection },
+					horizontalArrangement = Arrangement.SpaceBetween,
+					verticalAlignment = Alignment.CenterVertically
+				) {
+					Row(verticalAlignment = Alignment.CenterVertically) {
+						Text(
+							text = "Pending Requests",
+							style = MaterialTheme.typography.titleMedium
+						)
+						
+						if (pendingChats.isNotEmpty()) {
+							Spacer(modifier = Modifier.width(8.dp))
+							Badge { Text(text = pendingChats.size.toString()) }
+						}
+					}
+					
+					Icon(
+						imageVector = if (expandPendingSection)
+							Icons.Default.ExpandLess
+						else
+							Icons.Default.ExpandMore,
+						contentDescription = if (expandPendingSection)
+							"Collapse"
+						else
+							"Expand"
+					)
+				}
 				
-				Spacer(modifier = Modifier.height(8.dp))
-				
-				if (pendingChats.isEmpty()) {
-					Text("No pending requests")
-				} else {
-					LazyColumn {
-						items(pendingChats) { request ->
-							OutlinedCard(
-								onClick = { onSelectPendingChat(request.id) },
-								modifier = Modifier
-									.fillMaxWidth()
-									.padding(vertical = 4.dp)
-							) {
-								Row(
-									modifier = Modifier
-										.fillMaxWidth()
-										.padding(16.dp),
-									verticalAlignment = Alignment.CenterVertically
-								) {
-									Column(modifier = Modifier.weight(1f)) {
-										Text(
-											text = "Request from ${request.userName}",
-											fontWeight = FontWeight.Bold
-										)
-										Text(
-											text = "Subject: ${request.subject}",
-											style = MaterialTheme.typography.bodyMedium
-										)
-									}
-									
-									Text(
-										text = request.timeReceived,
-										style = MaterialTheme.typography.bodySmall,
-										color = MaterialTheme.colorScheme.outline
-									)
-								}
+				// Expandable content
+				AnimatedVisibility(visible = expandPendingSection) {
+					if (pendingChats.isEmpty()) {
+						Box(
+							modifier = Modifier
+								.fillMaxWidth()
+								.padding(vertical = 16.dp),
+							contentAlignment = Alignment.Center
+						) {
+							Text("No pending requests")
+						}
+					} else {
+						LazyColumn(
+							modifier = Modifier
+								.fillMaxWidth()
+								.padding(top = 8.dp)
+						) {
+							items(pendingChats) { chat ->
+								PendingChatItem(
+									chat = chat,
+									onClick = { onSelectPendingChat(chat.id) }
+								)
+								Divider()
 							}
 						}
 					}
@@ -91,56 +115,77 @@ fun SuperUserMessagingScreen(
 			}
 		}
 		
-		// Active Chats
-		Card(
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(16.dp)
-		) {
-			Column(
-				modifier = Modifier.padding(16.dp)
+		// Active Chats Section
+		Text(
+			text = "Active Conversations",
+			style = MaterialTheme.typography.titleMedium,
+			modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+		)
+		
+		if (activeChats.isEmpty()) {
+			Box(
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(32.dp),
+				contentAlignment = Alignment.Center
 			) {
-				Text(
-					text = "Active Chats",
-					style = MaterialTheme.typography.titleMedium,
-					fontWeight = FontWeight.Bold
-				)
-				
-				Spacer(modifier = Modifier.height(8.dp))
-				
-				if (activeChats.isEmpty()) {
-					Text("No active chats")
-				} else {
-					LazyColumn {
-						items(activeChats) { chat ->
-							OutlinedCard(
-								onClick = { onSelectActiveChat(chat.id) },
-								modifier = Modifier
-									.fillMaxWidth()
-									.padding(vertical = 4.dp)
-							) {
-								Row(
-									modifier = Modifier
-										.fillMaxWidth()
-										.padding(16.dp),
-									verticalAlignment = Alignment.CenterVertically
-								) {
-									Column(modifier = Modifier.weight(1f)) {
-										Text(
-											text = "Chat with ${chat.userName}",
-											fontWeight = FontWeight.Bold
-										)
-										Text(
-											text = "Last message: ${chat.lastMessageTime}",
-											style = MaterialTheme.typography.bodySmall
-										)
-									}
-								}
-							}
-						}
-					}
+				Text("No active conversations")
+			}
+		} else {
+			LazyColumn(
+				modifier = Modifier
+					.fillMaxWidth()
+					.weight(1f)
+			) {
+				items(activeChats) { chat ->
+					ActiveChatItem(
+						chat = chat,
+						onClick = { onSelectActiveChat(chat.id) }
+					)
+					Divider()
 				}
 			}
 		}
 	}
+}
+
+@Composable
+private fun PendingChatItem(
+	chat: ChatInfo,
+	onClick: () -> Unit
+) {
+	ListItem(
+		headlineContent = { Text("Request from ${chat.title}") },
+		supportingContent = { Text("Topic: ${chat.subject}") },
+		trailingContent = {
+			// Format timestamp to readable time
+			val timestamp = formatTime(chat.lastMessageTime)
+			Text(timestamp)
+		},
+		modifier = Modifier.clickable(onClick = onClick)
+	)
+}
+
+@Composable
+private fun ActiveChatItem(
+	chat: ChatInfo,
+	onClick: () -> Unit
+) {
+	ListItem(
+		headlineContent = { Text(chat.title) },
+		supportingContent = { Text(chat.lastMessageText) },
+		trailingContent = {
+			Column(horizontalAlignment = Alignment.End) {
+				Text(
+					text = formatTime(chat.lastMessageTime),
+					style = MaterialTheme.typography.bodySmall
+				)
+				
+				if (chat.unreadCount > 0) {
+					Badge { Text(text = chat.unreadCount.toString()) }
+				}
+			}
+		},
+		modifier = Modifier.clickable(onClick = onClick)
+	)
 }

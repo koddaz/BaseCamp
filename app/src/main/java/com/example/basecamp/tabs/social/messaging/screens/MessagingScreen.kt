@@ -1,4 +1,4 @@
-package com.example.basecamp.tabs.social.messaging
+package com.example.basecamp.tabs.social.messaging.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -12,16 +12,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.basecamp.tabs.social.messaging.models.Chat
-import com.example.basecamp.tabs.social.messaging.models.ChatRequest
+import com.example.basecamp.tabs.social.messaging.models.room.ChatInfo
+import com.example.basecamp.tabs.social.messaging.components.formatTime
 import com.example.basecamp.tabs.social.messaging.viewModels.SuperUserMessagingViewModel
 import com.example.basecamp.tabs.social.messaging.viewModels.UserMessagingViewModel
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,10 +30,19 @@ fun MessagingScreen(
 	onSelectActiveChat: (String) -> Unit,
 	onSelectClosedChat: (String) -> Unit,
 	onSelectChatRequest: (String) -> Unit,
-	onStartNewChat: () -> Unit,
-	userViewModel: UserMessagingViewModel = viewModel(),
-	superViewModel: SuperUserMessagingViewModel = viewModel()
+	onStartNewChat: () -> Unit
 ) {
+	val context = LocalContext.current
+	val scope = rememberCoroutineScope()
+	
+	// Initialize ViewModels with factories
+	val userViewModel: UserMessagingViewModel = viewModel(
+		factory = UserMessagingViewModel.Factory(context)
+	)
+	val superViewModel: SuperUserMessagingViewModel = viewModel(
+		factory = SuperUserMessagingViewModel.Factory(context)
+	)
+	
 	var showClosedChats by remember { mutableStateOf(false) }
 	var selectedTab by remember { mutableStateOf(0) }
 	
@@ -45,17 +53,24 @@ fun MessagingScreen(
 	}
 	
 	// Get data from appropriate ViewModel based on user role
-	val chats by if (isSuper) {
-		superViewModel.activeChats.collectAsState()
+	val chats = if (isSuper) {
+		if (showClosedChats) {
+			// Show both active and closed chats
+			val activeChats by superViewModel.getAssignedChats().collectAsState(initial = emptyList())
+			val closedChats by superViewModel.getClosedChats().collectAsState(initial = emptyList())
+			remember(activeChats, closedChats) { activeChats + closedChats }
+		} else {
+			// Show only active chats
+			val activeChats by superViewModel.getAssignedChats().collectAsState(initial = emptyList())
+			activeChats
+		}
 	} else {
-		userViewModel.chats.collectAsState()
+		val activeChats by userViewModel.getActiveChats().collectAsState(initial = emptyList())
+		val closedChats by userViewModel.getClosedChats().collectAsState(initial = emptyList())
+		remember(activeChats, closedChats) { activeChats + closedChats }
 	}
 	
-	val chatRequests by if (isSuper) {
-		superViewModel.pendingChats.collectAsState()
-	} else {
-		remember { mutableStateOf(emptyList<ChatRequest>()) }
-	}
+	val pendingChats by superViewModel.getPendingChats().collectAsState(initial = emptyList())
 	
 	Scaffold(
 		topBar = {
@@ -114,19 +129,13 @@ fun MessagingScreen(
 			when {
 				// SuperUser - Active Chats Tab
 				isSuper && selectedTab == 0 -> {
-					val filteredChats = if (showClosedChats) {
-						chats
-					} else {
-						chats.filter { it.isActive }
-					}
-					
-					if (filteredChats.isEmpty()) {
+					if (chats.isEmpty()) {
 						EmptyState(message = "No active chats")
 					} else {
-						ChatList(
-							chats = filteredChats,
+						ChatInfoList(
+							chats = chats,
 							onChatSelected = { chat ->
-								if (chat.isActive) {
+								if (chat.status == com.example.basecamp.tabs.social.messaging.models.ChatStatus.ACTIVE) {
 									onSelectActiveChat(chat.id)
 								} else {
 									onSelectClosedChat(chat.id)
@@ -138,17 +147,20 @@ fun MessagingScreen(
 				
 				// SuperUser - Chat Requests Tab
 				isSuper && selectedTab == 1 -> {
-					if (chatRequests.isEmpty()) {
+					if (pendingChats.isEmpty()) {
 						EmptyState(message = "No pending chat requests")
 					} else {
-						ChatRequestList(
-							requests = chatRequests,
-							onAccept = { requestId ->
-								superViewModel.acceptChatRequest(requestId)
-								onSelectChatRequest(requestId)
-							},
-							onDecline = { requestId ->
-								superViewModel.declineChatRequest(requestId)
+						ChatInfoList(
+							chats = pendingChats,
+							onChatSelected = { chatInfo ->
+								scope.launch {
+									// Use the acceptChatRequestWithResponse method
+									superViewModel.acceptChatRequestWithResponse(
+										chatInfo.id,
+										"I'm here to help. What can I do for you?"
+									)
+									onSelectChatRequest(chatInfo.id)
+								}
 							}
 						)
 					}
@@ -156,8 +168,8 @@ fun MessagingScreen(
 				
 				// Regular User - My Chats
 				else -> {
-					val activeChats = chats.filter { it.isActive }
-					val closedChats = chats.filter { !it.isActive }
+					val activeChats = chats.filter { it.status == com.example.basecamp.tabs.social.messaging.models.ChatStatus.ACTIVE }
+					val closedChats = chats.filter { it.status == com.example.basecamp.tabs.social.messaging.models.ChatStatus.CLOSED }
 					
 					if (chats.isEmpty()) {
 						EmptyState(message = "No chats yet")
@@ -170,7 +182,7 @@ fun MessagingScreen(
 									modifier = Modifier.padding(16.dp)
 								)
 								
-								ChatList(
+								ChatInfoList(
 									chats = activeChats,
 									onChatSelected = { chat -> onSelectActiveChat(chat.id) }
 								)
@@ -183,7 +195,7 @@ fun MessagingScreen(
 									modifier = Modifier.padding(16.dp)
 								)
 								
-								ChatList(
+								ChatInfoList(
 									chats = closedChats,
 									onChatSelected = { chat -> onSelectClosedChat(chat.id) }
 								)
@@ -210,13 +222,13 @@ fun EmptyState(message: String) {
 }
 
 @Composable
-fun ChatList(
-	chats: List<Chat>,
-	onChatSelected: (Chat) -> Unit
+fun ChatInfoList(
+	chats: List<ChatInfo>,
+	onChatSelected: (ChatInfo) -> Unit
 ) {
 	LazyColumn {
 		items(chats) { chat ->
-			ChatItem(
+			ChatInfoItem(
 				chat = chat,
 				onClick = { onChatSelected(chat) }
 			)
@@ -227,8 +239,8 @@ fun ChatList(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatItem(
-	chat: Chat,
+fun ChatInfoItem(
+	chat: ChatInfo,
 	onClick: () -> Unit
 ) {
 	Card(
@@ -278,7 +290,7 @@ fun ChatItem(
 					
 					Spacer(modifier = Modifier.width(8.dp))
 					
-					if (!chat.isActive) {
+					if (chat.status == com.example.basecamp.tabs.social.messaging.models.ChatStatus.CLOSED) {
 						Text(
 							text = "(Closed)",
 							style = MaterialTheme.typography.bodySmall,
@@ -317,119 +329,6 @@ fun ChatItem(
 					}
 				}
 			}
-		}
-	}
-}
-
-@Composable
-fun ChatRequestList(
-	requests: List<ChatRequest>,
-	onAccept: (String) -> Unit,
-	onDecline: (String) -> Unit
-) {
-	LazyColumn {
-		items(requests) { request ->
-			ChatRequestItem(
-				request = request,
-				onAccept = { onAccept(request.id) },
-				onDecline = { onDecline(request.id) }
-			)
-			Divider()
-		}
-	}
-}
-
-@Composable
-fun ChatRequestItem(
-	request: ChatRequest,
-	onAccept: () -> Unit,
-	onDecline: () -> Unit
-) {
-	Card(
-		modifier = Modifier
-			.fillMaxWidth()
-			.padding(horizontal = 16.dp, vertical = 8.dp),
-		colors = CardDefaults.cardColors(
-			containerColor = MaterialTheme.colorScheme.surface
-		)
-	) {
-		Column(
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(16.dp)
-		) {
-			Row(
-				modifier = Modifier.fillMaxWidth(),
-				horizontalArrangement = Arrangement.SpaceBetween,
-				verticalAlignment = Alignment.CenterVertically
-			) {
-				Text(
-					text = request.userName,
-					style = MaterialTheme.typography.titleMedium,
-					fontWeight = FontWeight.Bold
-				)
-				
-				Text(
-					text = formatTime(request.timestamp),
-					style = MaterialTheme.typography.labelSmall,
-					color = MaterialTheme.colorScheme.outline
-				)
-			}
-			
-			Spacer(modifier = Modifier.height(4.dp))
-			
-			Text(
-				text = "Subject: ${request.subject}",
-				style = MaterialTheme.typography.bodyMedium,
-				fontWeight = FontWeight.Medium
-			)
-			
-			Spacer(modifier = Modifier.height(8.dp))
-			
-			Text(
-				text = request.message,
-				style = MaterialTheme.typography.bodyMedium
-			)
-			
-			Spacer(modifier = Modifier.height(16.dp))
-			
-			Row(
-				modifier = Modifier.fillMaxWidth(),
-				horizontalArrangement = Arrangement.End
-			) {
-				OutlinedButton(
-					onClick = onDecline,
-					colors = ButtonDefaults.outlinedButtonColors(
-						contentColor = MaterialTheme.colorScheme.error
-					)
-				) {
-					Text("Decline")
-				}
-				
-				Spacer(modifier = Modifier.width(8.dp))
-				
-				Button(onClick = onAccept) {
-					Text("Accept")
-				}
-			}
-		}
-	}
-}
-
-// Helper function to format timestamps
-fun formatTime(timestamp: Long): String {
-	val now = System.currentTimeMillis()
-	val diff = now - timestamp
-	
-	return when {
-		diff < 60 * 1000 -> "Just now"
-		diff < 60 * 60 * 1000 -> "${diff / (60 * 1000)} min ago"
-		diff < 24 * 60 * 60 * 1000 -> {
-			SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date(timestamp))
-		}
-		diff < 48 * 60 * 60 * 1000 -> "Yesterday"
-		else -> {
-			SimpleDateFormat("MMM d", Locale.getDefault()).format(Date(timestamp))
 		}
 	}
 }

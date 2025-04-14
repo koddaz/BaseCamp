@@ -1,50 +1,54 @@
 package com.example.basecamp.tabs.social.messaging.models
 
 import java.util.UUID
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 /**
- * Represents a chat thread between users and BaseBuddies.
+ * Core model representing a chat conversation between users.
+ * Used for storing conversation data in Firebase.
  */
 data class Chat(
+	/**
+	 * Unique identifier for the chat.
+	 */
 	val id: String = UUID.randomUUID().toString(),
-	val title: String = "",
-	val isActive: Boolean = true,
+	
+	/**
+	 * Current state of the chat (PENDING, ACTIVE, CLOSED, DELETED).
+	 */
+	val status: ChatStatus = ChatStatus.PENDING,
+	
+	/**
+	 * When the chat was created.
+	 */
+	val createdAt: Long = System.currentTimeMillis(),
+	
+	/**
+	 * Timestamp of the most recent message.
+	 */
 	val lastMessageTime: Long = System.currentTimeMillis(),
+	
+	/**
+	 * Preview text of the most recent message.
+	 */
 	val lastMessageText: String = "",
-	val participantIds: List<String> = emptyList(),
-	val unreadCount: Int = 0,
 	
-	// Additional properties needed based on the errors
-	val userName: String = "", // Name of the other participant
-	val isBaseBuddy: Boolean = false // Whether the other participant is a BaseBuddy
-) {
-	// Computed property for formatted time
-	val time: String
-		get() {
-			val now = System.currentTimeMillis()
-			val diff = now - lastMessageTime
-			
-			return when {
-				diff < 60 * 1000 -> "Just now"
-				diff < 60 * 60 * 1000 -> "${diff / (60 * 1000)} min ago"
-				diff < 24 * 60 * 60 * 1000 -> {
-					SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date(lastMessageTime))
-				}
-				diff < 48 * 60 * 60 * 1000 -> "Yesterday"
-				else -> {
-					SimpleDateFormat("MMM d", Locale.getDefault()).format(Date(lastMessageTime))
-				}
-			}
-		}
+	/**
+	 * List of all users participating in this chat.
+	 */
+	val participants: List<Participant> = emptyList(),
 	
-	// Alias for lastMessageText to match usage in UI
-	val lastMessage: String
-		get() = lastMessageText
+	/**
+	 * ID of the user who initiated the chat.
+	 */
+	val creatorId: String = "",
 	
-	// Alias for title to match usage in UI
-	val name: String
-		get() = userName.ifEmpty { title }
-}
+	/**
+	 * ID of the SuperUser assigned to this chat, or null if pending.
+	 */
+	val assignedToId: String? = null,
+	
+	/**
+	 * Original topic/subject of the chat request.
+	 */
+	val subject: String = ""
+)

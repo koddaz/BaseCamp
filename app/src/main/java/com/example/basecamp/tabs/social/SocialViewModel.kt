@@ -19,6 +19,10 @@ class SocialViewModel : ViewModel() {
 	private val _unreadCount = MutableStateFlow(3)
 	val unreadCount: StateFlow<Int> = _unreadCount.asStateFlow()
 	
+	// Show/hide menu state
+	private val _showMenu = MutableStateFlow(false)
+	val showMenu = _showMenu.asStateFlow()
+	
 	// Toggle super user status (for testing purposes only)
 	fun toggleSuperUser() {
 		_isSuper.value = !_isSuper.value
@@ -28,28 +32,12 @@ class SocialViewModel : ViewModel() {
 	fun updateUnreadCount(count: Int) {
 		_unreadCount.value = count
 	}
+	
+	fun toggleMenu() {
+		_showMenu.value = !_showMenu.value
+	}
+	
+	fun hideMenu() {
+		_showMenu.value = false
+	}
 }
-
-//class SocialViewModel : ViewModel() {
-//	// Mock current user
-//	private val currentUserId = "user_1"
-//
-//	// Mock unread messages count
-//	private val _unreadMessages = MutableStateFlow(3)
-//	val unreadMessages: StateFlow<Int> = _unreadMessages.asStateFlow()
-//
-//	// Functions to manage unread messages
-//	fun incrementUnreadMessages() {
-//		_unreadMessages.value = _unreadMessages.value + 1
-//	}
-//
-//	fun decrementUnreadMessages() {
-//		if (_unreadMessages.value > 0) {
-//			_unreadMessages.value = _unreadMessages.value - 1
-//		}
-//	}
-//
-//	fun resetUnreadMessages() {
-//		_unreadMessages.value = 0
-//	}
-//}
