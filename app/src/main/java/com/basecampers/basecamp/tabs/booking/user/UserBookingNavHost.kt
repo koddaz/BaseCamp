@@ -9,6 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,6 +37,13 @@ fun UserBookingNavHost(authViewModel: AuthViewModel) {
     val categoryList by bookingViewModel.categories.collectAsState()
     val currentUser by authViewModel.companyProfile.collectAsState()
     val itemList: List<BookingItem> by bookingViewModel.bookingItemsList.collectAsState()
+
+    val selectedExtraItems by bookingViewModel?.selectedExtraItems?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
+    val selectedBookingItem by bookingViewModel?.selectedBookingItem?.collectAsState() ?: remember { mutableStateOf<BookingItem?>(null) }
+    val formattedDateRange by bookingViewModel?.formattedDateRange?.collectAsState() ?: remember { mutableStateOf("") }
+    val amountOfDays by bookingViewModel?.amountOfDays?.collectAsState() ?: remember { mutableIntStateOf(0) }
+    val extraItems by bookingViewModel?.bookingExtraList?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
+    val totalPrice by bookingViewModel?.finalPrice?.collectAsState() ?: remember { mutableDoubleStateOf(0.0) }
 
     var isAdmin by remember { mutableStateOf(false) }
 
@@ -72,13 +81,7 @@ fun UserBookingNavHost(authViewModel: AuthViewModel) {
                 startDestination = "start",
                 modifier = Modifier.weight(1f)
             ) {
-
                 composable("start") {
-                    BookingView(
-                        onClick = { navController.navigate("selectCategory") },
-                    )
-                }
-                composable("selectCategory") {
                     SelectBookingView(
                         categoryList = categoryList,
                         itemList = itemList,
@@ -88,7 +91,15 @@ fun UserBookingNavHost(authViewModel: AuthViewModel) {
                 composable("selectExtra") {
                     SelectExtraView(
                         bookingViewModel = bookingViewModel,
-                        navConfirmation = { navController.navigate("confirmation")}
+                        navConfirmation = {
+                            navController.navigate("confirmation")
+                        },
+                        selectedExtraItems = selectedExtraItems,
+                        selectedBookingItem = selectedBookingItem,
+                        formattedDateRange = formattedDateRange,
+                        amountOfDays = amountOfDays,
+                        extraItems = extraItems,
+                        totalPrice = totalPrice,
                     )
                 }
                 composable("confirmation") {

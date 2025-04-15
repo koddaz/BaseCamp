@@ -28,6 +28,7 @@ import com.basecampers.basecamp.tabs.profile.models.UserStatus
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.components.CustomButton
 import com.basecampers.basecamp.components.CustomColumn
+import com.basecampers.basecamp.tabs.booking.components.CategoriesCard
 import com.basecampers.basecamp.tabs.booking.models.AdminBookingViewModel
 import com.basecampers.basecamp.tabs.booking.models.BookingCategories
 import com.basecampers.basecamp.tabs.booking.models.BookingItem
@@ -122,45 +123,6 @@ fun AdminCategoriesView(
     }
 }
 
-@Composable
-fun CategoriesCard(
-    modifier: Modifier = Modifier,
-    title: String = "",
-    info: String = "",
-    itemList: List<BookingItem>? = null,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = modifier
-            .clickable(onClick = { onClick() })
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        Column(modifier = modifier.padding(16.dp)) {
-            Text(text = title)
-            Text(text = info)
-            
-            if (itemList != null) {
-                Text("Items in this category:", style = typography.labelLarge)
-                itemList.forEach { item ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "• ${item.name} - ${item.pricePerDay}",
-                            style = typography.bodyMedium
-                        )
-                    }
-                }
-            } else {
-                Text("No items in this category", style = typography.bodySmall)
-            }
-        }
-    }
-}
 
 @Preview(showBackground = true)
 @Composable

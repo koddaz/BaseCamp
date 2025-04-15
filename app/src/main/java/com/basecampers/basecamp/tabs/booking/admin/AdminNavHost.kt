@@ -48,12 +48,14 @@ fun AdminNavHost(authViewModel: AuthViewModel = viewModel(), changeView: () -> U
             startDestination = AdminRoutes.MAIN
         ) {
             composable(AdminRoutes.MAIN) {
-                AdminMainView(
+                AdminCategoriesView(
                     adminBookingViewModel = adminBookingViewModel,
-                    navigateCat = { navController.navigate(AdminRoutes.CATEGORY) },
-                    navigateBooking = { navController.navigate(AdminRoutes.BOOKING) },
-                    navigateExtra = { navController.navigate(AdminRoutes.EXTRA) },
+                    authViewModel = authViewModel,
                     userInfo = userInfo,
+                    goBack = { navController.popBackStack() },
+                    navigateToBooking = { categoryId ->
+                        navController.navigate(AdminRoutes.BOOKING)
+                    }
                 )
             }
             composable(AdminRoutes.BOOKING) {
@@ -71,17 +73,6 @@ fun AdminNavHost(authViewModel: AuthViewModel = viewModel(), changeView: () -> U
                     adminBookingViewModel = adminBookingViewModel,
                     userInfo = userInfo,
                     goBack = { navController.popBackStack() })
-            }
-            composable(AdminRoutes.CATEGORY) {
-                AdminCategoriesView(
-                    adminBookingViewModel = adminBookingViewModel,
-                    authViewModel = authViewModel,
-                    userInfo = userInfo,
-                    goBack = { navController.popBackStack() },
-                    navigateToBooking = { categoryId ->
-                        navController.navigate(AdminRoutes.BOOKING)
-                    }
-                )
             }
         }
     }

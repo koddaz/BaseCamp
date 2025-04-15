@@ -2,6 +2,7 @@ package com.basecampers.basecamp.tabs.booking.models
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.tabs.profile.models.CompanyProfileModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
@@ -16,10 +17,14 @@ import java.util.Locale
 class UserBookingViewModel : ViewModel() {
 
     val db = Firebase.firestore
+    val authViewModel = AuthViewModel()
     private val _selectedItemId = MutableStateFlow("")
     private val _selectedDateRange = MutableStateFlow<Pair<Long?, Long?>>(Pair(null, null))
     private val _startDate = MutableStateFlow<Long?>(null)
     private val _endDate = MutableStateFlow<Long?>(null)
+
+    val startDate: StateFlow<Long?> = _startDate
+    val endDate: StateFlow<Long?> = _endDate
 
     val selectedItemId : StateFlow<String> = _selectedItemId
 
@@ -90,6 +95,73 @@ class UserBookingViewModel : ViewModel() {
                 }
         }
     }
+    fun clearAllValues() {
+        _selectedItemId.value = ""
+        _selectedDateRange.value = Pair(null, null)
+        _startDate.value = null
+        _endDate.value = null
+        _formattedDateRange.value = ""
+        _selectedBookingItem.value = null
+        _selectedExtraItems.value = emptyList()
+        _amountOfDays.value = 0
+        _finalPrice.value = 0.0
+    }
+
+
+    fun saveUserBooking(userBooking: UserBooking) {
+        val companyId = getCompanyId() ?: return
+        val userId = authViewModel.getCurrentUserUid() ?: return
+
+        try {
+            // Create a flattened data structure with only essential fields
+            val bookingData = hashMapOf(
+                "userId" to userBooking.userId,
+                "companyId" to userBooking.companyId,
+                "bookingItemId" to userBooking.bookingItem?.id,
+                "bookingItemName" to userBooking.bookingItem?.name,
+                "startDate" to userBooking.startDate,
+                "endDate" to userBooking.endDate,
+                "totalPrice" to userBooking.totalPrice,
+                "createdAt" to userBooking.createdAt,
+                "extraItems" to userBooking.extraItems.map { extra ->
+                    mapOf(
+                        "id" to extra.id,
+                        "name" to extra.name,
+                        "price" to extra.price
+                    )
+                }
+            )
+
+            val userRef = db
+                .collection("companies").document(companyId)
+                .collection("users").document(userId)
+                .collection("bookings").document()
+
+            val companyRef = db
+                .collection("companies").document(companyId)
+                .collection("bookings").document()
+
+            // Use batch write to ensure both writes succeed or fail together
+            val batch = db.batch()
+            batch.set(userRef, bookingData)
+            batch.set(companyRef, bookingData)
+
+            batch.commit()
+                .addOnSuccessListener {
+                    Log.d("UserBookingViewModel", "Booking saved successfully")
+                    clearAllValues()
+                }
+                .addOnFailureListener { e ->
+                    Log.e("UserBookingViewModel", "Error saving booking", e)
+                }
+
+        } catch (e: Exception) {
+            Log.e("UserBookingViewModel", "Error saving booking", e)
+        }
+    }
+
+
+
 
     fun retrieveBookingItems(categoryId: String) {
         val companyId = getCompanyId() ?: return

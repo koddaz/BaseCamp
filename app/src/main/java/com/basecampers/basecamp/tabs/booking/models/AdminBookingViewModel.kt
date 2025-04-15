@@ -34,6 +34,8 @@ class AdminBookingViewModel : ViewModel() {
     val extraPrice: StateFlow<String> = _extraPrice
 
 
+    private val _bookingExtras = MutableStateFlow<List<BookingExtra>>(emptyList())
+    val bookingExtras: StateFlow<List<BookingExtra>> = _bookingExtras
 
     private val _bookingItems = MutableStateFlow<List<BookingItem>>(emptyList())
     val bookingItems: StateFlow<List<BookingItem>> = _bookingItems
@@ -210,6 +212,39 @@ class AdminBookingViewModel : ViewModel() {
                 val updatedMap = _categoryItems.value.toMutableMap()
                 updatedMap[selectedCategory] = itemList
                 _categoryItems.value = updatedMap
+            }
+    }
+
+    fun retrieveBookingExtras(categoryId: String, bookingItemId: String) {
+        val companyId = getCompanyId() ?: return
+
+        db.collection("companies").document(companyId)
+            .collection("categories").document(categoryId)
+            .collection("bookings").document(bookingItemId)
+            .collection("extras").get()
+            .addOnSuccessListener { snapshot ->
+                val extrasList = snapshot.documents.mapNotNull { doc ->
+                    val id = doc.id
+                    val name = doc.getString("name") ?: ""
+                    val info = doc.getString("info") ?: ""
+                    val price = doc.getString("price") ?: ""
+                    BookingExtra(id, price, name, info)
+                }
+                _bookingExtras.value = extrasList
+            }
+    }
+
+    // Function to delete an extra
+    fun deleteBookingExtra(categoryId: String, bookingItemId: String, extraId: String) {
+        val companyId = getCompanyId() ?: return
+
+        db.collection("companies").document(companyId)
+            .collection("categories").document(categoryId)
+            .collection("bookings").document(bookingItemId)
+            .collection("extras").document(extraId)
+            .delete()
+            .addOnSuccessListener {
+                retrieveBookingExtras(categoryId, bookingItemId)
             }
     }
 
