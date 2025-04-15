@@ -9,6 +9,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import com.basecampers.ui.theme.BaseCampTheme
 import com.basecampers.basecamp.aRootFolder.Root
+import com.basecampers.basecamp.authentication.CompanyScreen
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 
 class MainActivity : ComponentActivity() {
@@ -22,6 +23,7 @@ class MainActivity : ComponentActivity() {
             BaseCampTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Root(authViewModel)
+                    //CompanyScreen(authViewModel)
                 }
             }
         }
