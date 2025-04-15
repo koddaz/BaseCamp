@@ -378,6 +378,7 @@ class AuthViewModel : ViewModel() {
                                     Log.e("AuthViewModel", "Failed to add user to company: $error")
                                 }
                             )
+                            checkLoggedin()
                         }
                         .addOnFailureListener { e ->
                             Log.e("AuthViewModel", "Failed to create user profile: ${e.message}")
