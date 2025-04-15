@@ -1,5 +1,6 @@
 package com.basecampers.basecamp.authentication
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -44,6 +45,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.authentication.viewModels.Company
 import com.basecampers.basecamp.authentication.viewModels.USERVIEWMODEL
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 
 @Composable
 fun CompanyScreen(authViewModel : AuthViewModel) {
@@ -58,7 +62,7 @@ fun CompanyScreen(authViewModel : AuthViewModel) {
 
     // Load companies when the screen is first shown
     LaunchedEffect(true) {
-        authViewModel.getUserCompanies { memberList, nonMemberList ->
+        getUserCompanies { memberList, nonMemberList ->
             memberCompanies = memberList
             nonMemberCompanies = nonMemberList
             isLoading = false
@@ -182,10 +186,10 @@ fun CompanyScreen(authViewModel : AuthViewModel) {
                         onClick = {
                             isJoining = true
                             selectedCompany?.id?.let { companyId ->
-                                authViewModel.joinCompany(companyId) { success ->
+                                joinCompany(companyId) { success ->
                                     if (success) {
                                         // Refresh company lists
-                                        authViewModel.getUserCompanies { memberList, nonMemberList ->
+                                        getUserCompanies { memberList, nonMemberList ->
                                             memberCompanies = memberList
                                             nonMemberCompanies = nonMemberList
                                             selectedCompany = null
@@ -261,6 +265,100 @@ fun CompanyCard(company: Company) {
             }
         }
     }
+}
+
+val firestore = Firebase.firestore
+
+fun getCurrentUserUid(): String? {
+    return Firebase.auth.currentUser?.uid
+}
+
+fun getUserCompanies(onComplete: (List<Company>, List<Company>) -> Unit) {
+    val userId = getCurrentUserUid() ?: return
+    val memberCompanies = mutableListOf<Company>()
+    val nonMemberCompanies = mutableListOf<Company>()
+
+    firestore.collection("companies")
+        .get()
+        .addOnSuccessListener { companySnapshots ->
+            val totalCompanies = companySnapshots.size()
+            var processedCount = 0
+
+            if (companySnapshots.isEmpty) {
+                onComplete(emptyList(), emptyList())
+                return@addOnSuccessListener
+            }
+
+            for (companyDoc in companySnapshots.documents) {
+                val company = companyDoc.toObject(Company::class.java)?.copy(id = companyDoc.id)
+                    ?: continue
+
+                // Check if user is a member of this company
+                firestore.collection("companies")
+                    .document(companyDoc.id)
+                    .collection("users")
+                    .document(userId)
+                    .get()
+                    .addOnCompleteListener { userTask ->
+                        processedCount++
+
+                        if (userTask.isSuccessful && userTask.result.exists()) {
+                            // User is a member of this company
+                            memberCompanies.add(company)
+                        } else {
+                            // User is not a member
+                            nonMemberCompanies.add(company)
+                        }
+
+                        // When all companies have been processed, call the callback
+                        if (processedCount == totalCompanies) {
+                            onComplete(memberCompanies, nonMemberCompanies)
+                        }
+                    }
+            }
+        }
+        .addOnFailureListener { e ->
+            Log.e("AuthViewModel", "Failed to fetch companies", e)
+            onComplete(emptyList(), emptyList())
+        }
+}
+
+// Function to join a company
+fun joinCompany(companyId: String, onComplete: (Boolean) -> Unit) {
+    val userId = getCurrentUserUid() ?: return
+
+    // First get user data from Firestore
+    firestore.collection("users").document(userId).get()
+        .addOnSuccessListener { userDoc ->
+            if (userDoc.exists()) {
+                // Create minimal user data for company membership
+                val userData = hashMapOf(
+                    "uid" to userId,
+                    //"email" to userDoc.getString("email") ?: "",
+                    //"name" to userDoc.getString("userName") ?: "",
+                    "isAdmin" to false,
+                    "companyId" to companyId
+                )
+
+                // Add user to the company's users collection
+                firestore.collection("companies")
+                    .document(companyId)
+                    .collection("users")
+                    .document(userId)
+                    .set(userData)
+                    .addOnSuccessListener {
+                        onComplete(true)
+                    }
+                    .addOnFailureListener {
+                        onComplete(false)
+                    }
+            } else {
+                onComplete(false)
+            }
+        }
+        .addOnFailureListener {
+            onComplete(false)
+        }
 }
 
 @Preview(showBackground = true)
