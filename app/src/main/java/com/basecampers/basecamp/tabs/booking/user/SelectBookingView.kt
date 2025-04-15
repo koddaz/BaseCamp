@@ -24,8 +24,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.basecampers.basecamp.components.CustomButton
 import com.basecampers.basecamp.components.CustomColumn
-import com.basecampers.basecamp.tabs.booking.admin.CategoriesCard
 import com.basecampers.basecamp.tabs.booking.components.BookingCard
+import com.basecampers.basecamp.tabs.booking.components.CategoriesCard
 import com.basecampers.basecamp.tabs.booking.models.BookingCategories
 import com.basecampers.basecamp.tabs.booking.models.BookingItem
 import com.basecampers.basecamp.tabs.booking.models.UserBookingViewModel

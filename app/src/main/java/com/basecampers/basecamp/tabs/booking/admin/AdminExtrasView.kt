@@ -42,6 +42,7 @@ fun AdminExtrasView(
     val bookingPrice by adminBookingViewModel.itemPrice.collectAsState()
 
 
+
     var errorMessage by remember { mutableStateOf("") }
 
     CustomColumn(title = "Add Extra Item") {
