@@ -441,7 +441,7 @@ class AuthViewModel : ViewModel() {
                         email = email,
                         firstName = firstName,
                         lastName = lastName,
-                        companyList = listOf(companyName),
+                        companyList = listOf(companyId),
                     )
 
                     val companyRef = firestore.collection("companies").document(companyId)
