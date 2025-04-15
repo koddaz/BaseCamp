@@ -118,7 +118,7 @@ fun RegisterScreen(authViewModel: AuthViewModel, goLogin: () -> Unit) {
             }
 
             ConfirmPasswordTextField(
-                password = confirmPassword,
+                password = password,
                 onValueChange = { confirmPassword = it },
                 label = "Confirm Password",
                 authViewModel = authViewModel,
@@ -157,6 +157,7 @@ fun RegisterScreen(authViewModel: AuthViewModel, goLogin: () -> Unit) {
                     authViewModel.testRegToCompany(
                         companyId = "17c9dab0-e425-457a-b0d3-b3009ee81c27"
                     )
+
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
