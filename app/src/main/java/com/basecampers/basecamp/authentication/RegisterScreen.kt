@@ -1,6 +1,7 @@
 
 package com.basecampers.basecamp.authentication
 
+import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -10,16 +11,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.components.ConfirmPasswordTextField
 import com.basecampers.basecamp.components.PasswordInfoButton
 import com.basecampers.basecamp.components.PasswordPolicyInfo
 import com.basecampers.basecamp.components.PasswordTextField
+import java.util.UUID
 
 @Composable
-fun RegisterScreen(authViewModel : AuthViewModel, goLogin : () -> Unit) {
-    
+fun RegisterScreen(authViewModel: AuthViewModel, goLogin: () -> Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -27,10 +29,9 @@ fun RegisterScreen(authViewModel : AuthViewModel, goLogin : () -> Unit) {
     val hasEmailError by authViewModel.hasEmailError.collectAsState()
     val errorMessage by authViewModel.registerErrorMessage.collectAsState()
     val isEmailValid by authViewModel.emailValid.collectAsState()
-    //Maybe remove?
     var isAdmin by remember { mutableStateOf(false) }
     var companyName by remember { mutableStateOf("") }
-    
+
     val emailErrors = errorMessage.filter { error ->
         error in listOf(
             AuthViewModel.RegisterErrors.EMAIL_EMPTY,
@@ -52,95 +53,144 @@ fun RegisterScreen(authViewModel : AuthViewModel, goLogin : () -> Unit) {
             AuthViewModel.RegisterErrors.CONFIRM_PASSWORD_MISMATCH
         )
     }
-    
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text("Register", style = MaterialTheme.typography.headlineMedium)
-        
-        Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(checked = isAdmin, onCheckedChange = { isAdmin = it })
-            Text("Register as Admin")
-        }
-        
-        if(isAdmin) {
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        PasswordPolicyInfo(
+            visible = showPasswordPolicy,
+            onDismiss = { showPasswordPolicy = false },
+            modifier = Modifier.zIndex(10f)
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text("Register", style = MaterialTheme.typography.headlineMedium)
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(checked = isAdmin, onCheckedChange = { isAdmin = it })
+                Text("Register as Admin")
+            }
+
+            if (isAdmin) {
+                TextField(
+                    label = { Text("Company Name") },
+                    value = companyName,
+                    onValueChange = { companyName = it },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
             TextField(
-                label = { Text("Company Name") },
-                value = companyName,
-                onValueChange = { companyName = it },
+                label = { Text("Email") },
+                value = email,
+                onValueChange = {
+                    if (hasEmailError && it != email) {
+                        authViewModel.clearEmailErrors()
+                    }
+                    email = it
+                    authViewModel.validateEmailLive(it)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(1.dp , Color.Transparent)
+                    .border(
+                        1.dp,
+                        when {
+                            isEmailValid -> Color.Green
+                            hasEmailError && email.isNotEmpty() -> Color.Red
+                            else -> Color.LightGray
+                        }
+                    )
             )
-        }
-        
-        TextField(
-            label = { Text("Email") },
-            value = email,
-            onValueChange = {
-                if (hasEmailError && it != email) {
-                    authViewModel.clearEmailErrors()
-                }
-                email = it
-                authViewModel.validateEmailLive(it)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(
-                    1.dp,
-                    when {
-                        isEmailValid -> Color.Green
-                        hasEmailError && email.isNotEmpty() -> Color.Red
-                        else -> Color.LightGray
-                    }
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                PasswordTextField(
+                    password = password,
+                    onValueChange = { password = it },
+                    label = "Password",
+                    authViewModel = authViewModel,
+                    modifier = Modifier.weight(1f)
                 )
-        )
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            PasswordTextField(
+                Spacer(modifier = Modifier.width(8.dp))
+                PasswordInfoButton(onInfoClick = { showPasswordPolicy = !showPasswordPolicy })
+            }
+
+            ConfirmPasswordTextField(
                 password = password,
-                onValueChange = { password = it },
-                label = "Password",
+                onValueChange = { confirmPassword = it },
+                label = "Confirm Password",
                 authViewModel = authViewModel,
-                modifier = Modifier
+                modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.width(8.dp))
-            
-            PasswordInfoButton(onInfoClick = { showPasswordPolicy = !showPasswordPolicy })
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Random company button
+            Button(
+                onClick = {
+                    val randomSuffix = (1000..9999).random()
+                    val randomEmail = "company${randomSuffix}@example.com"
+                    val randomCompanyName = "Company${randomSuffix}"
+                    val companyId = UUID.randomUUID().toString()
+
+                    authViewModel.registerAsCompany(
+                        email = randomEmail,
+                        password = "Test123!", // Password that meets all requirements
+                        companyName = randomCompanyName,
+                        firstName = "Test",
+                        lastName = "Testsson",
+                        confirmPassword = "Test123!",
+                        companyId = companyId,
+                        onSuccess = {},
+                        onError = {}
+                    )
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Create Random Company")
+            }
+
+            // Random user button
+            Button(
+                onClick = {
+                    authViewModel.registerAsUser(
+                        email = "user${(1000..9999).random()}@example.com",
+                        password = "Test123!",
+                        confirmPassword = "Test123!",
+                    )
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Create Random User")
+            }
+
+            // Register button
+            Button(
+                onClick = {
+                    authViewModel.registerAsUser(
+                        email = email,
+                        password = password,
+                        confirmPassword = confirmPassword,
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = email.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank()
+            ) {
+                Text("Register")
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            // Go to login button
+            Button(
+                onClick = { goLogin() },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Go to Login")
+            }
         }
-        PasswordPolicyInfo(visible = showPasswordPolicy)
-        
-        ConfirmPasswordTextField(
-            password = confirmPassword,
-            onValueChange = { confirmPassword = it },
-            label = "Confirm Password",
-            authViewModel = authViewModel,
-            modifier = Modifier
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        Button(
-            onClick = {
-                authViewModel.registerAndCreateUserInFirestore(
-                    email, password,
-                    confirmPassword = confirmPassword,
-                    companyName = companyName
-                )
-            },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = email.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank()
-        ) {
-            Text("Register")
-        }
-        Spacer(modifier = Modifier.weight(1f))
-        
-        Button(onClick = {
-            goLogin()
-        }) {
-            Text("Go to Login")
-        }
-        Spacer(modifier = Modifier.height(50.dp))
     }
 }
 

@@ -19,11 +19,12 @@ fun ProfileScreen(authViewModel: AuthViewModel, profileViewModel: ProfileViewMod
 //    val profileCount by profileViewModel.profileCount.collectAsState()
 
 
-    val userInfo by authViewModel.userInfo.collectAsState()
+    val profile by authViewModel.profile.collectAsState()
+    val companyProfile by authViewModel.companyProfile.collectAsState()
     val uid = authViewModel.getCurrentUserUid()
     
     // Observe profile from Room
-    val profile by remember(uid) {
+    val roomProfile by remember(uid) {
         uid?.let { profileViewModel.observeProfile(it) } ?: flowOf(null)
     }.collectAsState(initial = null)
     
@@ -71,7 +72,7 @@ fun ProfileScreen(authViewModel: AuthViewModel, profileViewModel: ProfileViewMod
         
         // Data source indicator
         Text(
-            "Data source: ${if (profile != null) "Room Database" else "Not found in Room"}",
+            "Data source: ${if (roomProfile != null) "Room Database" else "Not found in Room"}",
             style = MaterialTheme.typography.labelMedium
         )
         
@@ -87,25 +88,27 @@ fun ProfileScreen(authViewModel: AuthViewModel, profileViewModel: ProfileViewMod
                 
                 Text("Profile Info", style = MaterialTheme.typography.titleMedium)
                 Spacer(modifier = Modifier.height(8.dp))
-                
-                Text("Username: ${userInfo?.userName ?: "N/A"}")
-                Text("Email: ${userInfo?.email ?: "N/A"}")
-                Text("Bio: ${userInfo?.bio ?: "N/A"}")
-                Text("Status: ${userInfo?.status ?: "N/A"}")
-                Text("Company: ${userInfo?.companyName ?: "N/A"}")
+
+
+
+                Text("First Name: ${profile?.firstName ?: "N/A"}")
+                Text("Last Name: ${profile?.lastName ?: "N/A"}")
+                Text("Email: ${profile?.email ?: "N/A"}")
+                Text("Bio: ${companyProfile?.bio ?: "N/A"}")
+                Text("Status: ${companyProfile?.status ?: "N/A"}")
+
 //                Text("Profiles in database: $profileCount")
-                profile?.let {
-                    if (it.bio.isNotEmpty()) {
+                roomProfile?.let {
+
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("Bio: ${it.bio}")
-                    }
-                    
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("Status: ${it.status}")
-                    
-                    if (it.companyName.isNotEmpty()) {
-                        Text("Company: ${it.companyName}")
-                    }
+                    Text("first: ${it.firstName}")
+                    Text("last: ${it.lastName}")
+                    Text("email: ${it.email}")
+
+
+
+
+
                 }
             }
         }

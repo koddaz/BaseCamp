@@ -23,8 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.basecampers.basecamp.UserModel
-import com.basecampers.basecamp.UserStatus
+import com.basecampers.basecamp.tabs.profile.models.CompanyProfileModel
+import com.basecampers.basecamp.tabs.profile.models.UserStatus
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.components.CustomButton
 import com.basecampers.basecamp.components.CustomColumn
@@ -35,7 +35,7 @@ import com.basecampers.basecamp.tabs.booking.models.BookingItem
 @Composable
 fun AdminCategoriesView(
     authViewModel: AuthViewModel?,
-    userInfo: UserModel?,
+    userInfo: CompanyProfileModel?,
     modifier : Modifier = Modifier,
     adminBookingViewModel: AdminBookingViewModel? = viewModel(),
     goBack: () -> Unit,
@@ -168,9 +168,7 @@ fun CategoriesViewPreview() {
     AdminCategoriesView(
         adminBookingViewModel = null,
         authViewModel = null,
-        userInfo = UserModel(
-            name = "asd",
-            email = "asd",
+        userInfo = CompanyProfileModel(
             status = UserStatus.ADMIN,
             imageUrl = null,
             id = "122",

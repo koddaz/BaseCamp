@@ -21,8 +21,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.basecampers.basecamp.UserModel
-import com.basecampers.basecamp.UserStatus
+import com.basecampers.basecamp.tabs.profile.models.CompanyProfileModel
+import com.basecampers.basecamp.tabs.profile.models.UserStatus
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.components.CustomButton
 import com.basecampers.basecamp.components.CustomColumn
@@ -34,16 +34,17 @@ import com.basecampers.basecamp.tabs.booking.models.BookingItem
 @Composable
 fun AdminBookingView(
     modifier: Modifier = Modifier,
-    userInfo: UserModel?,
+    userInfo: CompanyProfileModel?,
     authViewModel: AuthViewModel?,
     adminBookingViewModel: AdminBookingViewModel?,
     goBack: () -> Unit,
     categoryId: String = "",
-    navigateToExtra: (String, String, String, String, String) -> Unit = { _, _, _, _, _ -> }
+    navigateToExtra: (String) -> Unit = {},
 ) {
     var expanded by remember { mutableStateOf(false) }
     val selectedCategoryIdFromVM by adminBookingViewModel?.selectedCategoryId?.collectAsState() ?: remember { mutableStateOf("") }
     var selectedCategoryId by remember { mutableStateOf(categoryId.ifEmpty { selectedCategoryIdFromVM }) }
+    val selectedBookingId by adminBookingViewModel?.selectedItemId?.collectAsState() ?: remember { mutableStateOf("") }
     var selectedCategoryName by remember { mutableStateOf("") }
 
     val categories by adminBookingViewModel?.categories?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
@@ -105,16 +106,13 @@ fun AdminBookingView(
                     pricePerDay = ""
                     selectedCategoryName = ""
                     selectedCategoryId = ""
+                    quantity = ""
                 }
             },
             onAddExtrasClick = {
-                navigateToExtra(
-                    selectedCategoryId,  // categoryId (1st parameter)
-                    name,                // bookingName (2nd parameter)
-                    info,                // bookingInfo (3rd parameter)
-                    pricePerDay,         // bookingPrice (4th parameter)
-                    bookingId            // bookingId (5th parameter)
-                )
+                adminBookingViewModel?.setSelectedCategory(selectedCategoryId)
+                adminBookingViewModel?.setItems(name = name, info = info, price = pricePerDay, quantity = quantity)
+                navigateToExtra(selectedBookingId)
             }
         )
     }
@@ -221,14 +219,11 @@ fun BookingItemForm(
 @Composable
 fun AdminBookingViewPreview() {
     AdminBookingView(
-        userInfo = UserModel(
-            name = "",
-            email = "",
+        userInfo = CompanyProfileModel(
             imageUrl = null,
             bio = "",
             status = UserStatus.ADMIN,
             id = "",
-            companyName = ""
         ),
         authViewModel = null,
         adminBookingViewModel = null,

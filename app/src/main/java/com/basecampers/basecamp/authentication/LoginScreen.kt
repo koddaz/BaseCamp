@@ -1,4 +1,3 @@
-
 package com.basecampers.basecamp.authentication
 
 import androidx.compose.foundation.border
@@ -14,6 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
+import com.basecampers.basecamp.components.CustomButton
 import com.basecampers.basecamp.components.PasswordTextFieldLogin
 import com.google.firebase.ktx.Firebase
 
@@ -23,19 +23,21 @@ fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotP
     var password by remember { mutableStateOf("") }
     val isLoggedIn by authViewModel.loggedin.collectAsState()
     val loginErrorMessage by authViewModel.loginErrorMessage.collectAsState()
-    
+
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
             val currentUser = Firebase.auth.currentUser
             println("Logged in user: ${currentUser?.email ?: "No user logged in"}")
-            
+
         }
     }
-    
+
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Login", style = MaterialTheme.typography.headlineMedium)
+
         
-        if (loginErrorMessage.contains(AuthViewModel.LoginErrors.EMAIL_NOT_VALID) &&
+        if (loginErrorMessage.contains(AuthViewModel.LoginErrors.EMAIL_NOT_VALID) ||
+
             loginErrorMessage.contains(AuthViewModel.LoginErrors.PASSWORD_NOT_VALID)) {
             Text(
                 text = "Incorrect email or password",
@@ -64,7 +66,7 @@ fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotP
                 )
         )
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         PasswordTextFieldLogin(
             password = password,
             onValueChange = {
@@ -72,14 +74,14 @@ fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotP
                 if(loginErrorMessage.isNotEmpty()) {
                     authViewModel.clearLoginErrors()
                 } },
-            
+
             label = "Password",
             authViewModel = authViewModel,
             modifier = Modifier
         )
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         Button(
             onClick = { authViewModel.login(email, password) },
             modifier = Modifier.fillMaxWidth(),
@@ -87,50 +89,64 @@ fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotP
         ) {
             Text("Login")
         }
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
+
+        Button(onClick = {
+            authViewModel.login(email = "admin@admin.se", password = "Test123!")
+        }) {
+            Text("admin@admin.se & Test123!")
+        }
+
+        Button(onClick = {
+            authViewModel.login(email = "user9182@example.com", password = "Test123!")
+        }) {
+            Text("user9182@example.com & Test123!")
+        }
         Button(
             onClick = { goForgotPass() },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Forgot Password")
         }
-        
+
         Button(onClick = {
             authViewModel.isLoggedInTrue()
         }) {
             Text("Change isLoggedIn to True")
         }
-        
+
         Button(onClick = {
             authViewModel.loginUser1()
         }) {
             Text("User 1 (User)")
         }
-        
+
         Button(onClick = {
             authViewModel.loginUser2()
         }) {
             Text("User 2 (SuperUser)")
         }
-        
+
+
+
         Button(onClick = {
             authViewModel.loginUser3()
         }) {
             Text("User 3 (Admin)")
         }
-        
+
         Spacer(modifier = Modifier.weight(1f))
-        
+
         Button(
-            onClick = { goRegister() }
+            onClick = { goRegister() },
+            modifier = Modifier.fillMaxWidth()
         ) {
             Text("Go to Register")
         }
-        Spacer(modifier = Modifier.height(50.dp))
     }
 }
+
 @Preview(showBackground = true)
 @Composable
 fun PreviewLoginScreen() {

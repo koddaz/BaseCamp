@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             BaseCampTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Root(authViewModel)
+                    Root(authViewModel, innerPadding)
                 }
             }
         }
