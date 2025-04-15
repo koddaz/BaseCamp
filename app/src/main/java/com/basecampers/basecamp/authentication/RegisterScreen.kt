@@ -155,10 +155,8 @@ fun RegisterScreen(authViewModel: AuthViewModel, goLogin: () -> Unit) {
             // Random user button
             Button(
                 onClick = {
-                    authViewModel.registerAsUser(
-                        email = "user${(1000..9999).random()}@example.com",
-                        password = "Test123!",
-                        confirmPassword = "Test123!",
+                    authViewModel.testRegToCompany(companyId = "" +
+                            "c72fba39-b4c3-4090-ab6e-84aa46ce8299"
                     )
                 },
                 modifier = Modifier.fillMaxWidth()

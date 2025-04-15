@@ -378,6 +378,7 @@ class AuthViewModel : ViewModel() {
                                     Log.e("AuthViewModel", "Failed to add user to company: $error")
                                 }
                             )
+                            checkLoggedin()
                         }
                         .addOnFailureListener { e ->
                             Log.e("AuthViewModel", "Failed to create user profile: ${e.message}")
@@ -440,7 +441,7 @@ class AuthViewModel : ViewModel() {
                         email = email,
                         firstName = firstName,
                         lastName = lastName,
-                        companyList = listOf(companyName),
+                        companyList = listOf(companyId),
                     )
 
                     val companyRef = firestore.collection("companies").document(companyId)
