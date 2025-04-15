@@ -5,7 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 
-import com.basecampers.basecamp.authentication.models.authRoutes
+import com.basecampers.basecamp.authentication.models.AuthRoutes
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 
 
@@ -14,19 +14,19 @@ import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 fun AuthNavHost(authViewModel : AuthViewModel) {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = authRoutes.REGISTER) {
-        composable(authRoutes.LOGIN) {
+    NavHost(navController = navController, startDestination = AuthRoutes.REGISTER) {
+        composable(AuthRoutes.LOGIN) {
             LoginScreen(
-                goRegister = { navController.navigate(route = authRoutes.REGISTER) },
-                goForgotPass = { navController.navigate(route = authRoutes.FORGOTPASS) },
+                goRegister = { navController.navigate(route = AuthRoutes.REGISTER) },
+                goForgotPass = { navController.navigate(route = AuthRoutes.FORGOTPASS) },
                 authViewModel = authViewModel
             )
         }
-        composable(authRoutes.REGISTER) {
+        composable(AuthRoutes.REGISTER) {
             RegisterScreen(authViewModel = authViewModel,
-                goLogin = { navController.navigate(route = authRoutes.LOGIN) })
+                goLogin = { navController.navigate(route = AuthRoutes.LOGIN) })
         }
-        composable(authRoutes.FORGOTPASS) {
+        composable(AuthRoutes.FORGOTPASS) {
             ForgotPasswordScreen(authViewModel)
         }
     }

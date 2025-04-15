@@ -17,18 +17,26 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.basecamp.navigation.TabNavigation
 import com.basecampers.basecamp.authentication.AuthNavHost
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
+import com.basecampers.basecamp.company.CompanyNavHost
+import com.basecampers.basecamp.company.CompanyViewModel
 import kotlinx.coroutines.delay
 
 @Composable
-fun Root(authViewModel : AuthViewModel = viewModel(), innerPadding: PaddingValues) {
+fun Root(
+    authViewModel : AuthViewModel = viewModel(),
+    companyViewModel: CompanyViewModel = viewModel(),
+    innerPadding: PaddingValues
+) {
     var isLoading by remember { mutableStateOf(true) }
     val tempFunction = { isLoading = false }
 
     val isLoggedIn by authViewModel.loggedin.collectAsState()
-
+    val hasSelectedCompany by companyViewModel.hasSelectedCompany.collectAsState()
+    
     LaunchedEffect(Unit) {
         initializeAppSession(
             authViewModel = authViewModel,
+            companyViewModel = companyViewModel,
             onComplete = { isLoading = false }
         )
     }
@@ -39,16 +47,19 @@ fun Root(authViewModel : AuthViewModel = viewModel(), innerPadding: PaddingValue
                 tempFunction = tempFunction,
                 isLoggedIn = isLoggedIn
             )
-        } else if(isLoggedIn) {
-            TabNavigation(authViewModel)
-        } else {
+        } else if (!isLoggedIn) {
             AuthNavHost(authViewModel)
+        } else if (!hasSelectedCompany) {
+            CompanyNavHost(companyViewModel)
+        } else {
+            TabNavigation(authViewModel, companyViewModel)
         }
     }
 }
 
 private suspend fun initializeAppSession(
     authViewModel: AuthViewModel,
+    companyViewModel: CompanyViewModel,
     onComplete: () -> Unit
 ) {
     authViewModel.checkLoggedin()
@@ -58,6 +69,7 @@ private suspend fun initializeAppSession(
         userId?.let {
             authViewModel.fetchProfileFirestore(it)
             authViewModel.fetchCurrentUserModel()
+            companyViewModel.checkSelectedCompany(userId)
             // Check status of user in company (admin? SuperUser?)
             // load company specific data (Categories, Items)
         }
@@ -72,5 +84,7 @@ private suspend fun initializeAppSession(
 @Preview(showBackground = true)
 @Composable
 fun RootPreview() {
-    Root(authViewModel = viewModel(), innerPadding = PaddingValues())
+    val authViewModel = viewModel<AuthViewModel>()
+    val companyViewModel = viewModel<CompanyViewModel>()
+    Root(authViewModel = authViewModel, companyViewModel = companyViewModel, innerPadding = PaddingValues())
 }
