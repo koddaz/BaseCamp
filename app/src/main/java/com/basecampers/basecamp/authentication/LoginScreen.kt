@@ -93,15 +93,15 @@ fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotP
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(onClick = {
-            authViewModel.login(email = "admin@admin.se", password = "Test123!")
+            authViewModel.login(email = "admin@test.se", password = "Test123!")
         }) {
-            Text("admin@admin.se & Test123!")
+            Text("admin@test.se & Test123!")
         }
 
         Button(onClick = {
-            authViewModel.login(email = "user9182@example.com", password = "Test123!")
+            authViewModel.login(email = "user5398@example.com", password = "Test123!")
         }) {
-            Text("user9182@example.com & Test123!")
+            Text("user5398@example.com & Test123!")
         }
         Button(
             onClick = { goForgotPass() },

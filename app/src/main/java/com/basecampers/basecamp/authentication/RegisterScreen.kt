@@ -152,11 +152,10 @@ fun RegisterScreen(authViewModel: AuthViewModel, goLogin: () -> Unit) {
                 Text("Create Random Company")
             }
 
-            // Random user button
             Button(
                 onClick = {
-                    authViewModel.testRegToCompany(companyId = "" +
-                            "c72fba39-b4c3-4090-ab6e-84aa46ce8299"
+                    authViewModel.testRegToCompany(
+                        companyId = "17c9dab0-e425-457a-b0d3-b3009ee81c27"
                     )
                 },
                 modifier = Modifier.fillMaxWidth()
