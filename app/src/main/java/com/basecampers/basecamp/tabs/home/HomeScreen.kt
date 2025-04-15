@@ -9,9 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
+import com.basecampers.basecamp.company.CompanyViewModel
 
 @Composable
-fun HomeScreen(authViewModel: AuthViewModel) {
+fun HomeScreen(authViewModel: AuthViewModel, companyViewModel: CompanyViewModel) {
     val userInfo by authViewModel.companyProfile.collectAsState()
 
 
@@ -27,6 +28,12 @@ fun HomeScreen(authViewModel: AuthViewModel) {
             authViewModel.isLoggedInFalse()
         }) {
             Text("Change isLoggedIn to False")
+        }
+        
+        Button(onClick = {
+            companyViewModel.clearSelectedCompany()
+        }) {
+            Text("Change hasSelectedCompany to False")
         }
 
         Button(onClick = {

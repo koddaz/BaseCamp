@@ -34,6 +34,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.basecampers.ui.theme.BaseCampTheme
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
+import com.basecampers.basecamp.company.CompanyViewModel
 import com.basecampers.basecamp.tabs.booking.user.UserBookingNavHost
 import com.basecampers.basecamp.tabs.home.HomeNavHost
 import com.basecampers.basecamp.tabs.profile.ProfileNavHost
@@ -41,13 +42,13 @@ import com.basecampers.basecamp.tabs.social.SocialNavHost
 
 
 @Composable
-fun TabNavigation(authViewModel : AuthViewModel) {
+fun TabNavigation(authViewModel : AuthViewModel, companyViewModel: CompanyViewModel) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.weight(1f)) {
             when (selectedTabIndex) {
-                0 -> HomeNavHost(authViewModel)
+                0 -> HomeNavHost(authViewModel, companyViewModel)
                 1 -> UserBookingNavHost(authViewModel)
                 2 -> SocialNavHost()
                 3 -> ProfileNavHost(authViewModel)
@@ -89,6 +90,9 @@ private data class TabItem(
 @Composable
 fun NavigationBarPreview() {
     BaseCampTheme {
-        TabNavigation(authViewModel = viewModel())
+        TabNavigation(
+	        authViewModel = viewModel(),
+	        companyViewModel = viewModel()
+        )
     }
 }
