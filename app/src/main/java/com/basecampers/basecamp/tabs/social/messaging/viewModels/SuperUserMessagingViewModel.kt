@@ -2,7 +2,9 @@ package com.basecampers.basecamp.tabs.social.messaging.viewModels
 
 import androidx.lifecycle.ViewModel
 import com.basecampers.basecamp.tabs.social.messaging.models.Chat
-import com.basecampers.basecamp.tabs.social.messaging.models.ChatRequest
+import com.basecampers.basecamp.tabs.social.messaging.models.ChatInfo
+import com.basecampers.basecamp.tabs.social.messaging.models.ChatStatus
+import com.basecampers.basecamp.tabs.social.messaging.models.Participant
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,103 +13,137 @@ import java.util.*
 
 class SuperUserMessagingViewModel : ViewModel() {
 	// Mock active chats
-	private val _activeChats = MutableStateFlow<List<Chat>>(
+	private val _activeChats = MutableStateFlow<List<ChatInfo>>(
 		listOf(
-			Chat(
+			ChatInfo(
+				id = UUID.randomUUID().toString(),
 				title = "Support for Alex",
 				isActive = true,
 				lastMessageText = "I'll check that for you right away",
 				lastMessageTime = System.currentTimeMillis() - 10 * 60 * 1000, // 10 min ago
-				unreadCount = 0
+				unreadCount = 0,
+				isRead = true
 			),
-			Chat(
+			ChatInfo(
+				id = UUID.randomUUID().toString(),
 				title = "Help with Booking",
 				isActive = true,
 				lastMessageText = "Your booking has been updated successfully",
 				lastMessageTime = System.currentTimeMillis() - 3 * 60 * 60 * 1000, // 3 hours ago
-				unreadCount = 1
+				unreadCount = 1,
+				isRead = false
 			),
-			Chat(
+			ChatInfo(
+				id = UUID.randomUUID().toString(),
 				title = "Membership Question",
 				isActive = false,
 				lastMessageText = "Thank you for your help!",
 				lastMessageTime = System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000, // 2 days ago
-				unreadCount = 0
+				unreadCount = 0,
+				isRead = true
 			)
 		)
 	)
-	val activeChats: StateFlow<List<Chat>> = _activeChats.asStateFlow()
+	val activeChats: StateFlow<List<ChatInfo>> = _activeChats.asStateFlow()
 	
-	// Mock pending chat requests
-	private val _pendingChats = MutableStateFlow<List<ChatRequest>>(
+	// Mock pending chat requests (now using Chat with PENDING status)
+	private val _pendingChats = MutableStateFlow<List<ChatInfo>>(
 		listOf(
-			ChatRequest(
-				userId = "user-1",
-				userName = "Taylor Smith",
-				subject = "App Functionality",
-				message = "I'm having trouble with the payment system in the app",
-				timestamp = System.currentTimeMillis() - 20 * 60 * 1000 // 20 min ago
+			ChatInfo(
+				id = UUID.randomUUID().toString(),
+				title = "App Functionality - Taylor Smith",
+				isActive = false,
+				lastMessageText = "I'm having trouble with the payment system in the app",
+				lastMessageTime = System.currentTimeMillis() - 20 * 60 * 1000, // 20 min ago
+				unreadCount = 1,
+				isRead = false
 			),
-			ChatRequest(
-				userId = "user-2",
-				userName = "Alex Johnson",
-				subject = "Booking Issue",
-				message = "Hello, I need help with a booking that was canceled automatically",
-				timestamp = System.currentTimeMillis() - 5 * 60 * 1000 // 5 min ago
+			ChatInfo(
+				id = UUID.randomUUID().toString(),
+				title = "Booking Issue - Alex Johnson",
+				isActive = false,
+				lastMessageText = "Hello, I need help with a booking that was canceled automatically",
+				lastMessageTime = System.currentTimeMillis() - 5 * 60 * 1000, // 5 min ago
+				unreadCount = 1,
+				isRead = false
 			)
 		)
 	)
-	val pendingChats: StateFlow<List<ChatRequest>> = _pendingChats.asStateFlow()
+	val pendingChats: StateFlow<List<ChatInfo>> = _pendingChats.asStateFlow()
 	
-	// Get a specific chat request by ID
-	fun getPendingChatById(requestId: String): ChatRequest? {
-		return pendingChats.value.find { it.id == requestId }
+	// Internal storage for full chat objects
+	private val _allChats = MutableStateFlow<Map<String, Chat>>(
+		// Would be populated from Firestore in a real implementation
+		mapOf()
+	)
+	
+	// Get a specific chat by ID
+	fun getPendingChatById(chatId: String): ChatInfo? {
+		return pendingChats.value.find { it.id == chatId }
 	}
 	
-	// Get details of a chat request
-	fun getChatRequestDetails(requestId: String) = MutableStateFlow(
-		pendingChats.value.find { it.id == requestId }
+	// Get details of a chat
+	fun getChatDetails(chatId: String) = MutableStateFlow(
+		_allChats.value[chatId]
 	)
 	
-	// Mark a chat request as read
+	// Get the first message (for pending chats)
+	fun getChatRequestDetails(chatId: String) = MutableStateFlow(
+		pendingChats.value.find { it.id == chatId }?.let {
+			mapOf("message" to it.lastMessageText)
+		}
+	)
+	
+	// Mark a chat as read
 	fun markChatAsRead(chatId: String) {
+		// Update the local unread count
+		_pendingChats.update { chats ->
+			chats.map {
+				if (it.id == chatId) it.copy(unreadCount = 0, isRead = true) else it
+			}
+		}
+		
+		_activeChats.update { chats ->
+			chats.map {
+				if (it.id == chatId) it.copy(unreadCount = 0, isRead = true) else it
+			}
+		}
+		
 		// In a real implementation, update in Firestore
 	}
 	
 	// Accept a chat request
-	fun acceptChatRequest(requestId: String) {
-		val request = pendingChats.value.find { it.id == requestId } ?: return
+	fun acceptChatRequest(chatId: String) {
+		val pendingChat = pendingChats.value.find { it.id == chatId } ?: return
 		
-		// Create a new chat from the request
-		val newChat = Chat(
-			title = "Support for ${request.userName}",
-			isActive = true,
-			lastMessageText = request.message,
-			lastMessageTime = request.timestamp,
-			participantIds = listOf(request.userId, "current-super-user-id")
-		)
+		// Move from pending to active
+		_pendingChats.update { current ->
+			current.filter { it.id != chatId }
+		}
 		
 		// Add to active chats
 		_activeChats.update { current ->
-			listOf(newChat) + current
+			listOf(
+				pendingChat.copy(
+					isActive = true
+				)
+			) + current
 		}
 		
-		// Remove from pending
-		_pendingChats.update { current ->
-			current.filter { it.id != requestId }
-		}
-		
-		// In a real implementation, update in Firestore
+		// In a real implementation:
+		// 1. Update chat status to ACTIVE in Firestore
+		// 2. Add current user as participant
 	}
 	
 	// Decline a chat request
-	fun declineChatRequest(requestId: String) {
+	fun declineChatRequest(chatId: String) {
 		// Remove from pending
 		_pendingChats.update { current ->
-			current.filter { it.id != requestId }
+			current.filter { it.id != chatId }
 		}
 		
-		// In a real implementation, update in Firestore
+		// In a real implementation:
+		// Update chat status to DECLINED in Firestore
 	}
 	
 	// Get the current super user ID

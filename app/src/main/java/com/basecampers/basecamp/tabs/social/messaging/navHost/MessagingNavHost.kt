@@ -26,8 +26,6 @@ fun MessagingNavHost(
 				SuperUserMessagingScreen(
 					onSelectPendingChat = { chatId ->
 						navController.navigate("${MessagingRoutes.CHAT_REQUEST}/$chatId")
-						// When viewing a chat request, decrement unread count
-						socialViewModel.updateUnreadCount(unreadCount - 1)
 					},
 					onSelectActiveChat = { chatId ->
 						navController.navigate("${MessagingRoutes.CHAT}/$chatId")
@@ -36,10 +34,10 @@ fun MessagingNavHost(
 			} else {
 				UserMessagingScreen(
 					onSelectActiveChat = { chatId ->
-						navController.navigate("${MessagingRoutes.CHAT}/$chatId/false")
+						navController.navigate("${MessagingRoutes.CHAT}/$chatId")
 					},
 					onSelectClosedChat = { chatId ->
-						navController.navigate("${MessagingRoutes.CHAT}/$chatId/true")
+						navController.navigate("${MessagingRoutes.CHAT}/$chatId")
 					},
 					onStartNewChat = {
 						navController.navigate(MessagingRoutes.START_CHAT)
@@ -48,7 +46,8 @@ fun MessagingNavHost(
 			}
 		}
 		
-		composable("${MessagingRoutes.CHAT_REQUEST}/{chatId}") { backStackEntry ->
+		
+		composable(route = "${MessagingRoutes.CHAT_REQUEST}/{chatId}") { backStackEntry ->
 			val chatId = backStackEntry.arguments?.getString("chatId") ?: ""
 			ChatRequestScreen(
 				chatId = chatId,
@@ -63,23 +62,22 @@ fun MessagingNavHost(
 			)
 		}
 		
-		composable("${MessagingRoutes.CHAT}/{chatId}/{isReadOnly?}") { backStackEntry ->
+		composable(route = "${MessagingRoutes.CHAT}/{chatId}") { backStackEntry ->
 			val chatId = backStackEntry.arguments?.getString("chatId") ?: ""
-			val isReadOnly = backStackEntry.arguments?.getString("isReadOnly")?.toBoolean() ?: false
 			
 			ChatScreen(
 				chatId = chatId,
-				isReadOnly = isReadOnly,
+				isReadOnly = false,
 				onNavigateBack = {
 					navController.popBackStack()
 				}
 			)
 		}
 		
-		composable(MessagingRoutes.START_CHAT) {
+		composable(route = MessagingRoutes.START_CHAT) {
 			StartChatScreen(
-				onChatStarted = { superUserId ->
-					navController.navigate("${MessagingRoutes.CHAT}/$superUserId/false") {
+				onChatStarted = { chatId ->
+					navController.navigate("${MessagingRoutes.CHAT}/$chatId") {
 						popUpTo(MessagingRoutes.MAIN)
 					}
 				},

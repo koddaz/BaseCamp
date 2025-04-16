@@ -1,12 +1,8 @@
 package com.basecampers.basecamp.tabs.social.messaging.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -15,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.basecamp.tabs.social.messaging.MessageItem
+import com.basecampers.basecamp.tabs.social.messaging.models.Message
 import com.basecampers.basecamp.tabs.social.messaging.viewModels.ChatViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,44 +22,18 @@ fun ChatScreen(
 	onNavigateBack: () -> Unit,
 	viewModel: ChatViewModel = viewModel()
 ) {
-	val chatInfo by viewModel.getChatInfo(chatId).collectAsState(initial = null)
-	val messages by viewModel.getMessages(chatId).collectAsState(initial = emptyList())
-	
 	var messageText by remember { mutableStateOf("") }
-	var showCloseDialog by remember { mutableStateOf(false) }
-	var showDeleteDialog by remember { mutableStateOf(false) }
 	
 	Scaffold(
 		topBar = {
 			TopAppBar(
-				title = {
-					Text(chatInfo?.title ?: "Chat")
-				},
+				title = { Text("Chat") },
 				navigationIcon = {
 					IconButton(onClick = onNavigateBack) {
 						Icon(
 							imageVector = Icons.Default.ArrowBack,
 							contentDescription = "Back"
 						)
-					}
-				},
-				actions = {
-					if (!isReadOnly) {
-						// Close chat action for active chats
-						IconButton(onClick = { showCloseDialog = true }) {
-							Icon(
-								imageVector = Icons.Default.Close,
-								contentDescription = "Close Chat"
-							)
-						}
-					} else {
-						// Delete chat action for closed chats
-						IconButton(onClick = { showDeleteDialog = true }) {
-							Icon(
-								imageVector = Icons.Default.Delete,
-								contentDescription = "Delete Chat"
-							)
-						}
 					}
 				}
 			)
@@ -73,31 +44,28 @@ fun ChatScreen(
 				.padding(paddingValues)
 				.fillMaxSize()
 		) {
-			// Messages
-			LazyColumn(
+			// Simple placeholder message
+			Box(
 				modifier = Modifier
 					.weight(1f)
 					.fillMaxWidth()
 					.padding(16.dp),
-				reverseLayout = true
+				contentAlignment = Alignment.Center
 			) {
-				items(messages.reversed()) { message ->
-					MessageItem(
-						message = message,
-						isFromCurrentUser = message.senderId == viewModel.getCurrentUserId()
-					)
-					
-					Spacer(modifier = Modifier.height(8.dp))
-				}
+				MessageItem(
+					message = Message(
+						content = "Welcome to the chat! This is a placeholder message.",
+						senderName = "System"
+					),
+					isFromCurrentUser = false
+				)
 			}
 			
-			// Input field (if not read-only)
+			// Input field
 			if (!isReadOnly) {
 				Card(
 					modifier = Modifier.fillMaxWidth(),
-					elevation = CardDefaults.cardElevation(
-						defaultElevation = 4.dp
-					)
+					elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
 				) {
 					Row(
 						modifier = Modifier
@@ -115,14 +83,11 @@ fun ChatScreen(
 						
 						Spacer(modifier = Modifier.width(8.dp))
 						
-						IconButton(
-							onClick = {
-								if (messageText.isNotBlank()) {
-									viewModel.sendMessage(chatId, messageText)
-									messageText = ""
-								}
+						IconButton(onClick = {
+							if (messageText.isNotBlank()) {
+								messageText = ""
 							}
-						) {
+						}) {
 							Icon(
 								imageVector = Icons.Default.Send,
 								contentDescription = "Send"
@@ -131,79 +96,15 @@ fun ChatScreen(
 					}
 				}
 			} else {
-				Card(
+				Box(
 					modifier = Modifier
 						.fillMaxWidth()
 						.padding(16.dp),
-					colors = CardDefaults.cardColors(
-						containerColor = MaterialTheme.colorScheme.surfaceVariant
-					)
+					contentAlignment = Alignment.Center
 				) {
-					Row(
-						modifier = Modifier
-							.fillMaxWidth()
-							.padding(16.dp),
-						horizontalArrangement = Arrangement.Center,
-						verticalAlignment = Alignment.CenterVertically
-					) {
-						Text(
-							text = "This chat has been closed",
-							style = MaterialTheme.typography.bodyMedium,
-							color = MaterialTheme.colorScheme.onSurfaceVariant
-						)
-					}
+					Text("This chat is read-only")
 				}
 			}
-		}
-		
-		// Close Chat Dialog
-		if (showCloseDialog) {
-			AlertDialog(
-				onDismissRequest = { showCloseDialog = false },
-				title = { Text("Close Chat") },
-				text = { Text("Are you sure you want to close this chat? You won't be able to send new messages.") },
-				confirmButton = {
-					TextButton(
-						onClick = {
-							viewModel.closeChat(chatId)
-							showCloseDialog = false
-							onNavigateBack()
-						}
-					) {
-						Text("Close Chat")
-					}
-				},
-				dismissButton = {
-					TextButton(onClick = { showCloseDialog = false }) {
-						Text("Cancel")
-					}
-				}
-			)
-		}
-		
-		// Delete Chat Dialog
-		if (showDeleteDialog) {
-			AlertDialog(
-				onDismissRequest = { showDeleteDialog = false },
-				title = { Text("Delete Chat") },
-				text = { Text("Are you sure you want to delete this chat? This action cannot be undone.") },
-				confirmButton = {
-					TextButton(
-						onClick = {
-							viewModel.deleteChat(chatId)
-							showDeleteDialog = false
-							onNavigateBack()
-						}
-					) {
-						Text("Delete")
-					}
-				},
-				dismissButton = {
-					TextButton(onClick = { showDeleteDialog = false }) {
-						Text("Cancel")
-					}
-				}
-			)
 		}
 	}
 }

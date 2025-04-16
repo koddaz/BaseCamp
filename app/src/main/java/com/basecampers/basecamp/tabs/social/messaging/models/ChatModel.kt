@@ -1,50 +1,75 @@
 package com.basecampers.basecamp.tabs.social.messaging.models
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import java.util.UUID
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 /**
- * Represents a chat thread between users and BaseBuddies.
+ * Core model representing a chat conversation between users.
+ * Used for storing conversation data in both Room and Firebase.
  */
+@Entity(tableName = "chats")
 data class Chat(
+	/**
+	 * Unique identifier for the chat.
+	 */
+	@PrimaryKey
 	val id: String = UUID.randomUUID().toString(),
-	val title: String = "",
-	val isActive: Boolean = true,
+	
+	/**
+	 * Current state of the chat (PENDING, ACTIVE, CLOSED, DELETED).
+	 */
+	val status: ChatStatus = ChatStatus.PENDING,
+	
+	/**
+	 * When the chat was created.
+	 */
+	val createdAt: Long = System.currentTimeMillis(),
+	
+	/**
+	 * Timestamp of the most recent message.
+	 */
 	val lastMessageTime: Long = System.currentTimeMillis(),
+	
+	/**
+	 * Preview text of the most recent message.
+	 */
 	val lastMessageText: String = "",
-	val participantIds: List<String> = emptyList(),
-	val unreadCount: Int = 0,
 	
-	// Additional properties needed based on the errors
-	val userName: String = "", // Name of the other participant
-	val isBaseBuddy: Boolean = false // Whether the other participant is a BaseBuddy
+	/**
+	 * ID of the user who initiated the chat.
+	 */
+	val creatorId: String = "",
+	
+	/**
+	 * ID of the SuperUser assigned to this chat, or null if pending.
+	 */
+	val assignedToId: String? = null,
+	
+	/**
+	 * Original topic/subject of the chat request.
+	 */
+	val subject: String = "",
+	
+	/**
+	 * Flag indicating if the local cache is complete or needs refetching.
+	 */
+	val isCacheComplete: Boolean = false,
+	
+	/**
+	 * Flag indicating if this record has been synced with Firebase.
+	 */
+	val isSynced: Boolean = false
 ) {
-	// Computed property for formatted time
-	val time: String
-		get() {
-			val now = System.currentTimeMillis()
-			val diff = now - lastMessageTime
-			
-			return when {
-				diff < 60 * 1000 -> "Just now"
-				diff < 60 * 60 * 1000 -> "${diff / (60 * 1000)} min ago"
-				diff < 24 * 60 * 60 * 1000 -> {
-					SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date(lastMessageTime))
-				}
-				diff < 48 * 60 * 60 * 1000 -> "Yesterday"
-				else -> {
-					SimpleDateFormat("MMM d", Locale.getDefault()).format(Date(lastMessageTime))
-				}
-			}
-		}
+	/**
+	 * Computed property: whether this chat is currently active
+	 */
+	val isActive: Boolean
+		get() = status == ChatStatus.ACTIVE
 	
-	// Alias for lastMessageText to match usage in UI
-	val lastMessage: String
-		get() = lastMessageText
-	
-	// Alias for title to match usage in UI
-	val name: String
-		get() = userName.ifEmpty { title }
+	/**
+	 * Computed property: title to display in the UI
+	 */
+	val title: String
+		get() = subject.ifEmpty { "Chat #${id.takeLast(5)}" }
 }
