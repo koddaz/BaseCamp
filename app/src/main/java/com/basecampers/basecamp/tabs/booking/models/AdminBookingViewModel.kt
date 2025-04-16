@@ -13,25 +13,10 @@ import kotlinx.coroutines.flow.asStateFlow
 class AdminBookingViewModel : ViewModel() {
     val db = Firebase.firestore
 
-    // Booking item
-    private val _itemName = MutableStateFlow("")
-    private val _itemInfo = MutableStateFlow("")
-    private val _itemPrice = MutableStateFlow("")
-    private val _itemQuantity = MutableStateFlow("")
 
-    val itemName: StateFlow<String> = _itemName
-    val itemInfo: StateFlow<String> = _itemInfo
-    val itemPrice: StateFlow<String> = _itemPrice
-    val itemQuantity: StateFlow<String> = _itemQuantity
 
-    // Extra item
-    private val _extraName = MutableStateFlow("")
-    private val _extraInfo = MutableStateFlow("")
-    private val _extraPrice = MutableStateFlow("")
 
-    val extraName: StateFlow<String> = _extraName
-    val extraInfo: StateFlow<String> = _extraInfo
-    val extraPrice: StateFlow<String> = _extraPrice
+
 
 
     private val _bookingExtras = MutableStateFlow<List<BookingExtra>>(emptyList())
@@ -49,22 +34,15 @@ class AdminBookingViewModel : ViewModel() {
     private val _user = MutableStateFlow<CompanyProfileModel?>(null)
     val user: StateFlow<CompanyProfileModel?> = _user
 
-    private val _selectedCategoryId = MutableStateFlow<String>("")
-    val selectedCategoryId = _selectedCategoryId.asStateFlow()
 
-    private val _selectedItemId = MutableStateFlow<String>("")
-    val selectedItemId = _selectedItemId.asStateFlow()
+    private val _selectedItem = MutableStateFlow<BookingItem?>(null)
+    val selectedItem: StateFlow<BookingItem?> = _selectedItem
 
-    // Add this function
-    fun setSelectedCategory(categoryId: String) {
-        _selectedCategoryId.value = categoryId
-        // Load items for this category
-        retrieveBookingItems(categoryId)
-    }
+    private val _selectedCategory = MutableStateFlow<BookingCategories?>(null)
+    val selectedCategory = _selectedCategory.asStateFlow()
 
-    fun setSelectedItemId(itemId: String) {
-        _selectedItemId.value = itemId
-    }
+    private val _selectedExtraItem = MutableStateFlow<BookingExtra?>(null)
+    val selectedExtraItem = _selectedExtraItem.asStateFlow()
 
     private fun getCompanyId(): String? {
         return _user.value?.companyId
@@ -76,29 +54,60 @@ class AdminBookingViewModel : ViewModel() {
         retrieveCategories()
     }
 
-
-
-    fun setItems(
-        name: String = "",
-        info: String = "",
-        price: String = "",
-        quantity: String = "",
-    ) {
-        _itemName.value = name
-        _itemInfo.value = info
-        _itemPrice.value = price
-        _itemQuantity.value = quantity
+    fun addExtraList(extraList: List<BookingExtra>) {
+        _bookingExtras.value = extraList + _bookingExtras.value
     }
 
-    fun setExtras(
-        name: String = "",
-        info: String = "",
-        price: String = "",
+    fun updateExtraValue(
+        id: String = _selectedExtraItem.value?.id ?: "",
+        name: String = _selectedExtraItem.value?.name ?: "",
+        info: String = _selectedExtraItem.value?.info ?: "",
+        price: String = _selectedExtraItem.value?.price ?: ""
     ) {
-        _extraName.value = name
-        _extraInfo.value = info
-        _extraPrice.value = price
+        _selectedExtraItem.value = BookingExtra(
+            id = id.ifEmpty { "${System.currentTimeMillis()}_${(1000..9999).random()}" },
+            name = name,
+            info = info,
+            price = price
+        )
     }
+
+
+    fun updateCategoriesValues(
+        id: String = _selectedCategory.value?.id ?: "",
+        name: String = _selectedCategory.value?.name ?: "",
+        info: String = _selectedCategory.value?.info ?: "",
+        createdBy: String = _selectedCategory.value?.createdBy ?: ""
+    ) {
+        _selectedCategory.value = BookingCategories(
+            id = id.ifEmpty { "${System.currentTimeMillis()}_${(1000..9999).random()}" },
+            name = name,
+            info = info,
+            createdBy = createdBy
+        )
+    }
+
+    fun updateBookingItemValues(
+        id: String = _selectedItem.value?.id ?: "",
+        name: String = _selectedItem.value?.name ?: "",
+        info: String = _selectedItem.value?.info ?: "",
+        price: String = _selectedItem.value?.pricePerDay ?: "",
+        quantity: String = _selectedItem.value?.quantity ?: "",
+        categoryId: String = _selectedItem.value?.categoryId ?: "",
+        createdBy: String = _selectedItem.value?.createdBy ?: ""
+    ) {
+        _selectedItem.value = BookingItem(
+            id = id.ifEmpty { "${System.currentTimeMillis()}_${(1000..9999).random()}" },
+            name = name,
+            info = info,
+            pricePerDay = price,
+            quantity = quantity,
+            categoryId = categoryId,
+            createdBy = createdBy
+        )
+    }
+
+
 
     fun addBookingCategory(bookingCategory: BookingCategories) {
         val companyId = getCompanyId() ?: return
@@ -113,6 +122,24 @@ class AdminBookingViewModel : ViewModel() {
             }
             .addOnFailureListener { e ->
                 Log.e("AdminBookingViewModel", "Failed to add category: ${e.message}")
+            }
+    }
+
+    fun retrieveCategories() {
+        val companyId = getCompanyId() ?: return
+
+        db
+            .collection("companies").document(companyId)
+            .collection("categories").get()
+            .addOnSuccessListener { snapshot ->
+                val categoryList = snapshot.documents.mapNotNull { doc ->
+                    val id = doc.id
+                    val name = doc.getString("name") ?: ""
+                    val info = doc.getString("info") ?: ""
+                    val createdBy = doc.getString("createdBy") ?: ""
+                    BookingCategories(id, name, info, createdBy)
+                }
+                _categories.value = categoryList
             }
     }
 
@@ -248,21 +275,5 @@ class AdminBookingViewModel : ViewModel() {
             }
     }
 
-    fun retrieveCategories() {
-        val companyId = getCompanyId() ?: return
 
-        db
-            .collection("companies").document(companyId)
-            .collection("categories").get()
-            .addOnSuccessListener { snapshot ->
-                val categoryList = snapshot.documents.mapNotNull { doc ->
-                    val id = doc.id
-                    val name = doc.getString("name") ?: ""
-                    val info = doc.getString("info") ?: ""
-                    val createdBy = doc.getString("createdBy") ?: ""
-                    BookingCategories(id, name, info, createdBy)
-                }
-                _categories.value = categoryList
-            }
-    }
 }

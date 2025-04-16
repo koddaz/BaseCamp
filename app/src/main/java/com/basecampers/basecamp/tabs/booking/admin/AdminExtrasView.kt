@@ -1,8 +1,11 @@
 package com.basecampers.basecamp.tabs.booking.admin
 
-import android.util.Log
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -14,44 +17,54 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.basecamp.tabs.profile.models.CompanyProfileModel
 import com.basecampers.basecamp.components.CustomButton
 import com.basecampers.basecamp.components.CustomColumn
 import com.basecampers.basecamp.tabs.booking.models.AdminBookingViewModel
+import com.basecampers.basecamp.tabs.booking.models.BookingCategories
 import com.basecampers.basecamp.tabs.booking.models.BookingExtra
-import com.basecampers.basecamp.tabs.booking.models.BookingItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminExtrasView(
-    modifier: Modifier = Modifier,
     goBack: () -> Unit,
-    adminBookingViewModel: AdminBookingViewModel = viewModel(),
-    userInfo: CompanyProfileModel?
+    adminBookingViewModel: AdminBookingViewModel? = viewModel(),
 ) {
     var extraName by remember { mutableStateOf("") }
     var extraInfo by remember { mutableStateOf("") }
     var extraPrice by remember { mutableStateOf("") }
     var extraQuantity by remember { mutableStateOf("") }
 
-    val bookingId by adminBookingViewModel.selectedItemId.collectAsState()
-    val categoryId by adminBookingViewModel.selectedCategoryId.collectAsState()
-    val bookingName by adminBookingViewModel.itemName.collectAsState()
-    val bookingInfo by adminBookingViewModel.itemInfo.collectAsState()
-    val bookingPrice by adminBookingViewModel.itemPrice.collectAsState()
+    val scrollState = rememberScrollState()
 
+    val extraList by adminBookingViewModel?.bookingExtras?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
+    val selectedExtraItem by adminBookingViewModel?.selectedExtraItem?.collectAsState() ?: remember { mutableStateOf(null) }
+    val selectedItem by adminBookingViewModel?.selectedItem?.collectAsState() ?: remember { mutableStateOf(null) }
+    val selectedCategory by adminBookingViewModel?.selectedCategory?.collectAsState() ?: remember { mutableStateOf(BookingCategories(
+        id = "",
+        name = "",
+        info = "",
+        createdBy = ""
+    )
+    ) }
 
 
     var errorMessage by remember { mutableStateOf("") }
 
+    Column(Modifier
+        .fillMaxSize()
+        .verticalScroll(scrollState)
+        ) {
     CustomColumn(title = "Add Extra Item") {
         DisplayBookingDetails(
-            categoryId,
-            bookingName,
-            bookingInfo,
-            bookingPrice,
-            errorMessage
+            extraList = extraList,
+            categoryName = selectedCategory?.name ?: "",
+            bookingName = selectedItem?.name ?: "",
+            bookingInfo = selectedItem?.info ?: "",
+            bookingPrice = selectedItem?.pricePerDay ?: "",
+            errorMessage = errorMessage
         )
         ExtraItemForm(
             name = extraName,
@@ -62,82 +75,54 @@ fun AdminExtrasView(
             onPriceChange = { extraPrice = it },
             quantity = extraQuantity,
             onQuantityChange = { extraQuantity = it },
+            onSaveClick = {
+
+            },
             onAddExtraClick = {
-                // Validate inputs
-                if (extraName.isBlank() || extraPrice.isBlank()) {
-                    errorMessage = "Extra name and price are required"
-                    return@ExtraItemForm
+                when {
+                    extraName.isBlank() || extraPrice.isBlank() ->
+                        errorMessage = "Extra name and price are required"
+                    extraInfo.length > 300 ->
+                        errorMessage = "Extra info cannot exceed 300 characters"
+                    extraQuantity.isBlank() ->
+                        errorMessage = "Extra quantity is required"
+                    !extraPrice.all { it.isDigit() } ->
+                        errorMessage = "Price must contain only numbers"
+                    else -> {
+                        // Use selectedItem directly from ViewModel
+                        selectedItem?.let { item ->
+
+                            adminBookingViewModel?.updateExtraValue(
+                                id = "${System.currentTimeMillis()}_${(1000..9999).random()}",
+                                name = extraName,
+                                info = extraInfo,
+                                price = extraPrice
+                            )
+
+                            try {
+                                // Add the extra to the parent item
+                                adminBookingViewModel?.addExtraList(
+                                    listOf(BookingExtra(
+                                        id = "${System.currentTimeMillis()}_${(1000..9999).random()}",
+                                        name = extraName,
+                                        info = extraInfo,
+                                        price = extraPrice
+                                    )))
+
+                                // Reset form
+                                extraName = ""
+                                extraInfo = ""
+                                extraPrice = ""
+                                extraQuantity = ""
+                                errorMessage = ""
+                            } catch (e: Exception) {
+                                errorMessage = "Error: ${e.message}"
+                            }
+                        } ?: run {
+                            errorMessage = "Parent booking item not found"
+                        }
+                    }
                 }
-                if (extraInfo.length > 300) {
-                    errorMessage = "Extra info cannot exceed 300 characters"
-                    return@ExtraItemForm
-                }
-                if (extraQuantity.isBlank()) {
-                    errorMessage = "Extra quantity is required"
-                    return@ExtraItemForm
-                }
-                if (!extraPrice.all { it.isDigit() }) {
-                    errorMessage = "Price must contain only numbers"
-                    return@ExtraItemForm
-                }
-
-                if (errorMessage.isEmpty()) {
-                // Debug what's happening
-                Log.d("AdminExtrasView", "Adding extra with bookingId: $bookingId")
-                Log.d("AdminExtrasView", "Category: $categoryId")
-                Log.d("AdminExtrasView", "Booking Name: $bookingName")
-                Log.d("AdminExtrasView", "Booking Info: $bookingInfo")
-
-                // Generate IDs if needed
-                val newBookingId = if (bookingId.isEmpty()) {
-                    "${System.currentTimeMillis()}_${(1000..9999).random()}"
-                } else {
-                    bookingId
-                }
-
-                // Create booking item with correct values
-                val bookingItem = BookingItem(
-                    id = newBookingId,
-                    categoryId = categoryId,
-                    pricePerDay = bookingPrice,
-                    name = bookingName,
-                    info = bookingInfo,
-                    quantity = "1",
-                    createdBy = userInfo?.id ?: ""
-                )
-
-                val extraId = "${System.currentTimeMillis()}_${(1000..9999).random()}"
-                val extraItem = BookingExtra(
-                    id = extraId,
-                    price = extraPrice,
-                    name = extraName,
-                    info = extraInfo
-                )
-
-                try {
-                    // Always add or update the booking item
-                    adminBookingViewModel.addBookingItem(
-                        bookingItem = bookingItem,
-                        selectedCategory = categoryId
-                    )
-
-                    // Then add the extra
-                    adminBookingViewModel.addBookingExtra(
-                        bookingItem = bookingItem,
-                        bookingExtra = extraItem,
-                        selectedCategory = categoryId
-                    )
-
-                    // Reset form
-                    extraName = ""
-                    extraInfo = ""
-                    extraPrice = ""
-                    extraQuantity = ""
-                    errorMessage = ""
-                } catch (e: Exception) {
-                    errorMessage = "Error: ${e.message}"
-                }
-            }
             }
         )
         if (errorMessage.isNotEmpty()) {
@@ -146,18 +131,24 @@ fun AdminExtrasView(
         CustomButton(text = "Back", onClick = goBack)
 
 
-
+    }
     }
 }
 
 @Composable
-fun DisplayBookingDetails(categoryId: String, bookingName: String, bookingInfo: String, bookingPrice: String, errorMessage: String) {
+fun DisplayBookingDetails(categoryName: String, bookingName: String, bookingInfo: String, bookingPrice: String, errorMessage: String, extraList: List<BookingExtra> = emptyList()) {
     Column {
 
-        Text(text = "Category ID: $categoryId")
+        Text(text = "Category: $categoryName")
         Text(text = "Booking Name: $bookingName")
         Text(text = "Booking Info: $bookingInfo")
         Text(text = "Booking Price: $bookingPrice")
+
+        extraList.forEach { extra ->
+            Text(text = "Extra Name: ${extra.name}")
+            Text(text = "Extra Info: ${extra.info}")
+            Text(text = "Extra Price: ${extra.price}")
+        }
     }
 }
 
@@ -173,6 +164,7 @@ fun ExtraItemForm(
     price: String,
     onPriceChange: (String) -> Unit,
     onAddExtraClick: () -> Unit,
+    onSaveClick: () -> Unit,
 ) {
     Column {
         OutlinedTextField(
@@ -220,8 +212,24 @@ fun ExtraItemForm(
                     onAddExtraClick()
                 }
             },
-            text = "Add Extra"
+            text = "Add"
+        )
+        CustomButton(
+            text = "Save",
+            onClick = {
+
+
+            }
         )
     }
 }
+@Preview(showBackground = true)
+@Composable
+fun AdminExtrasViewPreview() {
+    AdminExtrasView(
+        goBack = {},
+        adminBookingViewModel = null,
+    )
+}
+
 
