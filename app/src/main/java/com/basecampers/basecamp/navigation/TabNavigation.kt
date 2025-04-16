@@ -1,8 +1,6 @@
 package com.basecampers.basecamp.navigation
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -14,35 +12,30 @@ import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.rememberNavController
 import com.basecampers.ui.theme.BaseCampTheme
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.company.CompanyViewModel
 import com.basecampers.basecamp.tabs.booking.user.UserBookingNavHost
 import com.basecampers.basecamp.tabs.home.HomeNavHost
 import com.basecampers.basecamp.tabs.profile.ProfileNavHost
-import com.basecampers.basecamp.tabs.social.SocialNavHost
+import com.basecampers.basecamp.tabs.social.navHost.SocialNavHost
+import com.basecampers.basecamp.tabs.social.SocialViewModel
 
 
 @Composable
-fun TabNavigation(authViewModel : AuthViewModel, companyViewModel: CompanyViewModel) {
+fun TabNavigation(authViewModel : AuthViewModel, companyViewModel: CompanyViewModel, socialViewModel: SocialViewModel) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -50,7 +43,7 @@ fun TabNavigation(authViewModel : AuthViewModel, companyViewModel: CompanyViewMo
             when (selectedTabIndex) {
                 0 -> HomeNavHost(authViewModel, companyViewModel)
                 1 -> UserBookingNavHost(authViewModel)
-                2 -> SocialNavHost()
+                2 -> SocialNavHost(authViewModel, socialViewModel)
                 3 -> ProfileNavHost(authViewModel)
                 else -> Text("Error: Tab not found")
             }
@@ -92,7 +85,8 @@ fun NavigationBarPreview() {
     BaseCampTheme {
         TabNavigation(
 	        authViewModel = viewModel(),
-	        companyViewModel = viewModel()
+	        companyViewModel = viewModel(),
+	        socialViewModel = viewModel()
         )
     }
 }

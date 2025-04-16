@@ -19,12 +19,14 @@ import com.basecampers.basecamp.authentication.AuthNavHost
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.company.CompanyNavHost
 import com.basecampers.basecamp.company.CompanyViewModel
+import com.basecampers.basecamp.tabs.social.SocialViewModel
 import kotlinx.coroutines.delay
 
 @Composable
 fun Root(
     authViewModel : AuthViewModel = viewModel(),
     companyViewModel: CompanyViewModel = viewModel(),
+    socialViewModel: SocialViewModel = viewModel(),
     innerPadding: PaddingValues
 ) {
     var isLoading by remember { mutableStateOf(true) }
@@ -37,6 +39,7 @@ fun Root(
         initializeAppSession(
             authViewModel = authViewModel,
             companyViewModel = companyViewModel,
+            socialViewModel = socialViewModel,
             onComplete = { isLoading = false }
         )
     }
@@ -52,7 +55,7 @@ fun Root(
         } else if (!hasSelectedCompany) {
             CompanyNavHost(companyViewModel)
         } else {
-            TabNavigation(authViewModel, companyViewModel)
+            TabNavigation(authViewModel, companyViewModel, socialViewModel)
         }
     }
 }
@@ -60,6 +63,7 @@ fun Root(
 private suspend fun initializeAppSession(
     authViewModel: AuthViewModel,
     companyViewModel: CompanyViewModel,
+    socialViewModel: SocialViewModel,
     onComplete: () -> Unit
 ) {
     authViewModel.checkLoggedin()
@@ -86,5 +90,8 @@ private suspend fun initializeAppSession(
 fun RootPreview() {
     val authViewModel = viewModel<AuthViewModel>()
     val companyViewModel = viewModel<CompanyViewModel>()
-    Root(authViewModel = authViewModel, companyViewModel = companyViewModel, innerPadding = PaddingValues())
+    val socialViewModel = viewModel<SocialViewModel>()
+    Root(authViewModel = authViewModel, companyViewModel = companyViewModel, socialViewModel =
+    socialViewModel, innerPadding =
+    PaddingValues())
 }

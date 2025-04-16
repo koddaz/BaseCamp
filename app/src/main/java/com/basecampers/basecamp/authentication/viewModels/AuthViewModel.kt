@@ -16,6 +16,7 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -34,6 +35,18 @@ class AuthViewModel : ViewModel() {
 
     private val _profile = MutableStateFlow<ProfileModel?>(null)
     val profile = _profile.asStateFlow()
+    
+    //User in SOCIAL
+    // Current user's super user status
+    // In production, this would be loaded from a user session or repository
+    private val _isSuper = MutableStateFlow(false)
+    val isSuper: StateFlow<Boolean> = _isSuper.asStateFlow()
+    
+    // Toggle super user status (for testing purposes only)
+    fun toggleSuperUser() {
+        _isSuper.value = !_isSuper.value
+    }
+    //SOCIAL
 
 
     private val _companyProfile = MutableStateFlow<CompanyProfileModel?>(null)

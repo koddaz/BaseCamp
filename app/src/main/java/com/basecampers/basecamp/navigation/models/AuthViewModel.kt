@@ -1,3 +1,4 @@
+/*
 package com.basecampers.basecamp.navigation.models
 
 import android.util.Log
@@ -319,4 +320,4 @@ data class Company(
     val name: String = "",
     val createdBy: String = "",
     val createdAt: Long = System.currentTimeMillis()
-)
+)*/
