@@ -31,19 +31,32 @@ import com.basecampers.basecamp.tabs.booking.user.UserBookingNavHost
 import com.basecampers.basecamp.tabs.home.HomeNavHost
 import com.basecampers.basecamp.tabs.profile.ProfileNavHost
 import com.basecampers.basecamp.tabs.social.navHost.SocialNavHost
-import com.basecampers.basecamp.tabs.social.SocialViewModel
+import com.basecampers.basecamp.tabs.social.viewModel.SocialViewModel
+import com.example.basecamp.navigation.AppState
 
 
 @Composable
 fun TabNavigation(authViewModel : AuthViewModel, companyViewModel: CompanyViewModel, socialViewModel: SocialViewModel) {
-    var selectedTabIndex by remember { mutableIntStateOf(0) }
-
+    
+    // Main tab state
+    var selectedTabIndex by remember { mutableIntStateOf(AppState.selectedMainTabIndex) }
+    
+    // Social tab state
+    var selectedSocialTabIndex by remember { mutableIntStateOf(AppState.selectedSocialTabIndex) }
+    
     Column(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.weight(1f)) {
             when (selectedTabIndex) {
                 0 -> HomeNavHost(authViewModel, companyViewModel)
                 1 -> UserBookingNavHost(authViewModel)
-                2 -> SocialNavHost(authViewModel, socialViewModel)
+                2 -> SocialNavHost(
+                    authViewModel = authViewModel,
+	                socialViewModel = socialViewModel,
+	                selectedSocialTabIndex = selectedSocialTabIndex
+                ) { newIndex ->
+                    selectedSocialTabIndex = newIndex
+                    AppState.selectedSocialTabIndex = newIndex
+                }
                 3 -> ProfileNavHost(authViewModel)
                 else -> Text("Error: Tab not found")
             }

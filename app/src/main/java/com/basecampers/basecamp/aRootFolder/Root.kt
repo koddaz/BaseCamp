@@ -19,7 +19,7 @@ import com.basecampers.basecamp.authentication.AuthNavHost
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.company.CompanyNavHost
 import com.basecampers.basecamp.company.CompanyViewModel
-import com.basecampers.basecamp.tabs.social.SocialViewModel
+import com.basecampers.basecamp.tabs.social.viewModel.SocialViewModel
 import kotlinx.coroutines.delay
 
 @Composable

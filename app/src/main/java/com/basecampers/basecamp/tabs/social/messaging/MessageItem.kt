@@ -1,4 +1,4 @@
-package com.basecampers.basecamp.tabs.social.messaging.components
+package com.basecampers.basecamp.tabs.social.messaging
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column

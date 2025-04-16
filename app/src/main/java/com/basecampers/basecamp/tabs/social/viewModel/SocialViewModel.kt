@@ -1,4 +1,4 @@
-package com.basecampers.basecamp.tabs.social
+package com.basecampers.basecamp.tabs.social.viewModel
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

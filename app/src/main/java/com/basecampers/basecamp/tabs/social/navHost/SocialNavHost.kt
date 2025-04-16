@@ -13,14 +13,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
-import com.basecampers.basecamp.tabs.social.SocialViewModel
+import com.basecampers.basecamp.tabs.social.viewModel.SocialViewModel
 import com.basecampers.basecamp.tabs.social.forum.ForumScreen
+import com.basecampers.basecamp.tabs.social.messaging.navHost.MessagingNavHost
 import com.basecampers.basecamp.tabs.social.qna.QnAScreen
-import com.example.basecamp.tabs.social.messaging.navHost.MessagingNavHost
-import com.example.basecamp.tabs.social.navHost.SocialMenu
 
 @Composable
 fun SocialNavHost(
@@ -105,9 +103,3 @@ fun SocialNavHost(
 		)
 	}
 }
-
-private data class SocialTabItem(
-	val label: String,
-	val selectedIcon: ImageVector,
-	val unselectedIcon: ImageVector
-)

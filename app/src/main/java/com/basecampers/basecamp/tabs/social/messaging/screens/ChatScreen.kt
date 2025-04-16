@@ -1,10 +1,8 @@
-package com.basecampers.basecamp.tabs.social.messaging
+package com.basecampers.basecamp.tabs.social.messaging.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -14,15 +12,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.basecampers.basecamp.tabs.social.messaging.components.MessageItem
+import com.basecampers.basecamp.tabs.social.messaging.MessageItem
 import com.basecampers.basecamp.tabs.social.messaging.viewModels.ChatViewModel
-import com.basecampers.basecamp.tabs.social.messaging.models.Message
-import java.text.SimpleDateFormat
-import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

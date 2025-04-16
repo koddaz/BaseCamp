@@ -1,15 +1,15 @@
-package com.example.basecamp.tabs.social.messaging.navHost
+package com.basecampers.basecamp.tabs.social.messaging.navHost
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.basecampers.basecamp.tabs.social.SocialViewModel
-import com.basecampers.basecamp.tabs.social.messaging.ChatRequestScreen
-import com.basecampers.basecamp.tabs.social.messaging.ChatScreen
-import com.basecampers.basecamp.tabs.social.messaging.StartChatScreen
-import com.basecampers.basecamp.tabs.social.messaging.SuperUserMessagingScreen
-import com.basecampers.basecamp.tabs.social.messaging.UserMessagingScreen
+import com.basecampers.basecamp.tabs.social.viewModel.SocialViewModel
+import com.basecampers.basecamp.tabs.social.messaging.screens.ChatRequestScreen
+import com.basecampers.basecamp.tabs.social.messaging.screens.ChatScreen
+import com.basecampers.basecamp.tabs.social.messaging.screens.StartChatScreen
+import com.basecampers.basecamp.tabs.social.messaging.screens.SuperUserMessagingScreen
+import com.basecampers.basecamp.tabs.social.messaging.screens.UserMessagingScreen
 import com.basecampers.basecamp.tabs.social.messaging.models.MessagingRoutes
 
 @Composable

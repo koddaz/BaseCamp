@@ -1,4 +1,4 @@
-package com.example.basecamp.tabs.social.navHost
+package com.basecampers.basecamp.tabs.social.navHost
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.layout.*

@@ -1,4 +1,4 @@
-package com.basecampers.basecamp.tabs.social.messaging
+package com.basecampers.basecamp.tabs.social.messaging.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
