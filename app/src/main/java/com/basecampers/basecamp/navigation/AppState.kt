@@ -1,4 +1,4 @@
-package com.example.basecamp.navigation
+package com.basecampers.basecamp.navigation
 
 /**
  * Singleton object to store persistent tab state across the app

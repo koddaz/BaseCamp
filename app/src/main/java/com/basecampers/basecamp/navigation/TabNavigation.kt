@@ -32,8 +32,6 @@ import com.basecampers.basecamp.tabs.home.HomeNavHost
 import com.basecampers.basecamp.tabs.profile.ProfileNavHost
 import com.basecampers.basecamp.tabs.social.navHost.SocialNavHost
 import com.basecampers.basecamp.tabs.social.viewModel.SocialViewModel
-import com.example.basecamp.navigation.AppState
-
 
 @Composable
 fun TabNavigation(authViewModel : AuthViewModel, companyViewModel: CompanyViewModel, socialViewModel: SocialViewModel) {
