@@ -11,6 +11,7 @@ import com.basecampers.ui.theme.BaseCampTheme
 import com.basecampers.basecamp.aRootFolder.Root
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.company.CompanyViewModel
+import com.basecampers.basecamp.tabs.social.viewModel.SocialViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,11 +20,12 @@ class MainActivity : ComponentActivity() {
 
         val authViewModel = AuthViewModel()
         val companyViewModel = CompanyViewModel()
+        val socialViewModel = SocialViewModel()
 
         setContent {
             BaseCampTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Root(authViewModel, companyViewModel, innerPadding)
+                    Root(authViewModel, companyViewModel, socialViewModel, innerPadding)
                 }
             }
         }
