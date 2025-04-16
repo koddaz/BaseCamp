@@ -10,7 +10,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.components.CustomButton
 import com.basecampers.basecamp.components.CustomColumn
 import com.basecampers.basecamp.tabs.booking.models.UserBooking
@@ -26,7 +25,7 @@ fun ConfirmationView(
 
     ) {
 
-    val selectedCategory by bookingViewModel.categories.collectAsState()
+    val selectedCategory by bookingViewModel.categoriesList.collectAsState()
     val selectedItem by bookingViewModel.selectedBookingItem.collectAsState()
     val selectedExtraItems by bookingViewModel.selectedExtraItems.collectAsState()
     val totalPrice by bookingViewModel.finalPrice.collectAsState()

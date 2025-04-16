@@ -25,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.basecamp.tabs.profile.models.CompanyProfileModel
 import com.basecampers.basecamp.tabs.profile.models.UserStatus
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
@@ -37,6 +38,7 @@ import com.basecampers.basecamp.tabs.booking.models.BookingItem
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminBookingView(
+    authViewModel: AuthViewModel? = viewModel(),
     modifier: Modifier = Modifier,
     userInfo: CompanyProfileModel?,
     adminBookingViewModel: AdminBookingViewModel?,
@@ -44,7 +46,7 @@ fun AdminBookingView(
     navigateToExtra: (String) -> Unit = {},
 ) {
     var expanded by remember { mutableStateOf(false) }
-
+    var userId = authViewModel?.getCurrentUserUid()
     val categories by adminBookingViewModel?.categories?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
     val bookingId = "${System.currentTimeMillis()}_${(1000..9999).random()}"
 
@@ -126,7 +128,7 @@ fun AdminBookingView(
                                     pricePerDay = pricePerDay,
                                     quantity = quantity,
                                     categoryId = selectedCategory?.id ?: "",
-                                    createdBy = userInfo?.id ?: ""
+                                    createdBy = userId ?: ""
                                 ),
                             )
                             name = ""

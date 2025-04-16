@@ -69,7 +69,9 @@ fun AdminNavHost(authViewModel: AuthViewModel = viewModel(), changeView: () -> U
             composable(AdminRoutes.EXTRA) {
                 AdminExtrasView(
                     adminBookingViewModel = adminBookingViewModel,
-                    goBack = { navController.popBackStack() })
+                    goBack = { navController.popBackStack() },
+                    navOnConfirm = { navController.navigate(AdminRoutes.MAIN) }
+                )
             }
         }
     }

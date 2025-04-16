@@ -9,15 +9,10 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlin.text.set
 
 class AdminBookingViewModel : ViewModel() {
     val db = Firebase.firestore
-
-
-
-
-
-
 
     private val _bookingExtras = MutableStateFlow<List<BookingExtra>>(emptyList())
     val bookingExtras: StateFlow<List<BookingExtra>> = _bookingExtras
@@ -108,7 +103,6 @@ class AdminBookingViewModel : ViewModel() {
     }
 
 
-
     fun addBookingCategory(bookingCategory: BookingCategories) {
         val companyId = getCompanyId() ?: return
 
@@ -127,7 +121,6 @@ class AdminBookingViewModel : ViewModel() {
 
     fun retrieveCategories() {
         val companyId = getCompanyId() ?: return
-
         db
             .collection("companies").document(companyId)
             .collection("categories").get()
@@ -172,7 +165,7 @@ class AdminBookingViewModel : ViewModel() {
         }
     }
 
-    fun addBookingExtra(bookingItem: BookingItem, bookingExtra: BookingExtra, selectedCategory: String) {
+    fun addBookingWithExtra(bookingItem: BookingItem, bookingExtras: List<BookingExtra>, selectedCategory: String) {
         val companyId = getCompanyId() ?: return
 
         if (selectedCategory.isEmpty()) {
@@ -180,31 +173,78 @@ class AdminBookingViewModel : ViewModel() {
             return
         }
 
-        if (bookingItem.id.isEmpty()) {
-            Log.e("AdminBookingViewModel", "BookingItem ID is empty")
-            return
-        }
-
-        Log.d("AdminBookingViewModel", "Adding extra to category: $selectedCategory")
-        Log.d("AdminBookingViewModel", "BookingItem ID: ${bookingItem.id}")
-        Log.d("AdminBookingViewModel", "BookingExtra ID: ${bookingExtra.id}")
-
         try {
-            val documentRef = db
+            val batch = db.batch()
+
+            val itemRef = db
                 .collection("companies").document(companyId)
                 .collection("categories").document(selectedCategory)
                 .collection("bookings").document(bookingItem.id)
-                .collection("extras").document(bookingExtra.id)
 
-            documentRef.set(bookingExtra)
+            // Add the booking item
+            batch.set(itemRef, bookingItem)
+
+            // Add each extra individually
+            bookingExtras.forEach { extra ->
+                // Use extra's ID if available, otherwise generate a new document ID
+                val extraRef = if (extra.id.isNotBlank()) {
+                    itemRef.collection("extras").document(extra.id)
+                } else {
+                    itemRef.collection("extras").document()
+                }
+                batch.set(extraRef, extra) // Save the individual extra
+            }
+
+            batch.commit()
                 .addOnSuccessListener {
-                    Log.d("AdminBookingViewModel", "Extra added successfully")
+                    Log.d("AdminBookingViewModel", "Item and ${bookingExtras.size} extras added successfully")
+                    retrieveBookingItems(selectedCategory)
+                    retrieveBookingExtras(selectedCategory, bookingItem.id)
                 }
                 .addOnFailureListener { e ->
-                    Log.e("AdminBookingViewModel", "Failed to add extra: ${e.message}")
+                    Log.e("AdminBookingViewModel", "Failed to add item and extras: ${e.message}")
+                }
+
+        } catch (e: Exception) {
+            Log.e("AdminBookingViewModel", "Error adding booking item and extras", e)
+        }
+    }
+
+    fun addBookingExtra(bookingItem: BookingItem, bookingExtras: List<BookingExtra>, selectedCategory: String) {
+        val companyId = getCompanyId() ?: return
+
+        if (selectedCategory.isEmpty() || bookingItem.id.isEmpty()) {
+            Log.e("AdminBookingViewModel", "Category or bookingItem ID is empty")
+            return
+        }
+
+        try {
+            val batch = db.batch()
+            val baseRef = db
+                .collection("companies").document(companyId)
+                .collection("categories").document(selectedCategory)
+                .collection("bookings").document(bookingItem.id)
+                .collection("extras")
+
+            bookingExtras.forEach { extra ->
+                val docRef = if (extra.id.isNotBlank()) {
+                    baseRef.document(extra.id)
+                } else {
+                    baseRef.document()
+                }
+                batch.set(docRef, extra)
+            }
+
+            batch.commit()
+                .addOnSuccessListener {
+                    Log.d("AdminBookingViewModel", "${bookingExtras.size} extras added successfully")
+                    retrieveBookingExtras(selectedCategory, bookingItem.id)
+                }
+                .addOnFailureListener { e ->
+                    Log.e("AdminBookingViewModel", "Failed to add extras: ${e.message}")
                 }
         } catch (e: Exception) {
-            Log.e("AdminBookingViewModel", "Error adding booking extra", e)
+            Log.e("AdminBookingViewModel", "Error adding booking extras", e)
         }
     }
 
