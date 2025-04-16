@@ -241,8 +241,8 @@ class UserBookingViewModel : ViewModel() {
         _selectedExtraItems.value = _selectedExtraItems.value + item
     }
 
-    fun removeExtraItem(item: BookingExtra) {
-        _selectedExtraItems.value = _selectedExtraItems.value - item
+    fun removeExtraItem(itemId: String) {
+        _selectedExtraItems.value = _selectedExtraItems.value.filter { it.id != itemId }
     }
 
     fun setSelection(

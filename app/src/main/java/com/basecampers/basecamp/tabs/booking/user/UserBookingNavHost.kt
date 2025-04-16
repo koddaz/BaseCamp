@@ -38,6 +38,9 @@ fun UserBookingNavHost(authViewModel: AuthViewModel) {
     val currentUser by authViewModel.companyProfile.collectAsState()
     val itemList: List<BookingItem> by bookingViewModel.bookingItemsList.collectAsState()
 
+    val selectedItem by bookingViewModel?.selectedBookingItem?.collectAsState()
+        ?: remember { mutableStateOf<BookingItem?>(null) }
+
     val selectedExtraItems by bookingViewModel.selectedExtraItems.collectAsState()
     val selectedBookingItem by bookingViewModel.selectedBookingItem.collectAsState()
     val formattedDateRange by bookingViewModel.formattedDateRange.collectAsState()
@@ -93,19 +96,34 @@ fun UserBookingNavHost(authViewModel: AuthViewModel) {
                     UserItemView(
                         bookingViewModel = bookingViewModel,
                         navExtra = { itemId ->
-                            navController.navigate("selectExtra")
+                            navController.navigate("extrasView")
                         }
                     )
                 }
 
                 composable("extrasView") {
                     UserExtraItem(
+                        selectedItem = selectedItem,
                         bookingViewModel = bookingViewModel,
-                        navBooking = { extraItems ->
-                            navController.navigate("confirmation")
+                        navBooking = {
+                            navController.navigate("confirmationView")
                         }
                     )
                 }
+
+                composable("confirmationView") {
+                    UserConfirmationView(
+                        formattedDateRange = formattedDateRange,
+                        selectedItem = selectedItem,
+                        selectedExtraItems = selectedExtraItems,
+                        bookingViewModel = bookingViewModel,
+                        navBooking = {
+                            navController.navigate("start")
+                        },
+                    )
+                }
+
+
 
                 composable("vieew") {
                     SelectBookingView(
@@ -128,6 +146,7 @@ fun UserBookingNavHost(authViewModel: AuthViewModel) {
                         totalPrice = totalPrice,
                     )
                 }
+                /*
                 composable("confirmation") {
                     ConfirmationView(
                         bookingViewModel = bookingViewModel,
@@ -136,6 +155,8 @@ fun UserBookingNavHost(authViewModel: AuthViewModel) {
                         }
                     )
                 }
+
+                 */
             }
         }
         Row(modifier = Modifier.fillMaxWidth()) {

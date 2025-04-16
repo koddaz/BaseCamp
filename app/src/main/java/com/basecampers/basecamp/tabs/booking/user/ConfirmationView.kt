@@ -19,7 +19,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
 @Composable
-fun ConfirmationView(
+fun ConfirmationView1(
     bookingViewModel: UserBookingViewModel,
     confirmBooking: () -> Unit,
 

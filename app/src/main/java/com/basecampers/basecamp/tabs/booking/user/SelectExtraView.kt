@@ -77,7 +77,7 @@ fun SelectExtraView(
                         extra = extra,
                         onClick = {
                             if (selectedExtraItems.contains(extra)) {
-                                bookingViewModel?.removeExtraItem(extra)
+                                bookingViewModel?.removeExtraItem(extra.id)
                             } else {
                                 bookingViewModel?.addExtraItem(extra)
                                 bookingViewModel?.calculateExtra(extraItems)
