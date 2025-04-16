@@ -5,8 +5,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -44,41 +47,41 @@ fun SocialNavHost(
 		socialViewModel.hideMenu()
 	}
 	
-	
 	Box(modifier = Modifier.fillMaxSize()) {
 		Column(modifier = Modifier.fillMaxSize()) {
 			// Add top padding for safe area (temporary solution)
 			Spacer(modifier = Modifier.height(25.dp))
 			
 			// SuperUser toggle (discreetly placed at the top)
+			// ONLY WHILE TESTING
 			Row(
 				modifier = Modifier
 					.padding(horizontal = 16.dp)
 					.padding(bottom = 8.dp),
 				verticalAlignment = Alignment.CenterVertically
 			) {
-				TextButton(
-					onClick = { socialViewModel.toggleSuperUser() }
-				) {
-					Text(if (isSuper) "SuperUser Mode" else "User Mode")
-				}
-				Spacer(modifier = Modifier.weight(1f))
 				Switch(
 					checked = isSuper,
-					onCheckedChange = { socialViewModel.toggleSuperUser() }
+					onCheckedChange = { authViewModel.toggleSuperUser()}
 				)
+				Spacer(modifier = Modifier.width(8.dp))
+				if (isSuper) {
+					Text("SuperUser")
+				} else {
+					Text("User")
+				}
 			}
+			
+			// ONLY WHILE TESTING
 			
 			// Content area - takes full remaining space
 			Box(modifier = Modifier.weight(1f)) {
 				when (currentSocialTabIndex) {
 					0 -> QnAScreen(
-						isSuper = isSuper,
-						onToggleSuperUser = { socialViewModel.toggleSuperUser() }
+						isSuper = isSuper
 					)
 					1 -> ForumScreen(
-						isSuper = isSuper,
-						onToggleSuperUser = { socialViewModel.toggleSuperUser() }
+						isSuper = isSuper
 					)
 					2 -> MessagingNavHost(
 						socialViewModel = socialViewModel,

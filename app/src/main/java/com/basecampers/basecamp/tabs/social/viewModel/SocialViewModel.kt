@@ -19,20 +19,9 @@ class SocialViewModel : ViewModel() {
 	fun updateUnreadCount(count: Int) {
 		_unreadCount.value = count
 	}
-	
-	// Current user's super user status
-	// In production, this would be loaded from a user session or repository
-	private val _isSuper = MutableStateFlow(false)
-	val isSuper: StateFlow<Boolean> = _isSuper.asStateFlow()
-	
 	// Show/hide menu state
 	private val _showMenu = MutableStateFlow(false)
 	val showMenu = _showMenu.asStateFlow()
-	
-	// Toggle super user status (for testing purposes only)
-	fun toggleSuperUser() {
-		_isSuper.value = !_isSuper.value
-	}
 	
 	fun toggleMenu() {
 		_showMenu.value = !_showMenu.value

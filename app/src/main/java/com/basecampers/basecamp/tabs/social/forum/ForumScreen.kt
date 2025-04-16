@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun ForumScreen(
 	isSuper: Boolean,
-	onToggleSuperUser: () -> Unit
 ) {
 	Box(modifier = Modifier.fillMaxSize()) {
 		Column(
@@ -39,23 +38,6 @@ fun ForumScreen(
 				singleLine = true
 			)
 			
-			// Super user toggle (for testing purposes)
-			if (isSuper) {
-				TextButton(
-					onClick = onToggleSuperUser,
-					modifier = Modifier.align(Alignment.End)
-				) {
-					Text("Switch to User Mode")
-				}
-			} else {
-				TextButton(
-					onClick = onToggleSuperUser,
-					modifier = Modifier.align(Alignment.End)
-				) {
-					Text("Switch to Super User Mode")
-				}
-			}
-			
 			// Placeholder forum content
 			Box(
 				modifier = Modifier
@@ -72,7 +54,7 @@ fun ForumScreen(
 			FloatingActionButton(
 				onClick = { /* TODO: Implement create post */ },
 				modifier = Modifier
-					.align(Alignment.BottomEnd)
+					.align(Alignment.BottomStart)
 					.padding(16.dp)
 			) {
 				Icon(Icons.Default.Add, contentDescription = "Create Post")
