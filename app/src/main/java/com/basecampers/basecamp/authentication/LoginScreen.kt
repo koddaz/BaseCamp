@@ -1,154 +1,180 @@
 package com.basecampers.basecamp.authentication
 
-import androidx.compose.foundation.border
-import com.google.firebase.auth.ktx.auth
-
-
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.unit.sp
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
-import com.basecampers.basecamp.components.CustomButton
-import com.basecampers.basecamp.components.PasswordTextFieldLogin
-import com.google.firebase.ktx.Firebase
+import com.basecampers.basecamp.components.*
+import com.basecampers.basecamp.ui.theme.*
 
 @Composable
-fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotPass : () -> Unit) {
+fun LoginScreen(
+    goRegister: () -> Unit,
+    goForgotPass: () -> Unit,
+    authViewModel: AuthViewModel
+) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    val isLoggedIn by authViewModel.loggedin.collectAsState()
-    val loginErrorMessage by authViewModel.loginErrorMessage.collectAsState()
+    var passwordVisible by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
 
-    LaunchedEffect(isLoggedIn) {
-        if (isLoggedIn) {
-            val currentUser = Firebase.auth.currentUser
-            println("Logged in user: ${currentUser?.email ?: "No user logged in"}")
-
-        }
-    }
-
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text("Login", style = MaterialTheme.typography.headlineMedium)
-
-        
-        if (loginErrorMessage.contains(AuthViewModel.LoginErrors.EMAIL_NOT_VALID) ||
-
-            loginErrorMessage.contains(AuthViewModel.LoginErrors.PASSWORD_NOT_VALID)) {
-            Text(
-                text = "Incorrect email or password",
-                color = Color.Red,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(start = 4.dp)
-            )
-        }
-        TextField(
-            label = { Text("Email") },
-            value = email,
-            onValueChange = {
-                email = it
-                if(loginErrorMessage.isNotEmpty())   {
-                    authViewModel.clearLoginErrors()
+    BaseScreenContainer(
+        content = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Triangle pattern placeholder
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .padding(bottom = 24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    // TODO: Replace with actual triangle pattern image
+                    Text(
+                        text = "Triangle Pattern Placeholder",
+                        color = SecondaryAqua,
+                        fontSize = 14.sp
+                    )
                 }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(
-                    1.dp,
-                    when{
-                        loginErrorMessage.contains(AuthViewModel.LoginErrors.EMAIL_NOT_VALID) -> Color.Red
-                        else -> Color.LightGray
+
+                // Title
+                Text(
+                    text = "Sign In",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = TextPrimary,
+                    modifier = Modifier
+                        .align(Alignment.Start)
+                        .padding(bottom = 24.dp)
+                )
+
+                // Email field
+                BasecampTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = "Email",
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                )
+
+                // Password field
+                BasecampTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = "Password",
+                    modifier = Modifier.padding(bottom = 4.dp),
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(
+                                painter = painterResource(
+                                    id = if (passwordVisible) android.R.drawable.ic_menu_view 
+                                    else android.R.drawable.ic_secure
+                                ),
+                                contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                                tint = TextSecondary
+                            )
+                        }
                     }
                 )
-        )
-        Spacer(modifier = Modifier.height(8.dp))
 
-        PasswordTextFieldLogin(
-            password = password,
-            onValueChange = {
-                password = it
-                if(loginErrorMessage.isNotEmpty()) {
-                    authViewModel.clearLoginErrors()
-                } },
+                // Forgot password
+                Text(
+                    text = "Forgot password?",
+                    color = TextSecondary,
+                    fontSize = 14.sp,
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .padding(bottom = 24.dp)
+                        .clickable { goForgotPass() }
+                )
 
-            label = "Password",
-            authViewModel = authViewModel,
-            modifier = Modifier
-        )
+                // Login button
+                BasecampButton(
+                    text = "Login",
+                    onClick = {
+                        isLoading = true
+                        authViewModel.login(email, password)
+                    },
+                    isLoading = isLoading,
+                    modifier = Modifier.padding(bottom = 24.dp)
+                )
 
-        Spacer(modifier = Modifier.height(16.dp))
+                // OR divider
+                BasecampDivider(
+                    text = "OR",
+                    color = BorderColor,
+                    thickness = 1f
+                )
 
-        Button(
-            onClick = { authViewModel.login(email, password) },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = email.isNotBlank() && password.isNotBlank()
-        ) {
-            Text("Login")
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Google sign in button
+                OutlinedButton(
+                    onClick = { /* TODO: Implement Google Sign In */ },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, BorderColor)
+                ) {
+                    Text(
+                        text = "Sign in with Google",
+                        fontSize = 16.sp,
+                        color = TextSecondary
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Sign up text
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "Don't have an account? ",
+                        color = TextSecondary,
+                        fontSize = 14.sp
+                    )
+                    Text(
+                        text = "Sign Up",
+                        color = SecondaryAqua,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.clickable { goRegister() }
+                    )
+                }
+
+                // Bottom indicator
+                Box(
+                    modifier = Modifier
+                        .padding(top = 24.dp)
+                        .size(width = 40.dp, height = 4.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(TextPrimary)
+                )
+            }
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Button(onClick = {
-            authViewModel.login(email = "admin@admin.se", password = "Test123!")
-        }) {
-            Text("admin@admin.se & Test123!")
-        }
-
-        Button(onClick = {
-            authViewModel.login(email = "user9182@example.com", password = "Test123!")
-        }) {
-            Text("user9182@example.com & Test123!")
-        }
-        Button(
-            onClick = { goForgotPass() },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Forgot Password")
-        }
-
-        Button(onClick = {
-            authViewModel.isLoggedInTrue()
-        }) {
-            Text("Change isLoggedIn to True")
-        }
-
-        Button(onClick = {
-            authViewModel.loginUser1()
-        }) {
-            Text("User 1 (User)")
-        }
-
-        Button(onClick = {
-            authViewModel.loginUser2()
-        }) {
-            Text("User 2 (SuperUser)")
-        }
-
-
-
-        Button(onClick = {
-            authViewModel.loginUser3()
-        }) {
-            Text("User 3 (Admin)")
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        Button(
-            onClick = { goRegister() },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Go to Register")
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewLoginScreen() {
-    LoginScreen(goRegister = {}, goForgotPass = {}, authViewModel = viewModel())
+    )
 }
