@@ -30,16 +30,16 @@ import java.util.Locale
 
 @Composable
 fun SelectExtraView(
+    selectedExtraItems: List<BookingExtra>,
+    selectedBookingItem: BookingItem?,
+    formattedDateRange: String,
+    amountOfDays: Int,
+    extraItems: List<BookingExtra>,
+    totalPrice: Double,
     navConfirmation: () -> Unit,
     bookingViewModel: UserBookingViewModel?,
     modifier: Modifier = Modifier) {
 
-    val selectedExtraItems by bookingViewModel?.selectedExtraItems?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
-    val selectedBookingItem by bookingViewModel?.selectedBookingItem?.collectAsState() ?: remember { mutableStateOf<BookingItem?>(null) }
-    val formattedDateRange by bookingViewModel?.formattedDateRange?.collectAsState() ?: remember { mutableStateOf("") }
-    val amountOfDays by bookingViewModel?.amountOfDays?.collectAsState() ?: remember { mutableIntStateOf(0) }
-    val extraItems by bookingViewModel?.bookingExtraList?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
-    val totalPrice by bookingViewModel?.finalPrice?.collectAsState() ?: remember { mutableDoubleStateOf(0.0) }
 
     LaunchedEffect(selectedExtraItems, selectedBookingItem, amountOfDays) {
         selectedBookingItem?.let { item ->
@@ -96,7 +96,7 @@ fun SelectExtraView(
                 }
             )
             CustomButton(
-                text = "Confirm",
+                text = "Next",
                 onClick = {
                     navConfirmation()
                 }

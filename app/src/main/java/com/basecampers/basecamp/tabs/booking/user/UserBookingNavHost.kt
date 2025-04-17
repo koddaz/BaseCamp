@@ -9,6 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -32,9 +34,16 @@ fun UserBookingNavHost(authViewModel: AuthViewModel) {
     val navController = rememberNavController()
     val bookingViewModel: UserBookingViewModel = viewModel()
 
-    val categoryList by bookingViewModel.categories.collectAsState()
+    val categoryList by bookingViewModel.categoriesList.collectAsState()
     val currentUser by authViewModel.companyProfile.collectAsState()
     val itemList: List<BookingItem> by bookingViewModel.bookingItemsList.collectAsState()
+
+    val selectedExtraItems by bookingViewModel.selectedExtraItems.collectAsState()
+    val selectedBookingItem by bookingViewModel.selectedBookingItem.collectAsState()
+    val formattedDateRange by bookingViewModel.formattedDateRange.collectAsState()
+    val amountOfDays by bookingViewModel.amountOfDays.collectAsState()
+    val extraItems by bookingViewModel.bookingExtraList.collectAsState()
+    val totalPrice by bookingViewModel.finalPrice.collectAsState()
 
     var isAdmin by remember { mutableStateOf(false) }
 
@@ -72,13 +81,33 @@ fun UserBookingNavHost(authViewModel: AuthViewModel) {
                 startDestination = "start",
                 modifier = Modifier.weight(1f)
             ) {
-
                 composable("start") {
-                    BookingView(
-                        onClick = { navController.navigate("selectCategory") },
+                    UserCategoryView(
+                        bookingViewModel = bookingViewModel,
+                        navBooking = { categoryId ->
+                            navController.navigate("itemView")
+                        },
                     )
                 }
-                composable("selectCategory") {
+                composable("itemView") {
+                    UserItemView(
+                        bookingViewModel = bookingViewModel,
+                        navExtra = { itemId ->
+                            navController.navigate("selectExtra")
+                        }
+                    )
+                }
+
+                composable("extrasView") {
+                    UserExtraItem(
+                        bookingViewModel = bookingViewModel,
+                        navBooking = { extraItems ->
+                            navController.navigate("confirmation")
+                        }
+                    )
+                }
+
+                composable("vieew") {
                     SelectBookingView(
                         categoryList = categoryList,
                         itemList = itemList,
@@ -88,7 +117,15 @@ fun UserBookingNavHost(authViewModel: AuthViewModel) {
                 composable("selectExtra") {
                     SelectExtraView(
                         bookingViewModel = bookingViewModel,
-                        navConfirmation = { navController.navigate("confirmation")}
+                        navConfirmation = {
+                            navController.navigate("confirmation")
+                        },
+                        selectedExtraItems = selectedExtraItems,
+                        selectedBookingItem = selectedBookingItem,
+                        formattedDateRange = formattedDateRange,
+                        amountOfDays = amountOfDays,
+                        extraItems = extraItems,
+                        totalPrice = totalPrice,
                     )
                 }
                 composable("confirmation") {
@@ -106,21 +143,7 @@ fun UserBookingNavHost(authViewModel: AuthViewModel) {
             CustomButton(text = "User", onClick = { isAdmin = false })
         }
     }
-
 }
-
-@Composable
-fun ConfirmationView(bookingViewModel: UserBookingViewModel?) {
-    val selectedBookingItem by bookingViewModel?.selectedBookingItem?.collectAsState() ?: remember { mutableStateOf<BookingItem?>(null) }
-    val formattedDateRange by bookingViewModel?.formattedDateRange?.collectAsState() ?: remember { mutableStateOf("") }
-
-}
-
-
-
-
-
-
 
 @Preview
 @Composable

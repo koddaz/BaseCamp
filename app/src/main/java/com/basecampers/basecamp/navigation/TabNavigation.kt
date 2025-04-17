@@ -1,9 +1,7 @@
 package com.basecampers.basecamp.navigation
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Forum
@@ -20,8 +18,14 @@ import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.Icon
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -38,22 +42,37 @@ import com.basecampers.basecamp.ui.theme.TextSecondary
 import com.basecampers.basecamp.ui.theme.BaseCampTheme
 
 // Feature imports
+import com.basecampers.ui.theme.BaseCampTheme
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
+import com.basecampers.basecamp.company.CompanyViewModel
 import com.basecampers.basecamp.tabs.booking.user.UserBookingNavHost
 import com.basecampers.basecamp.tabs.home.HomeNavHost
 import com.basecampers.basecamp.tabs.profile.ProfileNavHost
-import com.basecampers.basecamp.tabs.social.SocialNavHost
+import com.basecampers.basecamp.tabs.social.navHost.SocialNavHost
+import com.basecampers.basecamp.tabs.social.viewModel.SocialViewModel
 
 @Composable
-fun TabNavigation(authViewModel: AuthViewModel) {
-    var selectedTabIndex by remember { mutableIntStateOf(0) }
-
+fun TabNavigation(authViewModel: AuthViewModel, companyViewModel: CompanyViewModel, socialViewModel: SocialViewModel) {
+    
+    // Main tab state
+    var selectedTabIndex by remember { mutableIntStateOf(AppState.selectedMainTabIndex) }
+    
+    // Social tab state
+    var selectedSocialTabIndex by remember { mutableIntStateOf(AppState.selectedSocialTabIndex) }
+    
     Column(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.weight(1f)) {
             when (selectedTabIndex) {
-                0 -> HomeNavHost(authViewModel)
+                0 -> HomeNavHost(authViewModel, companyViewModel)
                 1 -> UserBookingNavHost(authViewModel)
-                2 -> SocialNavHost()
+                2 -> SocialNavHost(
+                    authViewModel = authViewModel,
+	                socialViewModel = socialViewModel,
+	                selectedSocialTabIndex = selectedSocialTabIndex
+                ) { newIndex ->
+                    selectedSocialTabIndex = newIndex
+                    AppState.selectedSocialTabIndex = newIndex
+                }
                 3 -> ProfileNavHost(authViewModel)
                 else -> Text("Error: Tab not found")
             }
@@ -140,6 +159,10 @@ private data class TabItem(
 @Composable
 fun NavigationBarPreview() {
     BaseCampTheme {
-        TabNavigation(authViewModel = viewModel())
+        TabNavigation(
+	        authViewModel = viewModel(),
+	        companyViewModel = viewModel(),
+	        socialViewModel = viewModel()
+        )
     }
 }

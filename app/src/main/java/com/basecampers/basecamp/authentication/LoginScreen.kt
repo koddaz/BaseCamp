@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.components.*
 import com.basecampers.basecamp.ui.theme.*
+import com.basecampers.basecamp.BuildConfig
 
 @Composable
 fun LoginScreen(
@@ -38,14 +39,10 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
-
-    // Observe login state
     val isLoggedIn by authViewModel.loggedin.collectAsState()
 
-    // Handle navigation when logged in
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
-            // The Root composable will handle the navigation to TabNavigation
             Log.d("LoginScreen", "User logged in successfully")
         }
     }
@@ -91,102 +88,85 @@ fun LoginScreen(
                     .padding(bottom = 8.dp)
             )
 
-
-            // Email Field
-            BasecampTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = "Email",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
-            )
-
-            // Password Field
-            BasecampTextField(
-                value = password,
-                onValueChange = { password = it },
+            PasswordTextFieldLogin(
+                password = password,
+                onValueChange = {
+                    password = it
+                    if(loginErrorMessage.isNotEmpty()) {
+                        authViewModel.clearLoginErrors()
+                    } },
                 label = "Password",
+                authViewModel = authViewModel,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 24.dp),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                trailingIcon = {
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(
-                            imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                            contentDescription = if (passwordVisible) "Hide password" else "Show password",
-                            tint = TextSecondary
-                        )
-                    }
-                }
             )
 
-            // Sign In Button
-            BasecampButton(
-                text = "Sign In",
-                onClick = {
-                    isLoading = true
-                    authViewModel.login(email, password)
-                },
-                isLoading = isLoading,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-            )
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // Forgot Password
-            Text(
-                text = "Forgot Password?",
-                color = PrimaryRed,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .clickable { goForgotPass() }
-                    .padding(bottom = 24.dp)
-            )
-
-            // Divider
-            BasecampDivider(
-                text = "OR",
-                color = BorderColor,
-                thickness = 1f
-            )
-
-            // Test User Button (formerly Google Sign In)
-            BasecampOutlinedButton(
-                text = "Sign in with Google",
-                onClick = {
-                    // Use valid test credentials
-                    email = "user@example.com"
-                    password = "Admin123!"
-                    isLoading = true
-                    authViewModel.login(email, password)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-            )
-
-            // Register Link
-            Row(
+            Button(
+                onClick = { authViewModel.login(email, password) },
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
+                enabled = email.isNotBlank() && password.isNotBlank()
             ) {
-                Text(
-                    text = "Don't have an account? ",
-                    color = TextSecondary,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Text(
-                    text = "Sign Up",
-                    color = PrimaryRed,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.clickable { goRegister() }
-                )
+                Text("Login")
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(onClick = {
+                authViewModel.login(email = "admin@admin.se", password = "Test123!")
+            }) {
+                Text("admin@admin.se & Test123!")
+            }
+
+            Button(onClick = {
+                authViewModel.login(email = "user9182@example.com", password = "Test123!")
+            }) {
+                Text("user9182@example.com & Test123!")
+            }
+            Button(
+                onClick = { goForgotPass() },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Forgot Password")
+            }
+
+            Button(onClick = {
+                authViewModel.isLoggedInTrue()
+            }) {
+                Text("Change isLoggedIn to True")
+            }
+
+            Button(onClick = {
+                authViewModel.loginUser1()
+            }) {
+                Text("User 1 (User)")
+            }
+
+            Button(onClick = {
+                authViewModel.loginUser2()
+            }) {
+                Text("User 2 (SuperUser)")
+            }
+
+            Button(onClick = {
+                authViewModel.loginUser3()
+            }) {
+                Text("User 3 (Admin)")
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+        Button(
+            onClick = { goRegister() },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Go to Register")
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewLoginScreen() {
+    LoginScreen(goRegister = {}, goForgotPass = {}, authViewModel = viewModel())
 }

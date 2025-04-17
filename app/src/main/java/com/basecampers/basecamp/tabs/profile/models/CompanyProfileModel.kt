@@ -2,21 +2,20 @@ package com.basecampers.basecamp.tabs.profile.models
 
 import java.net.URL
 
-
 data class CompanyProfileModel(
-    val imageUrl : URL? = null,
-    val bio : String = "No bio yet",
-    val status : UserStatus = UserStatus.USER,
-    val id : String = "",
-    val companyId: String = ""
+    val id: String = "",
+    val companyId: String = "",
+    val bio: String = "No bio yet",
+    val status: UserStatus = UserStatus.USER,
+    val imageUrl: URL? = null
 )
 
 data class CompanyModel(
-    val companyName : String = "No name yet",
-    val ownerUID : String,
     val companyId: String = "",
-    val bio : String = "No bio yet",
-    val imageUrl : URL?
+    val companyName: String = "No name yet",
+    val ownerUID: String = "",
+    val bio: String = "No bio yet",
+    val imageUrl: URL? = null
 )
 
 enum class UserStatus {

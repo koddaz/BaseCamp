@@ -9,31 +9,13 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlin.text.set
 
 class AdminBookingViewModel : ViewModel() {
     val db = Firebase.firestore
 
-    // Booking item
-    private val _itemName = MutableStateFlow("")
-    private val _itemInfo = MutableStateFlow("")
-    private val _itemPrice = MutableStateFlow("")
-    private val _itemQuantity = MutableStateFlow("")
-
-    val itemName: StateFlow<String> = _itemName
-    val itemInfo: StateFlow<String> = _itemInfo
-    val itemPrice: StateFlow<String> = _itemPrice
-    val itemQuantity: StateFlow<String> = _itemQuantity
-
-    // Extra item
-    private val _extraName = MutableStateFlow("")
-    private val _extraInfo = MutableStateFlow("")
-    private val _extraPrice = MutableStateFlow("")
-
-    val extraName: StateFlow<String> = _extraName
-    val extraInfo: StateFlow<String> = _extraInfo
-    val extraPrice: StateFlow<String> = _extraPrice
-
-
+    private val _bookingExtras = MutableStateFlow<List<BookingExtra>>(emptyList())
+    val bookingExtras: StateFlow<List<BookingExtra>> = _bookingExtras
 
     private val _bookingItems = MutableStateFlow<List<BookingItem>>(emptyList())
     val bookingItems: StateFlow<List<BookingItem>> = _bookingItems
@@ -47,22 +29,15 @@ class AdminBookingViewModel : ViewModel() {
     private val _user = MutableStateFlow<CompanyProfileModel?>(null)
     val user: StateFlow<CompanyProfileModel?> = _user
 
-    private val _selectedCategoryId = MutableStateFlow<String>("")
-    val selectedCategoryId = _selectedCategoryId.asStateFlow()
 
-    private val _selectedItemId = MutableStateFlow<String>("")
-    val selectedItemId = _selectedItemId.asStateFlow()
+    private val _selectedItem = MutableStateFlow<BookingItem?>(null)
+    val selectedItem: StateFlow<BookingItem?> = _selectedItem
 
-    // Add this function
-    fun setSelectedCategory(categoryId: String) {
-        _selectedCategoryId.value = categoryId
-        // Load items for this category
-        retrieveBookingItems(categoryId)
-    }
+    private val _selectedCategory = MutableStateFlow<BookingCategories?>(null)
+    val selectedCategory = _selectedCategory.asStateFlow()
 
-    fun setSelectedItemId(itemId: String) {
-        _selectedItemId.value = itemId
-    }
+    private val _selectedExtraItem = MutableStateFlow<BookingExtra?>(null)
+    val selectedExtraItem = _selectedExtraItem.asStateFlow()
 
     private fun getCompanyId(): String? {
         return _user.value?.companyId
@@ -74,29 +49,59 @@ class AdminBookingViewModel : ViewModel() {
         retrieveCategories()
     }
 
-
-
-    fun setItems(
-        name: String = "",
-        info: String = "",
-        price: String = "",
-        quantity: String = "",
-    ) {
-        _itemName.value = name
-        _itemInfo.value = info
-        _itemPrice.value = price
-        _itemQuantity.value = quantity
+    fun addExtraList(extraList: List<BookingExtra>) {
+        _bookingExtras.value = extraList + _bookingExtras.value
     }
 
-    fun setExtras(
-        name: String = "",
-        info: String = "",
-        price: String = "",
+    fun updateExtraValue(
+        id: String = _selectedExtraItem.value?.id ?: "",
+        name: String = _selectedExtraItem.value?.name ?: "",
+        info: String = _selectedExtraItem.value?.info ?: "",
+        price: String = _selectedExtraItem.value?.price ?: ""
     ) {
-        _extraName.value = name
-        _extraInfo.value = info
-        _extraPrice.value = price
+        _selectedExtraItem.value = BookingExtra(
+            id = id.ifEmpty { "${System.currentTimeMillis()}_${(1000..9999).random()}" },
+            name = name,
+            info = info,
+            price = price
+        )
     }
+
+
+    fun updateCategoriesValues(
+        id: String = _selectedCategory.value?.id ?: "",
+        name: String = _selectedCategory.value?.name ?: "",
+        info: String = _selectedCategory.value?.info ?: "",
+        createdBy: String = _selectedCategory.value?.createdBy ?: ""
+    ) {
+        _selectedCategory.value = BookingCategories(
+            id = id.ifEmpty { "${System.currentTimeMillis()}_${(1000..9999).random()}" },
+            name = name,
+            info = info,
+            createdBy = createdBy
+        )
+    }
+
+    fun updateBookingItemValues(
+        id: String = _selectedItem.value?.id ?: "",
+        name: String = _selectedItem.value?.name ?: "",
+        info: String = _selectedItem.value?.info ?: "",
+        price: String = _selectedItem.value?.pricePerDay ?: "",
+        quantity: String = _selectedItem.value?.quantity ?: "",
+        categoryId: String = _selectedItem.value?.categoryId ?: "",
+        createdBy: String = _selectedItem.value?.createdBy ?: ""
+    ) {
+        _selectedItem.value = BookingItem(
+            id = id.ifEmpty { "${System.currentTimeMillis()}_${(1000..9999).random()}" },
+            name = name,
+            info = info,
+            pricePerDay = price,
+            quantity = quantity,
+            categoryId = categoryId,
+            createdBy = createdBy
+        )
+    }
+
 
     fun addBookingCategory(bookingCategory: BookingCategories) {
         val companyId = getCompanyId() ?: return
@@ -111,6 +116,23 @@ class AdminBookingViewModel : ViewModel() {
             }
             .addOnFailureListener { e ->
                 Log.e("AdminBookingViewModel", "Failed to add category: ${e.message}")
+            }
+    }
+
+    fun retrieveCategories() {
+        val companyId = getCompanyId() ?: return
+        db
+            .collection("companies").document(companyId)
+            .collection("categories").get()
+            .addOnSuccessListener { snapshot ->
+                val categoryList = snapshot.documents.mapNotNull { doc ->
+                    val id = doc.id
+                    val name = doc.getString("name") ?: ""
+                    val info = doc.getString("info") ?: ""
+                    val createdBy = doc.getString("createdBy") ?: ""
+                    BookingCategories(id, name, info, createdBy)
+                }
+                _categories.value = categoryList
             }
     }
 
@@ -143,7 +165,7 @@ class AdminBookingViewModel : ViewModel() {
         }
     }
 
-    fun addBookingExtra(bookingItem: BookingItem, bookingExtra: BookingExtra, selectedCategory: String) {
+    fun addBookingWithExtra(bookingItem: BookingItem, bookingExtras: List<BookingExtra>, selectedCategory: String) {
         val companyId = getCompanyId() ?: return
 
         if (selectedCategory.isEmpty()) {
@@ -151,31 +173,78 @@ class AdminBookingViewModel : ViewModel() {
             return
         }
 
-        if (bookingItem.id.isEmpty()) {
-            Log.e("AdminBookingViewModel", "BookingItem ID is empty")
-            return
-        }
-
-        Log.d("AdminBookingViewModel", "Adding extra to category: $selectedCategory")
-        Log.d("AdminBookingViewModel", "BookingItem ID: ${bookingItem.id}")
-        Log.d("AdminBookingViewModel", "BookingExtra ID: ${bookingExtra.id}")
-
         try {
-            val documentRef = db
+            val batch = db.batch()
+
+            val itemRef = db
                 .collection("companies").document(companyId)
                 .collection("categories").document(selectedCategory)
                 .collection("bookings").document(bookingItem.id)
-                .collection("extras").document(bookingExtra.id)
 
-            documentRef.set(bookingExtra)
+            // Add the booking item
+            batch.set(itemRef, bookingItem)
+
+            // Add each extra individually
+            bookingExtras.forEach { extra ->
+                // Use extra's ID if available, otherwise generate a new document ID
+                val extraRef = if (extra.id.isNotBlank()) {
+                    itemRef.collection("extras").document(extra.id)
+                } else {
+                    itemRef.collection("extras").document()
+                }
+                batch.set(extraRef, extra) // Save the individual extra
+            }
+
+            batch.commit()
                 .addOnSuccessListener {
-                    Log.d("AdminBookingViewModel", "Extra added successfully")
+                    Log.d("AdminBookingViewModel", "Item and ${bookingExtras.size} extras added successfully")
+                    retrieveBookingItems(selectedCategory)
+                    retrieveBookingExtras(selectedCategory, bookingItem.id)
                 }
                 .addOnFailureListener { e ->
-                    Log.e("AdminBookingViewModel", "Failed to add extra: ${e.message}")
+                    Log.e("AdminBookingViewModel", "Failed to add item and extras: ${e.message}")
+                }
+
+        } catch (e: Exception) {
+            Log.e("AdminBookingViewModel", "Error adding booking item and extras", e)
+        }
+    }
+
+    fun addBookingExtra(bookingItem: BookingItem, bookingExtras: List<BookingExtra>, selectedCategory: String) {
+        val companyId = getCompanyId() ?: return
+
+        if (selectedCategory.isEmpty() || bookingItem.id.isEmpty()) {
+            Log.e("AdminBookingViewModel", "Category or bookingItem ID is empty")
+            return
+        }
+
+        try {
+            val batch = db.batch()
+            val baseRef = db
+                .collection("companies").document(companyId)
+                .collection("categories").document(selectedCategory)
+                .collection("bookings").document(bookingItem.id)
+                .collection("extras")
+
+            bookingExtras.forEach { extra ->
+                val docRef = if (extra.id.isNotBlank()) {
+                    baseRef.document(extra.id)
+                } else {
+                    baseRef.document()
+                }
+                batch.set(docRef, extra)
+            }
+
+            batch.commit()
+                .addOnSuccessListener {
+                    Log.d("AdminBookingViewModel", "${bookingExtras.size} extras added successfully")
+                    retrieveBookingExtras(selectedCategory, bookingItem.id)
+                }
+                .addOnFailureListener { e ->
+                    Log.e("AdminBookingViewModel", "Failed to add extras: ${e.message}")
                 }
         } catch (e: Exception) {
-            Log.e("AdminBookingViewModel", "Error adding booking extra", e)
+            Log.e("AdminBookingViewModel", "Error adding booking extras", e)
         }
     }
 
@@ -213,21 +282,38 @@ class AdminBookingViewModel : ViewModel() {
             }
     }
 
-    fun retrieveCategories() {
+    fun retrieveBookingExtras(categoryId: String, bookingItemId: String) {
         val companyId = getCompanyId() ?: return
 
-        db
-            .collection("companies").document(companyId)
-            .collection("categories").get()
+        db.collection("companies").document(companyId)
+            .collection("categories").document(categoryId)
+            .collection("bookings").document(bookingItemId)
+            .collection("extras").get()
             .addOnSuccessListener { snapshot ->
-                val categoryList = snapshot.documents.mapNotNull { doc ->
+                val extrasList = snapshot.documents.mapNotNull { doc ->
                     val id = doc.id
                     val name = doc.getString("name") ?: ""
                     val info = doc.getString("info") ?: ""
-                    val createdBy = doc.getString("createdBy") ?: ""
-                    BookingCategories(id, name, info, createdBy)
+                    val price = doc.getString("price") ?: ""
+                    BookingExtra(id, price, name, info)
                 }
-                _categories.value = categoryList
+                _bookingExtras.value = extrasList
             }
     }
+
+    // Function to delete an extra
+    fun deleteBookingExtra(categoryId: String, bookingItemId: String, extraId: String) {
+        val companyId = getCompanyId() ?: return
+
+        db.collection("companies").document(companyId)
+            .collection("categories").document(categoryId)
+            .collection("bookings").document(bookingItemId)
+            .collection("extras").document(extraId)
+            .delete()
+            .addOnSuccessListener {
+                retrieveBookingExtras(categoryId, bookingItemId)
+            }
+    }
+
+
 }

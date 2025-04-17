@@ -3,8 +3,10 @@ package com.basecampers.basecamp.tabs.booking.admin
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.NoteAdd
@@ -28,6 +30,7 @@ import com.basecampers.basecamp.tabs.profile.models.UserStatus
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.components.CustomButton
 import com.basecampers.basecamp.components.CustomColumn
+import com.basecampers.basecamp.tabs.booking.components.CategoriesCard
 import com.basecampers.basecamp.tabs.booking.models.AdminBookingViewModel
 import com.basecampers.basecamp.tabs.booking.models.BookingCategories
 import com.basecampers.basecamp.tabs.booking.models.BookingItem
@@ -41,30 +44,38 @@ fun AdminCategoriesView(
     goBack: () -> Unit,
     navigateToBooking: (String) -> Unit
 ) {
-    
+
     var category by remember { mutableStateOf("") }
     val categories by adminBookingViewModel?.categories?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
     val bookingItems by adminBookingViewModel?.bookingItems?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
     var info by remember { mutableStateOf("") }
     var error by remember { mutableStateOf("") }
     var isAddVisible by remember { mutableStateOf(false) }
+
     
     
-    Column(modifier.fillMaxSize().padding(16.dp)) {
-        CustomButton(text = "Back", onClick = goBack)
+    Column(modifier
+        .fillMaxSize()
+        .padding(16.dp)) {
+        Column(modifier.weight(1f)) {
         CustomColumn(
             title = "Categories",
             onClick = { isAddVisible = !isAddVisible },
-            imageVector = Icons.AutoMirrored.Filled.NoteAdd)
+            )
         {
-            
+
             Column(modifier.padding(start = 16.dp)) {
                 if (categories.isNotEmpty()) {
                     categories.forEach { category ->
                         val categoryItems = bookingItems.filter { it.categoryId == category.id }
                         CategoriesCard(
                             onClick = {
-                                adminBookingViewModel?.setSelectedCategory(category.id)
+                                adminBookingViewModel?.updateCategoriesValues(
+                                    id = category.id,
+                                    name = category.name,
+                                    info = category.info,
+                                    createdBy = category.createdBy
+                                )
                                 navigateToBooking(category.id)
                             },
                             title = category.name,
@@ -77,90 +88,73 @@ fun AdminCategoriesView(
                     Text(text = "No categories found")
                 }
             }
-            
-            
+
+        }
+            Spacer(modifier.height(8.dp))
             if (isAddVisible) {
-                OutlinedTextField(
-                    label = { Text("Category") },
-                    value = category,
-                    onValueChange = { newCategory ->
-                        val filteredValue = newCategory.replace("\\s".toRegex(), "")
-                        category = filteredValue
-                    },
-                    maxLines = 1,
-                    modifier = modifier.fillMaxWidth()
-                )
-                CustomButton(onClick = {
-                    if (category.isNotEmpty()) {
-                        // Generate a unique ID using current timestamp + random suffix
-                        val categoryId = "${System.currentTimeMillis()}_${(1000..9999).random()}"
-                        val createdBy = authViewModel?.getCurrentUserUid() ?: ""
-                        
-                        
-                        userInfo?.let { user ->
-                            adminBookingViewModel?.addBookingCategory(
-                                bookingCategory = BookingCategories(
-                                    id = categoryId,
-                                    name = category,
-                                    info = info,
-                                    createdBy = createdBy
-                                )
-                            )
-                        }
-                        
-                        
-                        // Reset fields after successful add
-                        category = ""
-                        info = ""
-                        error = ""
-                    } else {
-                        error = "Category name is required"
+                CustomColumn {
+                    OutlinedTextField(
+                        label = { Text("Category") },
+                        value = category,
+                        onValueChange = { newCategory ->
+                            val filteredValue = newCategory.replace("\\s".toRegex(), "")
+                            category = filteredValue
+                        },
+                        maxLines = 1,
+                        modifier = modifier.fillMaxWidth()
+                    )
+                    Row(modifier.fillMaxWidth()) {
+                        Spacer(modifier.weight(1f))
+                        CustomButton(onClick = {
+                            if (category.isNotEmpty()) {
+                                // Generate a unique ID using current timestamp + random suffix
+                                val categoryId =
+                                    "${System.currentTimeMillis()}_${(1000..9999).random()}"
+                                val createdBy = authViewModel?.getCurrentUserUid() ?: ""
+
+
+                                userInfo?.let { user ->
+                                    adminBookingViewModel?.addBookingCategory(
+                                        bookingCategory = BookingCategories(
+                                            id = categoryId,
+                                            name = category,
+                                            info = info,
+                                            createdBy = createdBy
+                                        )
+                                    )
+                                }
+
+
+                                // Reset fields after successful add
+                                category = ""
+                                info = ""
+                                error = ""
+                            } else {
+                                error = "Category name is required"
+                            }
+                        }, text = "Save")
+                        CustomButton(onClick = {
+                            category = ""
+                            info = ""
+                            error = ""
+                            isAddVisible = !isAddVisible
+                                               },
+                            text = "Cancel")
                     }
-                }, text = "Add category")
+                }
             }
+        }
+        Row() {
+            CustomButton(text = "Back", onClick = goBack)
+            Spacer(modifier = Modifier.weight(1f))
+            CustomButton(text = "Add category", onClick = { isAddVisible = !isAddVisible })
+
+
+
         }
     }
 }
 
-@Composable
-fun CategoriesCard(
-    modifier: Modifier = Modifier,
-    title: String = "",
-    info: String = "",
-    itemList: List<BookingItem>? = null,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = modifier
-            .clickable(onClick = { onClick() })
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        Column(modifier = modifier.padding(16.dp)) {
-            Text(text = title)
-            Text(text = info)
-            
-            if (itemList != null) {
-                Text("Items in this category:", style = typography.labelLarge)
-                itemList.forEach { item ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "• ${item.name} - ${item.pricePerDay}",
-                            style = typography.bodyMedium
-                        )
-                    }
-                }
-            } else {
-                Text("No items in this category", style = typography.bodySmall)
-            }
-        }
-    }
-}
 
 @Preview(showBackground = true)
 @Composable

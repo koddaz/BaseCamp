@@ -1,5 +1,7 @@
 package com.basecampers.basecamp.tabs.social.models
 
-object socialRoutes {
-    const val MAIN = "main"
+object SocialRoutes {
+    const val QNA = "qna"
+    const val FORUM = "forum"
+    const val MESSAGES = "messages"
 }

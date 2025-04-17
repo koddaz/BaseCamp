@@ -9,7 +9,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import com.basecampers.basecamp.aRootFolder.Root
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
-import com.basecampers.basecamp.ui.theme.BaseCampTheme
+import com.basecampers.basecamp.company.CompanyViewModel
+import com.basecampers.basecamp.tabs.social.viewModel.SocialViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -17,11 +18,13 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         val authViewModel = AuthViewModel()
+        val companyViewModel = CompanyViewModel()
+        val socialViewModel = SocialViewModel()
 
         setContent {
             BaseCampTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Root(authViewModel, innerPadding)
+                    Root(authViewModel, companyViewModel, socialViewModel, innerPadding)
                 }
             }
         }
