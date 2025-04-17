@@ -28,7 +28,6 @@ fun AdminNavHost(authViewModel: AuthViewModel = viewModel(), changeView: () -> U
     val navController = rememberNavController()
     val userInfo by authViewModel.companyProfile.collectAsState()
     val categories by adminBookingViewModel.categories.collectAsState()
-    val selectedItemId by adminBookingViewModel.selectedItemId.collectAsState()
 
 
 
@@ -60,7 +59,6 @@ fun AdminNavHost(authViewModel: AuthViewModel = viewModel(), changeView: () -> U
             }
             composable(AdminRoutes.BOOKING) {
                 AdminBookingView(
-                    authViewModel = authViewModel,
                     adminBookingViewModel = adminBookingViewModel,
                     userInfo = userInfo,
                     goBack = { navController.popBackStack() },
@@ -71,8 +69,9 @@ fun AdminNavHost(authViewModel: AuthViewModel = viewModel(), changeView: () -> U
             composable(AdminRoutes.EXTRA) {
                 AdminExtrasView(
                     adminBookingViewModel = adminBookingViewModel,
-                    userInfo = userInfo,
-                    goBack = { navController.popBackStack() })
+                    goBack = { navController.popBackStack() },
+                    navOnConfirm = { navController.navigate(AdminRoutes.MAIN) }
+                )
             }
         }
     }

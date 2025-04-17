@@ -1,6 +1,7 @@
 package com.basecampers.basecamp.company
 
 import androidx.lifecycle.ViewModel
+import com.basecampers.basecamp.aRootFolder.UserSession
 import com.basecampers.basecamp.tabs.profile.models.CompanyModel
 import com.basecampers.basecamp.tabs.profile.models.CompanyProfileModel
 import com.basecampers.basecamp.tabs.profile.models.UserStatus
@@ -37,6 +38,14 @@ class CompanyViewModel : ViewModel() {
 		if (storedCompanyId != null) {
 			_currentCompanyId.value = storedCompanyId
 			_hasSelectedCompany.value = true
+			
+			// Update UserSession reference
+			UserSession.setSelectedCompanyId(storedCompanyId)
+			
+			// Fetch company data for UserSession
+			fetchCompanyData(storedCompanyId)
+			fetchCompanyProfileData(userId, storedCompanyId)
+			
 			return
 		}
 		
@@ -51,6 +60,13 @@ class CompanyViewModel : ViewModel() {
 						_currentCompanyId.value = lastCompanyId
 						_hasSelectedCompany.value = true
 						storeCompanyId(lastCompanyId)
+						
+						// Update UserSession reference
+						UserSession.setSelectedCompanyId(lastCompanyId)
+						
+						// Fetch company data for UserSession
+						fetchCompanyData(lastCompanyId)
+						fetchCompanyProfileData(userId, lastCompanyId)
 					} else {
 						_hasSelectedCompany.value = false
 					}
@@ -189,5 +205,35 @@ class CompanyViewModel : ViewModel() {
 	
 	private fun clearStoredCompanyId() {
 		// Implement using SharedPreferences or DataStore
+	}
+	
+	
+	// Add these helper methods to fetch company data for UserSession
+	private fun fetchCompanyData(companyId: String) {
+		db.collection("companies").document(companyId).get()
+			.addOnSuccessListener { document ->
+				if (document.exists()) {
+					val company = document.toObject(CompanyModel::class.java)
+					company?.let {
+						UserSession.setCompany(it)
+					}
+				}
+			}
+	}
+	
+	private fun fetchCompanyProfileData(userId: String, companyId: String) {
+		db.collection("companies")
+			.document(companyId)
+			.collection("users")
+			.document(userId)
+			.get()
+			.addOnSuccessListener { document ->
+				if (document.exists()) {
+					val companyProfile = document.toObject(CompanyProfileModel::class.java)
+					companyProfile?.let {
+						UserSession.setCompanyProfile(it)
+					}
+				}
+			}
 	}
 }

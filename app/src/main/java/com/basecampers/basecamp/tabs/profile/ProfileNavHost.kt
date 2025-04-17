@@ -13,7 +13,7 @@ fun ProfileNavHost(authViewModel : AuthViewModel) {
 
     NavHost(navController = navController, startDestination = profileRoutes.MAIN) {
         composable(profileRoutes.MAIN) {
-            ProfileScreen(authViewModel)
+            ProfileScreen()
         }
     }
 

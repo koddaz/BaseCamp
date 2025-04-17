@@ -31,6 +31,7 @@ import com.google.firebase.auth.auth
 @Composable
 fun ChooseCompanyScreen(
 	companyViewModel: CompanyViewModel,
+	authViewModel: AuthViewModel,
 	goCreateCompany: () -> Unit
 ) {
 
@@ -114,6 +115,14 @@ fun ChooseCompanyScreen(
 			) {
 				Text("Join")
 			}
+		}
+		Button(
+			onClick = { authViewModel.registerToTestCompany() },
+			modifier = Modifier
+				.fillMaxWidth()
+				.padding(bottom = 32.dp)
+		) {
+			Text("Register to Test Company")
 		}
 	}
 }
