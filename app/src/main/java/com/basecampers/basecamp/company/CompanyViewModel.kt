@@ -22,9 +22,7 @@ class CompanyViewModel : ViewModel() {
 
 	private val _companies = MutableStateFlow<List<CompanyModel>>(emptyList())
 	val companies: StateFlow<List<CompanyModel>> = _companies.asStateFlow()
-
-
-
+	
 	private val db = FirebaseFirestore.getInstance()
 
 	init {
