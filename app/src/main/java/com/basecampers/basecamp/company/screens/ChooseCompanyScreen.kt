@@ -55,9 +55,16 @@ fun ChooseCompanyScreen(
 	var expanded by remember { mutableStateOf(false) }
 	val userId = Firebase.auth.currentUser?.uid ?: ""
 
+	// Filter companies, show only those that the user is a member of
 	val userCompanies = companies.filter { company ->
 		userProfile?.companyList?.contains(company.companyId) == true
 	}
+	// Filter companies, show only those that the user is not a member of
+	val availableCompanies = companies.filter { company ->
+		userProfile?.companyList?.contains(company.companyId) != true
+	}
+
+
 
 	Column(
 		modifier = Modifier
@@ -151,7 +158,7 @@ fun ChooseCompanyScreen(
 				onDismissRequest = { expanded = false },
 				modifier = Modifier.fillMaxWidth()
 			) {
-				companies.forEach { company ->
+				availableCompanies.forEach { company ->
 					DropdownMenuItem(
 						text = { Text(company.companyName) },
 						onClick = {
