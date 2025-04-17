@@ -72,12 +72,15 @@ class AuthViewModel : ViewModel() {
     val hasEmailError = registerErrorMessage.map { errors ->
         errors.any { it in listOf(
             RegisterErrors.EMAIL_EMPTY,
-            RegisterErrors.EMAIL_NOT_VALID)
-        } }.stateIn(viewModelScope, SharingStarted.Lazily, false)
+            RegisterErrors.EMAIL_NOT_VALID,
+            RegisterErrors.EMAIL_ALREADY_IN_USE
+        ) }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     var errorMessages = mapOf(
         RegisterErrors.EMAIL_EMPTY to "Email cannot be empty",
         RegisterErrors.EMAIL_NOT_VALID to "Email is not valid",
+        RegisterErrors.EMAIL_ALREADY_IN_USE to "This email is already registered",
         RegisterErrors.PASSWORD_EMPTY to "Password cannot be empty",
         RegisterErrors.PASSWORD_TOO_SHORT to "Password must be at least 6 characters long",
         RegisterErrors.PASSWORD_NO_SPECIAL_CHAR to "Password must contain at least one special character",
@@ -98,7 +101,8 @@ class AuthViewModel : ViewModel() {
         CONFIRM_PASSWORD_EMPTY,
         CONFIRM_PASSWORD_MISMATCH,
         EMAIL_EMPTY,
-        EMAIL_NOT_VALID
+        EMAIL_NOT_VALID,
+        EMAIL_ALREADY_IN_USE
     }
 
     enum class LoginErrors {
@@ -211,7 +215,8 @@ class AuthViewModel : ViewModel() {
         val currentErrors = registerErrorMessage.value.toMutableList()
         currentErrors.removeAll { it in listOf(
             RegisterErrors.EMAIL_EMPTY,
-            RegisterErrors.EMAIL_NOT_VALID
+            RegisterErrors.EMAIL_NOT_VALID,
+            RegisterErrors.EMAIL_ALREADY_IN_USE
         )}
         _registerErrorMessage.value = currentErrors
     }
@@ -520,12 +525,7 @@ class AuthViewModel : ViewModel() {
         confirmPassword: String,
         ) {
 
-        val checkError = mutableListOf<RegisterErrors>().apply {
-            addAll(validateEmail(email))
-            addAll(validatePassword(password))
-            addAll(validateConfirmPassword(password, confirmPassword))
-        }
-        _registerErrorMessage.value = checkError
+        val checkError = validateAll(email, password, confirmPassword)
 
         if(checkError.isEmpty()) {
             Firebase.auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener { authResult ->
@@ -549,10 +549,16 @@ class AuthViewModel : ViewModel() {
                         Log.e("AuthViewModel", "Failed to create user profile in Firestore")
                     }
                 }
-            }.addOnFailureListener {
-                // Auth error
-                Log.e("AuthViewModel", "Failed to create user account")
             }
+                .addOnFailureListener { e ->
+                    Log.e("AuthViewModel", "Failed to create user account: ${e.message}")
+                    if (e.message?.contains("email address is already in use") == true) {
+                        _registerErrorMessage.value = listOf(RegisterErrors.EMAIL_ALREADY_IN_USE)
+                        _emailValid.value = false
+                    } else {
+                        _registerErrorMessage.value = listOf(RegisterErrors.EMAIL_NOT_VALID)
+                    }
+                }
         }
     }
     private fun updateUserCompanyList(userId: String, companyId: String) {
