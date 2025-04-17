@@ -122,12 +122,12 @@ class CompanyViewModel : ViewModel() {
 			val isOwner = company.ownerUID == userId
 			val status = if(isOwner) UserStatus.ADMIN else UserStatus.USER
 
-			val companyProfile = mapOf(
-				"imageUrl" to null,
-				"bio" to "No bio yet",
-				"status" to status.name,
-				"id" to userId,
-				"companyId" to companyId
+			val companyProfile = CompanyProfileModel(
+				imageUrl = null,
+				bio = "No bio yet",
+				status = status,
+				id = userId,
+				companyId = companyId
 			)
 
 			db.collection("users")
