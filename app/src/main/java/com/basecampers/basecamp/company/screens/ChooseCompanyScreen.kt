@@ -9,11 +9,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.company.CompanyViewModel
 
 @Composable
 fun ChooseCompanyScreen(
 	companyViewModel: CompanyViewModel,
+	authViewModel: AuthViewModel,
 	goCreateCompany: () -> Unit
 ) {
 	Column(
@@ -46,6 +48,14 @@ fun ChooseCompanyScreen(
 				.padding(bottom = 32.dp)
 		) {
 			Text("Choose")
+		}
+		Button(
+			onClick = { authViewModel.registerToTestCompany() },
+			modifier = Modifier
+				.fillMaxWidth()
+				.padding(bottom = 32.dp)
+		) {
+			Text("Register to Test Company")
 		}
 	}
 }

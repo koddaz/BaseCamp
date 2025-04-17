@@ -24,36 +24,42 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun Root(
-    authViewModel : AuthViewModel = viewModel(),
+    authViewModel: AuthViewModel = viewModel(),
     companyViewModel: CompanyViewModel = viewModel(),
     socialViewModel: SocialViewModel = viewModel(),
     innerPadding: PaddingValues
 ) {
     var isLoading by remember { mutableStateOf(true) }
-    val tempFunction = { isLoading = false }
-
+    
     val isLoggedIn by authViewModel.loggedin.collectAsState()
     val hasSelectedCompany by companyViewModel.hasSelectedCompany.collectAsState()
     
+    // Safety timeout
+    LaunchedEffect(Unit) {
+        delay(5000)
+        isLoading = false
+    }
+    
+    // Initialize app
     LaunchedEffect(Unit) {
         initializeAppSession(
             authViewModel = authViewModel,
             companyViewModel = companyViewModel,
-            socialViewModel = socialViewModel,
-            onComplete = { isLoading = false }
+            socialViewModel = socialViewModel
         )
+        
+        // Give time for operations to complete
+        delay(500)
+        isLoading = false
     }
     
     Column(Modifier.fillMaxSize().padding(innerPadding)) {
         if (isLoading) {
-            LoadingScreen(
-                tempFunction = tempFunction,
-                isLoggedIn = isLoggedIn
-            )
+            LoadingScreen()
         } else if (!isLoggedIn) {
             AuthNavHost(authViewModel)
         } else if (!hasSelectedCompany) {
-            CompanyNavHost(companyViewModel)
+            CompanyNavHost(companyViewModel, authViewModel)
         } else {
             TabNavigation(authViewModel, companyViewModel, socialViewModel)
         }
@@ -63,26 +69,30 @@ fun Root(
 private suspend fun initializeAppSession(
     authViewModel: AuthViewModel,
     companyViewModel: CompanyViewModel,
-    socialViewModel: SocialViewModel,
-    onComplete: () -> Unit
+    socialViewModel: SocialViewModel
 ) {
+    // Initialize auth
     authViewModel.checkLoggedin()
-
+    
+    // Wait for auth to stabilize
+    delay(500)
+    
     if (authViewModel.loggedin.value) {
         val userId = authViewModel.getCurrentUserUid()
         userId?.let {
-            authViewModel.fetchProfileFirestore(it)
+            // Initialize UserSession
+            UserSession.initialize(userId)
+            
+            // Fetch user profile
             authViewModel.fetchCurrentUserModel()
+            
+            // Wait for profile fetch
+            delay(500)
+            
+            // Check selected company
             companyViewModel.checkSelectedCompany(userId)
-            // Check status of user in company (admin? SuperUser?)
-            // load company specific data (Categories, Items)
         }
     }
-
-    delay(1500) //Temporary delay to simulate loading, vi tar bort denna när vi har lagt till
-    // alla funktioner som ska köras på appstart.
-
-    onComplete()
 }
 
 @Preview(showBackground = true)
@@ -91,7 +101,10 @@ fun RootPreview() {
     val authViewModel = viewModel<AuthViewModel>()
     val companyViewModel = viewModel<CompanyViewModel>()
     val socialViewModel = viewModel<SocialViewModel>()
-    Root(authViewModel = authViewModel, companyViewModel = companyViewModel, socialViewModel =
-    socialViewModel, innerPadding =
-    PaddingValues())
+    Root(
+        authViewModel = authViewModel,
+        companyViewModel = companyViewModel,
+        socialViewModel = socialViewModel,
+        innerPadding = PaddingValues()
+    )
 }

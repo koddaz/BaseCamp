@@ -1,148 +1,307 @@
 package com.basecampers.basecamp.tabs.profile
 
-import android.util.Log
+import android.annotation.SuppressLint
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Business
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
-import com.basecampers.basecamp.tabs.profile.viewModel.ProfileViewModel
-import kotlinx.coroutines.flow.flowOf
+import com.basecampers.basecamp.aRootFolder.UserSession
+import com.basecampers.basecamp.tabs.profile.models.UserStatus
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun ProfileScreen(authViewModel: AuthViewModel, profileViewModel: ProfileViewModel = viewModel()) {
-
-
-//    val profileCount by profileViewModel.profileCount.collectAsState()
-
-
-    val profile by authViewModel.profile.collectAsState()
-    val companyProfile by authViewModel.companyProfile.collectAsState()
-    val uid = authViewModel.getCurrentUserUid()
+fun ProfileScreen() {
+    // Access data from UserSession
+    val profile by UserSession.profile.collectAsState()
+    val companyProfile by UserSession.companyProfile.collectAsState()
+    val company by UserSession.company.collectAsState()
     
-    // Observe profile from Room
-    val roomProfile by remember(uid) {
-        uid?.let { profileViewModel.observeProfile(it) } ?: flowOf(null)
-    }.collectAsState(initial = null)
-    
-    var isRefreshing by remember { mutableStateOf(false) }
-    
-    //var profileCount by remember { mutableStateOf(0) }
-//    Log.d("ProfileScreen", "Current profileCount: $profileCount")
-
-
-   // LaunchedEffect(Unit) {
-      //  profileCount = profileViewModel.getProfileCount()
-   // }
-
-   // LaunchedEffect(uid) {
-     //   uid?.let {
-       //     isRefreshing = true
-         //   profileViewModel.refreshProfile(it)
-           // isRefreshing = false
-    //    }
-   // }
-
-
-
-    LaunchedEffect(uid) {
-        Log.d("ProfileScreen", "LaunchedEffect(uid) triggered. uid: $uid")
-        if (uid != null) {
-            isRefreshing = true
-            profileViewModel.refreshProfile(uid)
-            isRefreshing = false
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Profile Image Placeholder
+        Box(
+            modifier = Modifier
+                .size(100.dp)
+                .background(Color.LightGray, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Person,
+                contentDescription = "Profile Picture",
+                tint = Color.White,
+                modifier = Modifier.size(50.dp)
+            )
         }
-    }
-
-
-
-
-
-
-
-    Spacer(modifier = Modifier.height(16.dp))
-    
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text("Profile", style = MaterialTheme.typography.headlineMedium)
-        
-//        Text("Profiles in database: $profileCount")
-        
-        // Data source indicator
-        Text(
-            "Data source: ${if (roomProfile != null) "Room Database" else "Not found in Room"}",
-            style = MaterialTheme.typography.labelMedium
-        )
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        // Profile data display
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                if (isRefreshing) {
-                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-                
-                Text("Profile Info", style = MaterialTheme.typography.titleMedium)
-                Spacer(modifier = Modifier.height(8.dp))
-
-
-
-                Text("First Name: ${profile?.firstName ?: "N/A"}")
-                Text("Last Name: ${profile?.lastName ?: "N/A"}")
-                Text("Email: ${profile?.email ?: "N/A"}")
-                Text("Bio: ${companyProfile?.bio ?: "N/A"}")
-                Text("Status: ${companyProfile?.status ?: "N/A"}")
-
-//                Text("Profiles in database: $profileCount")
-                roomProfile?.let {
-
-                        Spacer(modifier = Modifier.height(8.dp))
-                    Text("first: ${it.firstName}")
-                    Text("last: ${it.lastName}")
-                    Text("email: ${it.email}")
-
-
-
-
-
-                }
+        // User Name
+        Text(
+            text = "${profile?.firstName ?: ""} ${profile?.lastName ?: ""}",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
+        
+        // User Email
+        Text(
+            text = profile?.email ?: "",
+            style = MaterialTheme.typography.bodyLarge,
+            color = Color.Gray
+        )
+        
+        // User Status Badge
+        companyProfile?.status?.let { status ->
+            val statusColor = when(status) {
+                UserStatus.ADMIN -> Color.Red
+                UserStatus.SUPER_USER -> Color.Blue
+                UserStatus.USER -> Color.Green
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Surface(
+                modifier = Modifier.padding(4.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = statusColor.copy(alpha = 0.1f)
+            ) {
+                Text(
+                    text = status.name,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                    color = statusColor
+                )
             }
         }
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        // Manual refresh button
-        Button(
-            onClick = {
-                uid?.let {
-                    isRefreshing = true
-                    profileViewModel.refreshProfile(it)
-                    isRefreshing = false
-                }
-            },
+        // Scrollable content for all model data
+        LazyColumn(
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Refresh Profile Data")
-        }
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        Button(
-            onClick = { authViewModel.deleteUser() },
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error)
-        ) {
-            Text("Delete Account")
+            // Profile Model Card
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "Profile Data",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        if (profile != null) {
+                            ModelDataItem("ID", profile?.id ?: "")
+                            ModelDataItem("Email", profile?.email ?: "")
+                            ModelDataItem("First Name", profile?.firstName ?: "")
+                            ModelDataItem("Last Name", profile?.lastName ?: "")
+                            ModelDataItem("Company List", profile?.companyList?.joinToString(", ") ?: "")
+                        } else {
+                            Text(
+                                text = "No profile data found",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Gray
+                            )
+                        }
+                    }
+                }
+            }
+            
+            // Company Profile Model Card
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "Company Profile Data",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        if (companyProfile != null) {
+                            ModelDataItem("ID", companyProfile?.id ?: "")
+                            ModelDataItem("Company ID", companyProfile?.companyId ?: "")
+                            ModelDataItem("Bio", companyProfile?.bio ?: "")
+                            ModelDataItem("Status", companyProfile?.status?.name ?: "")
+                            ModelDataItem("Image URL", companyProfile?.imageUrl?.toString() ?: "No image")
+                        } else {
+                            Text(
+                                text = "No company profile data found",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Gray
+                            )
+                        }
+                    }
+                }
+            }
+            
+            // Company Model Card
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "Company Data",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        if (company != null) {
+                            ModelDataItem("Company ID", company?.companyId ?: "")
+                            ModelDataItem("Company Name", company?.companyName ?: "")
+                            ModelDataItem("Owner UID", company?.ownerUID ?: "")
+                            ModelDataItem("Bio", company?.bio ?: "")
+                            ModelDataItem("Image URL", company?.imageUrl?.toString() ?: "No image")
+                        } else {
+                            Text(
+                                text = "No company data found",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Gray
+                            )
+                        }
+                    }
+                }
+            }
+            
+            // Your Companies List
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "Your Companies",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        if (profile?.companyList?.isNotEmpty() == true) {
+                            Column {
+                                profile?.companyList?.forEach { companyId ->
+                                    CompanyListItem(
+                                        companyId = companyId,
+                                        isSelected = companyId == UserSession.selectedCompanyId.value,
+                                        onCompanySelected = { /* Call your selectCompany function */ }
+                                    )
+                                }
+                            }
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "No companies added yet",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color.Gray
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun ProfilePreviewScreen() {
-    ProfileScreen(authViewModel = viewModel())
+fun ModelDataItem(label: String, value: String) {
+    Column(modifier = Modifier.padding(vertical = 4.dp)) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.Gray
+        )
+        Text(
+            text = if (value.isNotEmpty()) value else "Not available",
+            style = MaterialTheme.typography.bodyMedium
+        )
+    }
+}
+
+@Composable
+fun CompanyListItem(
+    companyId: String,
+    isSelected: Boolean,
+    onCompanySelected: (String) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onCompanySelected(companyId) }
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Company Icon placeholder
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .background(Color.LightGray, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Business,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(16.dp)
+            )
+        }
+        
+        Spacer(modifier = Modifier.width(8.dp))
+        
+        // Company ID
+        Text(
+            text = companyId,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.weight(1f)
+        )
+        
+        // Selected indicator
+        if (isSelected) {
+            Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = "Selected",
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
 }
