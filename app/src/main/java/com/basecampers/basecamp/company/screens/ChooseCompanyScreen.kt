@@ -76,7 +76,6 @@ fun ChooseCompanyScreen(
 		Card(
 			modifier = Modifier
 				.fillMaxWidth()
-				.weight(1f)
 				.padding(vertical = 16.dp),
 			elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
 		) {
