@@ -525,12 +525,7 @@ class AuthViewModel : ViewModel() {
         confirmPassword: String,
         ) {
 
-        val checkError = mutableListOf<RegisterErrors>().apply {
-            addAll(validateEmail(email))
-            addAll(validatePassword(password))
-            addAll(validateConfirmPassword(password, confirmPassword))
-        }
-        _registerErrorMessage.value = checkError
+        val checkError = validateAll(email, password, confirmPassword)
 
         if(checkError.isEmpty()) {
             Firebase.auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener { authResult ->
