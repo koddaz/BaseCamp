@@ -20,6 +20,7 @@ fun HomeScreen(authViewModel: AuthViewModel, companyViewModel: CompanyViewModel)
         Text("Home Screen", style = MaterialTheme.typography.titleLarge)
         Button(onClick = {
             authViewModel.logout()
+            companyViewModel.clearSelectedCompany()
         }) {
             Text("Logout")
         }

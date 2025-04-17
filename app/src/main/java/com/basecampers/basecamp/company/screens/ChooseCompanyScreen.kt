@@ -102,27 +102,18 @@ fun ChooseCompanyScreen(
 		}
 
 		// Join button (visible only when a company is selected)
-		if (selectedCompany != null) {
-			Button(
-				onClick = {
-					selectedCompany?.let {
-						companyViewModel.joinCompany(it.companyId, userId )
-					}
-				},
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(bottom = 16.dp)
-			) {
-				Text("Join")
-			}
-		}
 		Button(
-			onClick = { authViewModel.registerToTestCompany() },
+			onClick = {
+				selectedCompany?.let {
+					companyViewModel.joinCompany(it.companyId, userId)
+				}
+			},
+			enabled = selectedCompany != null,
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(bottom = 32.dp)
+				.padding(bottom = 16.dp)
 		) {
-			Text("Register to Test Company")
+			Text("Join")
 		}
 	}
 }
