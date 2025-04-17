@@ -1,11 +1,17 @@
 package com.basecampers.basecamp.authentication
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,151 +36,157 @@ fun LoginScreen(
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
+    var passwordVisible by remember { mutableStateOf(false) }
 
-    BaseScreenContainer(
-        content = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // Triangle pattern placeholder
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .padding(bottom = 24.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    // TODO: Replace with actual triangle pattern image
-                    Text(
-                        text = "Triangle Pattern Placeholder",
-                        color = SecondaryAqua,
-                        fontSize = 14.sp
-                    )
-                }
+    // Observe login state
+    val isLoggedIn by authViewModel.loggedin.collectAsState()
 
-                // Title
-                Text(
-                    text = "Sign In",
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = TextPrimary,
-                    modifier = Modifier
-                        .align(Alignment.Start)
-                        .padding(bottom = 24.dp)
-                )
+    // Handle navigation when logged in
+    LaunchedEffect(isLoggedIn) {
+        if (isLoggedIn) {
+            // The Root composable will handle the navigation to TabNavigation
+            Log.d("LoginScreen", "User logged in successfully")
+        }
+    }
 
-                // Email field
-                BasecampTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    label = "Email",
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
-                )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AppBackground)
+            .padding(horizontal = 16.dp)
+    ) {
+        // Background Pattern
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .align(Alignment.TopCenter)
+        ) {
+            Text(
+                text = "Pattern Placeholder",
+                color = SecondaryAqua,
+                fontSize = 14.sp,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
 
-                // Password field
-                BasecampTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = "Password",
-                    modifier = Modifier.padding(bottom = 4.dp),
-                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    trailingIcon = {
-                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                            Icon(
-                                painter = painterResource(
-                                    id = if (passwordVisible) android.R.drawable.ic_menu_view 
-                                    else android.R.drawable.ic_secure
-                                ),
-                                contentDescription = if (passwordVisible) "Hide password" else "Show password",
-                                tint = TextSecondary
-                            )
-                        }
+        // Content
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(top = 180.dp, bottom = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Title
+            Text(
+                text = "Sign In",
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = TextPrimary,
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(bottom = 8.dp)
+            )
+
+
+            // Email Field
+            BasecampTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = "Email",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+            )
+
+            // Password Field
+            BasecampTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = "Password",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                            tint = TextSecondary
+                        )
                     }
-                )
+                }
+            )
 
-                // Forgot password
+            // Sign In Button
+            BasecampButton(
+                text = "Sign In",
+                onClick = {
+                    isLoading = true
+                    authViewModel.login(email, password)
+                },
+                isLoading = isLoading,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            )
+
+            // Forgot Password
+            Text(
+                text = "Forgot Password?",
+                color = PrimaryRed,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .clickable { goForgotPass() }
+                    .padding(bottom = 24.dp)
+            )
+
+            // Divider
+            BasecampDivider(
+                text = "OR",
+                color = BorderColor,
+                thickness = 1f
+            )
+
+            // Test User Button (formerly Google Sign In)
+            BasecampOutlinedButton(
+                text = "Sign in with Google",
+                onClick = {
+                    // Use valid test credentials
+                    email = "user@example.com"
+                    password = "Admin123!"
+                    isLoading = true
+                    authViewModel.login(email, password)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            )
+
+            // Register Link
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
                 Text(
-                    text = "Forgot password?",
+                    text = "Don't have an account? ",
                     color = TextSecondary,
-                    fontSize = 14.sp,
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .padding(bottom = 24.dp)
-                        .clickable { goForgotPass() }
+                    style = MaterialTheme.typography.bodyMedium
                 )
-
-                // Login button
-                BasecampButton(
-                    text = "Login",
-                    onClick = {
-                        isLoading = true
-                        authViewModel.login(email, password)
-                    },
-                    isLoading = isLoading,
-                    modifier = Modifier.padding(bottom = 24.dp)
-                )
-
-                // OR divider
-                BasecampDivider(
-                    text = "OR",
-                    color = BorderColor,
-                    thickness = 1f
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Google sign in button
-                OutlinedButton(
-                    onClick = { /* TODO: Implement Google Sign In */ },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    border = BorderStroke(1.dp, BorderColor)
-                ) {
-                    Text(
-                        text = "Sign in with Google",
-                        fontSize = 16.sp,
-                        color = TextSecondary
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Sign up text
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = "Don't have an account? ",
-                        color = TextSecondary,
-                        fontSize = 14.sp
-                    )
-                    Text(
-                        text = "Sign Up",
-                        color = SecondaryAqua,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.clickable { goRegister() }
-                    )
-                }
-
-                // Bottom indicator
-                Box(
-                    modifier = Modifier
-                        .padding(top = 24.dp)
-                        .size(width = 40.dp, height = 4.dp)
-                        .clip(RoundedCornerShape(2.dp))
-                        .background(TextPrimary)
+                Text(
+                    text = "Sign Up",
+                    color = PrimaryRed,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.clickable { goRegister() }
                 )
             }
         }
-    )
+    }
 }
