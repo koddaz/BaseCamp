@@ -16,12 +16,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.basecamp.navigation.TabNavigation
-import com.basecampers.basecamp.authentication.AuthNavHost
+import com.basecampers.basecamp.authentication.navHost.AuthNavHost
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.company.CompanyNavHost
-import com.basecampers.basecamp.company.CompanyViewModel
-import com.basecampers.basecamp.tabs.profile.models.CompanyModel
-import com.basecampers.basecamp.tabs.profile.models.CompanyProfileModel
+import com.basecampers.basecamp.company.viewModel.CompanyViewModel
+import com.basecampers.basecamp.company.models.CompanyModel
+import com.basecampers.basecamp.company.models.CompanyProfileModel
+import com.basecampers.basecamp.tabs.profile.viewModel.ProfileViewModel
 import com.basecampers.basecamp.tabs.social.viewModel.SocialViewModel
 import kotlinx.coroutines.delay
 
@@ -31,6 +32,7 @@ fun Root(
     authViewModel: AuthViewModel = viewModel(),
     companyViewModel: CompanyViewModel = viewModel(),
     socialViewModel: SocialViewModel = viewModel(),
+    profileViewModel: ProfileViewModel = viewModel(),
     innerPadding: PaddingValues
 ) {
     var isLoading by remember { mutableStateOf(true) }
@@ -90,11 +92,11 @@ fun Root(
         if (isLoading) {
             LoadingScreen()
         } else if (!isLoggedIn) {
-            AuthNavHost(authViewModel)
+            AuthNavHost(authViewModel, profileViewModel)
         } else if (!hasSelectedCompany) {
             CompanyNavHost(companyViewModel, authViewModel)
         } else {
-            TabNavigation(authViewModel, companyViewModel, socialViewModel)
+            TabNavigation(authViewModel, companyViewModel, socialViewModel, profileViewModel)
         }
     }
 }

@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
-import com.basecampers.basecamp.company.CompanyViewModel
+import com.basecampers.basecamp.company.viewModel.CompanyViewModel
 
 @Composable
 fun HomeScreen(authViewModel: AuthViewModel, companyViewModel: CompanyViewModel) {

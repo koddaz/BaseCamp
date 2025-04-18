@@ -5,14 +5,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,11 +27,12 @@ fun SocialNavHost(
 	selectedSocialTabIndex: Int = 1,
 	onSocialTabSelected: (Int) -> Unit = {}
 ) {
-	// Get states from ViewModel
+	// lets take the states from UserSession insataed where it makes sense, isSuper should be
+	// added.
 	val isSuper by authViewModel.isSuper.collectAsState()
 	val unreadCount by socialViewModel.unreadCount.collectAsState()
 	val showMenu by socialViewModel.showMenu.collectAsState()
-	// Local copy of the selectedSocialTabIndex
+	
 	var currentSocialTabIndex by remember { mutableIntStateOf(selectedSocialTabIndex) }
 	
 	// Update current tab when external state changes
@@ -49,10 +47,10 @@ fun SocialNavHost(
 	
 	Box(modifier = Modifier.fillMaxSize()) {
 		Column(modifier = Modifier.fillMaxSize()) {
-			// Add top padding for safe area (temporary solution)
+			
+			// Instead of safearea... /Top bar space
 			Spacer(modifier = Modifier.height(25.dp))
 			
-			// SuperUser toggle (discreetly placed at the top)
 			// ONLY WHILE TESTING
 			Row(
 				modifier = Modifier
@@ -71,10 +69,9 @@ fun SocialNavHost(
 					Text("User")
 				}
 			}
-			
 			// ONLY WHILE TESTING
 			
-			// Content area - takes full remaining space
+			
 			Box(modifier = Modifier.weight(1f)) {
 				when (currentSocialTabIndex) {
 					0 -> QnAScreen(
@@ -93,7 +90,6 @@ fun SocialNavHost(
 			}
 		}
 		
-		// Social Menu Overlay
 		SocialMenu(
 			selectedTabIndex = currentSocialTabIndex,
 			unreadCount = unreadCount,

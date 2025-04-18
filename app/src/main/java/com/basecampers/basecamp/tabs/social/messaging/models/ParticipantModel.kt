@@ -1,6 +1,6 @@
 package com.basecampers.basecamp.tabs.social.messaging.models
 
-import com.basecampers.basecamp.tabs.profile.models.UserStatus
+import com.basecampers.basecamp.company.models.UserStatus
 
 /**
  * Represents a participant in a chat conversation.

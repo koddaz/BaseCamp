@@ -8,6 +8,7 @@ import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.company.models.CompanyRoutes
 import com.basecampers.basecamp.company.screens.ChooseCompanyScreen
 import com.basecampers.basecamp.company.screens.CreateCompanyScreen
+import com.basecampers.basecamp.company.viewModel.CompanyViewModel
 
 
 @Composable
