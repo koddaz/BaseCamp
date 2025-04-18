@@ -26,21 +26,27 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.ui.theme.BaseCampTheme
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
-import com.basecampers.basecamp.company.CompanyViewModel
+import com.basecampers.basecamp.company.viewModel.CompanyViewModel
 import com.basecampers.basecamp.tabs.booking.user.UserBookingNavHost
 import com.basecampers.basecamp.tabs.home.HomeNavHost
-import com.basecampers.basecamp.tabs.profile.ProfileNavHost
+import com.basecampers.basecamp.tabs.profile.navHost.ProfileNavHost
+import com.basecampers.basecamp.tabs.profile.viewModel.ProfileViewModel
 import com.basecampers.basecamp.tabs.social.navHost.SocialNavHost
 import com.basecampers.basecamp.tabs.social.viewModel.SocialViewModel
 
 @Composable
-fun TabNavigation(authViewModel : AuthViewModel, companyViewModel: CompanyViewModel, socialViewModel: SocialViewModel) {
+fun TabNavigation(authViewModel : AuthViewModel, companyViewModel: CompanyViewModel,
+                  socialViewModel: SocialViewModel, profileViewModel: ProfileViewModel
+) {
     
     // Main tab state
     var selectedTabIndex by remember { mutableIntStateOf(AppState.selectedMainTabIndex) }
     
     // Social tab state
     var selectedSocialTabIndex by remember { mutableIntStateOf(AppState.selectedSocialTabIndex) }
+    
+    // Profile tab state
+    var selectedProfileTabIndex by remember { mutableIntStateOf(AppState.selectedProfileTabIndex) }
     
     Column(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.weight(1f)) {
@@ -51,11 +57,19 @@ fun TabNavigation(authViewModel : AuthViewModel, companyViewModel: CompanyViewMo
                     authViewModel = authViewModel,
 	                socialViewModel = socialViewModel,
 	                selectedSocialTabIndex = selectedSocialTabIndex
-                ) { newIndex ->
+                )
+                { newIndex ->
                     selectedSocialTabIndex = newIndex
                     AppState.selectedSocialTabIndex = newIndex
                 }
-                3 -> ProfileNavHost(authViewModel)
+                3 -> ProfileNavHost(
+                    profileViewModel,
+                    selectedProfileTabIndex = selectedProfileTabIndex
+                )
+                { newIndex ->
+                    selectedProfileTabIndex = newIndex
+                    AppState.selectedProfileTabIndex = newIndex
+                }
                 else -> Text("Error: Tab not found")
             }
         }
@@ -97,7 +111,8 @@ fun NavigationBarPreview() {
         TabNavigation(
 	        authViewModel = viewModel(),
 	        companyViewModel = viewModel(),
-	        socialViewModel = viewModel()
+	        socialViewModel = viewModel(),
+            profileViewModel = viewModel()
         )
     }
 }

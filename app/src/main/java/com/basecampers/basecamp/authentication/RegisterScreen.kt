@@ -18,10 +18,12 @@ import com.basecampers.basecamp.components.ConfirmPasswordTextField
 import com.basecampers.basecamp.components.PasswordInfoButton
 import com.basecampers.basecamp.components.PasswordPolicyInfo
 import com.basecampers.basecamp.components.PasswordTextField
+import com.basecampers.basecamp.tabs.profile.viewModel.ProfileViewModel
 import java.util.UUID
 
 @Composable
-fun RegisterScreen(authViewModel: AuthViewModel, goLogin: () -> Unit) {
+fun RegisterScreen(authViewModel: AuthViewModel, profileViewModel: ProfileViewModel, goLogin: () ->
+Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -34,6 +36,7 @@ fun RegisterScreen(authViewModel: AuthViewModel, goLogin: () -> Unit) {
 
     val emailErrors = errorMessage.filter { error ->
         error in listOf(
+            AuthViewModel.RegisterErrors.EMAIL_ALREADY_IN_USE,
             AuthViewModel.RegisterErrors.EMAIL_EMPTY,
             AuthViewModel.RegisterErrors.EMAIL_NOT_VALID
         )
@@ -83,6 +86,14 @@ fun RegisterScreen(authViewModel: AuthViewModel, goLogin: () -> Unit) {
                 )
             }
 
+            // Display email error messages
+            emailErrors.forEach { error ->
+                Text(
+                    text = authViewModel.errorMessages[error] ?: "Unknown error",
+                    color = Color.Red,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
             TextField(
                 label = { Text("Email") },
                 value = email,
@@ -98,8 +109,8 @@ fun RegisterScreen(authViewModel: AuthViewModel, goLogin: () -> Unit) {
                     .border(
                         1.dp,
                         when {
-                            isEmailValid -> Color.Green
-                            hasEmailError && email.isNotEmpty() -> Color.Red
+                            hasEmailError -> Color.Red
+                            isEmailValid && email.isNotEmpty() -> Color.Green
                             else -> Color.LightGray
                         }
                     )
@@ -171,6 +182,9 @@ fun RegisterScreen(authViewModel: AuthViewModel, goLogin: () -> Unit) {
                         email = email,
                         password = password,
                         confirmPassword = confirmPassword,
+                        profileViewModel = profileViewModel,
+                        onSuccess = { /* Handle success */ },
+                        onError = { /* Handle error */ }
                     )
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -195,5 +209,5 @@ fun RegisterScreen(authViewModel: AuthViewModel, goLogin: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun RegisterScreenPreview() {
-    RegisterScreen(authViewModel = viewModel(), goLogin = {})
+    RegisterScreen(authViewModel = viewModel(), profileViewModel = viewModel(), goLogin = {})
 }
