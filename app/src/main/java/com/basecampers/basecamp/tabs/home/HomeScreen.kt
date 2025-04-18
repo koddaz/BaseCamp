@@ -20,8 +20,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
-import com.basecampers.basecamp.company.viewModels.CompanyViewModel
+import com.basecampers.basecamp.company.CompanyViewModel
 
 @Composable
 fun HomeScreen(
@@ -64,9 +65,12 @@ fun HomeScreen(
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
+    val authViewModel: AuthViewModel = viewModel()
+    val companyViewModel: CompanyViewModel = viewModel()
+    
     HomeScreen(
-        authViewModel = AuthViewModel(),
-        companyViewModel = CompanyViewModel(),
+        authViewModel = authViewModel,
+        companyViewModel = companyViewModel,
         onReportClick = {}
     )
 }

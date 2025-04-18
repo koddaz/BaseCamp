@@ -24,10 +24,17 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.components.*
 import com.basecampers.basecamp.ui.theme.*
-import com.basecampers.basecamp.BuildConfig
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewLoginScreen() {
+    LoginScreen(goRegister = {}, goForgotPass = {}, authViewModel = viewModel())
+}
 
 @Composable
 fun LoginScreen(
@@ -40,6 +47,7 @@ fun LoginScreen(
     var isLoading by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
     val isLoggedIn by authViewModel.loggedin.collectAsState()
+    val loginErrorMessage by authViewModel.loginErrorMessage.collectAsState()
 
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
@@ -94,7 +102,8 @@ fun LoginScreen(
                     password = it
                     if(loginErrorMessage.isNotEmpty()) {
                         authViewModel.clearLoginErrors()
-                    } },
+                    }
+                },
                 label = "Password",
                 authViewModel = authViewModel,
                 modifier = Modifier
@@ -123,6 +132,7 @@ fun LoginScreen(
             }) {
                 Text("user9182@example.com & Test123!")
             }
+
             Button(
                 onClick = { goForgotPass() },
                 modifier = Modifier.fillMaxWidth()
@@ -156,17 +166,12 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-        Button(
-            onClick = { goRegister() },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Go to Register")
+            Button(
+                onClick = { goRegister() },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Go to Register")
+            }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewLoginScreen() {
-    LoginScreen(goRegister = {}, goForgotPass = {}, authViewModel = viewModel())
 }
