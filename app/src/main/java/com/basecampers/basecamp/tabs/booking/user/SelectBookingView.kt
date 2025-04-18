@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.basecampers.basecamp.company.viewModel.CompanyViewModel
 import com.basecampers.basecamp.components.CustomButton
 import com.basecampers.basecamp.components.CustomColumn
 import com.basecampers.basecamp.tabs.booking.components.BookingCard
@@ -69,7 +70,6 @@ fun UserItemView(
     var showDatePicker by remember { mutableStateOf(false) }
 
     val formattedDateRange by bookingViewModel?.formattedDateRange?.collectAsState() ?: remember { mutableStateOf("") }
-    val selectedCategory by bookingViewModel?.selectedCategory?.collectAsState() ?: remember { mutableStateOf<BookingCategories?>(null) }
     val selectedItem by bookingViewModel?.selectedBookingItem?.collectAsState() ?: remember { mutableStateOf<BookingItem?>(null) }
     val itemList by bookingViewModel?.bookingItemsList?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
 
@@ -77,12 +77,12 @@ fun UserItemView(
         Column(modifier = Modifier.weight(1f)) {
             itemList.forEach { item ->
                 BookingCard(
-                    selected = item.id == selectedCategory?.id,
+                    selected = item.id == selectedItem?.id,
                     title = item.name,
                     info = item.info,
                     price = item.pricePerDay,
                     onClick = {
-                        bookingViewModel?.setSelection(item.id, item)
+                        bookingViewModel?.setSelectedBookingItem(item)
                     }
                 )
             }
@@ -123,7 +123,6 @@ fun UserItemView(
             }
             CustomButton(text = "Next", onClick = {
                 selectedItem?.let { item ->
-                    bookingViewModel?.setSelection(item.id, item)
                     bookingViewModel?.retrieveExtraItems(item.categoryId, item.id)
                     navExtra(item.id)
                 }
@@ -136,18 +135,20 @@ fun UserItemView(
 
 @Composable
 fun UserExtraItem(
-    selectedItem: BookingItem?,
     bookingViewModel: UserBookingViewModel?,
     navBooking: () -> Unit,
 ) {
 
+    val selectedExtraItems by bookingViewModel?.selectedExtraItems?.collectAsState() ?: remember {
+        mutableStateOf(emptyList<BookingExtra?>())
+    }
     val extraList by bookingViewModel?.bookingExtraList?.collectAsState()
         ?: remember { mutableStateOf(emptyList()) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         extraList.forEach { extra ->
             BookingCard(
-                selected = extra.id == selectedItem?.id,
+                selected = selectedExtraItems.any { it?.id == extra.id },
                 title = extra.name,
                 info = extra.info,
                 price = extra.price,
@@ -215,80 +216,4 @@ fun UserConfirmationView(
     }
 
 
-}
-@Composable
-fun SelectBookingView(
-    categoryList: List<BookingCategories>,
-    itemList: List<BookingItem>,
-    bookingViewModel: UserBookingViewModel?,
-    navExtra: () -> Unit,
-) {
-    val selectedCategory by bookingViewModel?.selectedCategory?.collectAsState()
-        ?: remember { mutableStateOf<BookingCategories?>(null) }
-    val selectedItem by bookingViewModel?.selectedBookingItem?.collectAsState()
-        ?: remember { mutableStateOf<BookingItem?>(null) }
-
-
-
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .background(Color.White)) {
-
-        Column(modifier = Modifier.weight(1f)) {
-            CustomColumn(title = "Select a category") {
-                LazyRow {
-                    items(categoryList.size) { index ->
-                        val category = categoryList[index]
-
-                        CategoriesCard(title = category.name, info = category.info, onClick = {
-                            bookingViewModel?.setSelectedCategory(category = category)
-                        })
-                    }
-                }
-
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            CustomColumn() {
-
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            CustomColumn(title = "Select an item") {
-
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    val filteredItems = itemList.filter { it.categoryId == selectedCategory?.id }
-
-                    items(filteredItems.size) { index ->
-                        val item = filteredItems[index]
-                        BookingCard(
-                            selected = item.id == selectedItem?.id,
-                            title = item.name,
-                            info = item.info,
-                            price = item.pricePerDay,
-                            modifier = Modifier.fillParentMaxWidth(),
-                            onClick = {
-                                bookingViewModel?.setSelection(item.id)
-                            }
-                        )
-                    }
-                }
-            }
-        }
-        CustomColumn() {
-            CustomButton(text = "Next", onClick = {
-
-                val selectedItem = itemList.find { it.id == selectedItem?.id }
-                selectedItem?.let { item ->
-                    bookingViewModel?.setSelection(item.id, item)
-                    bookingViewModel?.retrieveExtraItems(item.categoryId, item.id)
-                    navExtra()
-
-                }
-
-            })
-        }
-
-
-    }
 }

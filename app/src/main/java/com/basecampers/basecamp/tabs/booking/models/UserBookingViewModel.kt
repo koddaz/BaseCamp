@@ -2,7 +2,6 @@ package com.basecampers.basecamp.tabs.booking.models
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.company.models.CompanyProfileModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
@@ -15,10 +14,12 @@ import java.util.Locale
 
 
 class UserBookingViewModel : ViewModel() {
-    val userId = Firebase.auth.currentUser?.uid
-    val db = Firebase.firestore
-    val authViewModel = AuthViewModel()
 
+    val userId = Firebase.auth.currentUser?.uid ?: ""
+    private val _currentCompanyId = MutableStateFlow("")
+    val currentCompanyId: StateFlow<String> = _currentCompanyId
+
+    private val db = Firebase.firestore
 
     private val _selectedItemId = MutableStateFlow("")
     private val _selectedDateRange = MutableStateFlow<Pair<Long?, Long?>>(Pair(null, null))
@@ -26,21 +27,16 @@ class UserBookingViewModel : ViewModel() {
     private val _endDate = MutableStateFlow<Long?>(null)
 
 
-    val _selectedCategory = MutableStateFlow<BookingCategories?>(null)
+    private val _selectedCategory = MutableStateFlow<BookingCategories?>(null)
     val selectedCategory: StateFlow<BookingCategories?> = _selectedCategory
-
-    val _selectedExtraItems = MutableStateFlow<List<BookingExtra>>(emptyList())
+    private val _selectedExtraItems = MutableStateFlow<List<BookingExtra>>(emptyList())
     val selectedExtraItems: StateFlow<List<BookingExtra>> = _selectedExtraItems
-
     private val _selectedBookingItem = MutableStateFlow<BookingItem?>(null)
     val selectedBookingItem: StateFlow<BookingItem?> = _selectedBookingItem
-
     private val _bookingItemsList = MutableStateFlow<List<BookingItem>>(emptyList())
     val bookingItemsList: StateFlow<List<BookingItem>> = _bookingItemsList
-
     private val _bookingExtraList = MutableStateFlow<List<BookingExtra>>(emptyList())
     val bookingExtraList: StateFlow<List<BookingExtra>> = _bookingExtraList
-
     private val _categoriesList = MutableStateFlow<List<BookingCategories>>(emptyList())
     val categoriesList: StateFlow<List<BookingCategories>> = _categoriesList
 
@@ -48,7 +44,6 @@ class UserBookingViewModel : ViewModel() {
     private val _amountOfDays = MutableStateFlow<Int>(0)
     private val _formattedDateRange = MutableStateFlow<String>("")
     val _finalPrice = MutableStateFlow<Double>(0.0)
-
     val startDate: StateFlow<Long?> = _startDate
     val endDate: StateFlow<Long?> = _endDate
     val amountOfDays: StateFlow<Int> = _amountOfDays
@@ -61,13 +56,14 @@ class UserBookingViewModel : ViewModel() {
 
     fun setUser(companyProfileModel: CompanyProfileModel) {
         _user.value = companyProfileModel
+        companyProfileModel.companyId.let {
+            _currentCompanyId.value = it
+        }
         retrieveCategories()
     }
 
-
-    private fun getCompanyId(): String? {
-        return _user.value?.companyId
-        Log.d("UserBookingViewModel", "Company ID: ${_user.value?.companyId}")
+    fun setSelectedItem(item: BookingItem) {
+        _selectedBookingItem.value = item
     }
 
     fun setSelectedCategory(category: BookingCategories) {
@@ -75,30 +71,28 @@ class UserBookingViewModel : ViewModel() {
     }
 
     fun retrieveCategories() {
-       val companyId = getCompanyId().toString()
-        if (userId != null) {
-            if (companyId.isEmpty()) {
-                Log.d("UserBookingViewModel", "Company ID is empty")
-                return
-            }
-            db
-                .collection("companies").document(companyId)
-                .collection("categories").get()
-                .addOnSuccessListener { snapshot ->
-                    val categoryList = snapshot.documents.mapNotNull { doc ->
-                        val id = doc.id
-                        val name = doc.getString("name") ?: ""
-                        val info = doc.getString("info") ?: ""
-                        val createdBy = doc.getString("createdBy") ?: ""
-                        BookingCategories(id, name, info, createdBy)
-                    }
-                    _categoriesList.value = categoryList
-                }
-                .addOnFailureListener { e ->
-                    // Log the error
-                }
+        if (currentCompanyId.value.isEmpty()) {
+            Log.d("UserBookingViewModel", "Company ID is empty")
+            return
         }
+
+        db.collection("companies").document(currentCompanyId.value)
+            .collection("categories").get()
+            .addOnSuccessListener { snapshot ->
+                val categoryList = snapshot.documents.mapNotNull { doc ->
+                    val id = doc.id
+                    val name = doc.getString("name") ?: ""
+                    val info = doc.getString("info") ?: ""
+                    val createdBy = doc.getString("createdBy") ?: ""
+                    BookingCategories(id, name, info, createdBy)
+                }
+                _categoriesList.value = categoryList
+            }
+            .addOnFailureListener { e ->
+                // Log the error
+            }
     }
+
     fun clearAllValues() {
         _selectedItemId.value = ""
         _selectedDateRange.value = Pair(null, null)
@@ -113,8 +107,6 @@ class UserBookingViewModel : ViewModel() {
 
 
     fun saveUserBooking(userBooking: UserBooking) {
-        val companyId = getCompanyId() ?: return
-        val userId = authViewModel.getCurrentUserUid() ?: return
 
         try {
             // Create a flattened data structure with only essential fields
@@ -137,12 +129,12 @@ class UserBookingViewModel : ViewModel() {
             )
 
             val userRef = db
-                .collection("companies").document(companyId)
+                .collection("companies").document(currentCompanyId.value)
                 .collection("users").document(userId)
                 .collection("bookings").document()
 
             val companyRef = db
-                .collection("companies").document(companyId)
+                .collection("companies").document(currentCompanyId.value)
                 .collection("bookings").document()
 
             // Use batch write to ensure both writes succeed or fail together
@@ -168,10 +160,8 @@ class UserBookingViewModel : ViewModel() {
 
 
     fun retrieveBookingItems(categoryId: String) {
-        val companyId = getCompanyId() ?: return
-
         db
-            .collection("companies").document(companyId)
+            .collection("companies").document(currentCompanyId.value)
             .collection("categories").document(categoryId)
             .collection("bookings")
             .get()
@@ -212,8 +202,7 @@ class UserBookingViewModel : ViewModel() {
         categoryId: String,
         itemId: String,
     ) {
-        val companyId = getCompanyId() ?: return
-        db.collection("companies").document(companyId)
+        db.collection("companies").document(currentCompanyId.value)
             .collection("categories").document(categoryId)
             .collection("bookings").document(itemId)
             .collection("extras").get().addOnSuccessListener { snapshot ->
@@ -245,16 +234,6 @@ class UserBookingViewModel : ViewModel() {
         _selectedExtraItems.value = _selectedExtraItems.value.filter { it.id != itemId }
     }
 
-    fun setSelection(
-        itemId: String,
-        item: BookingItem? = null,
-        ) {
-        _selectedItemId.value = itemId
-        if (item != null) {
-            _selectedBookingItem.value = item
-
-        }
-    }
 
     fun calculateDays(startDate: Long?, endDate: Long?) {
         if (startDate != null && endDate != null) {

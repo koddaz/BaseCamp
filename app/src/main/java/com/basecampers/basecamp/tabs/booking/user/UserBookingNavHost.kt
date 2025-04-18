@@ -21,6 +21,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.basecampers.basecamp.aRootFolder.UserSession
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.components.CustomButton
 import com.basecampers.basecamp.tabs.booking.admin.AdminNavHost
@@ -31,6 +32,7 @@ import com.basecampers.basecamp.tabs.booking.models.UserBookingViewModel
 
 @Composable
 fun UserBookingNavHost(authViewModel: AuthViewModel) {
+
     val navController = rememberNavController()
     val bookingViewModel: UserBookingViewModel = viewModel()
 
@@ -40,9 +42,10 @@ fun UserBookingNavHost(authViewModel: AuthViewModel) {
 
     val selectedItem by bookingViewModel?.selectedBookingItem?.collectAsState()
         ?: remember { mutableStateOf<BookingItem?>(null) }
-
     val selectedExtraItems by bookingViewModel.selectedExtraItems.collectAsState()
     val selectedBookingItem by bookingViewModel.selectedBookingItem.collectAsState()
+
+
     val formattedDateRange by bookingViewModel.formattedDateRange.collectAsState()
     val amountOfDays by bookingViewModel.amountOfDays.collectAsState()
     val extraItems by bookingViewModel.bookingExtraList.collectAsState()
@@ -103,7 +106,6 @@ fun UserBookingNavHost(authViewModel: AuthViewModel) {
 
                 composable("extrasView") {
                     UserExtraItem(
-                        selectedItem = selectedItem,
                         bookingViewModel = bookingViewModel,
                         navBooking = {
                             navController.navigate("confirmationView")
@@ -125,38 +127,8 @@ fun UserBookingNavHost(authViewModel: AuthViewModel) {
 
 
 
-                composable("vieew") {
-                    SelectBookingView(
-                        categoryList = categoryList,
-                        itemList = itemList,
-                        bookingViewModel = bookingViewModel,
-                        navExtra = { navController.navigate("selectExtra") })
-                }
-                composable("selectExtra") {
-                    SelectExtraView(
-                        bookingViewModel = bookingViewModel,
-                        navConfirmation = {
-                            navController.navigate("confirmation")
-                        },
-                        selectedExtraItems = selectedExtraItems,
-                        selectedBookingItem = selectedBookingItem,
-                        formattedDateRange = formattedDateRange,
-                        amountOfDays = amountOfDays,
-                        extraItems = extraItems,
-                        totalPrice = totalPrice,
-                    )
-                }
-                /*
-                composable("confirmation") {
-                    ConfirmationView(
-                        bookingViewModel = bookingViewModel,
-                        confirmBooking = {
-                            navController.navigate("start")
-                        }
-                    )
-                }
 
-                 */
+
             }
         }
         Row(modifier = Modifier.fillMaxWidth()) {
@@ -227,10 +199,4 @@ fun BookingViewPreview() {
         )
     )
 
-    SelectBookingView(
-        categoryList = dummyCategories,
-        itemList = dummyItems,
-        bookingViewModel = null,
-        navExtra = {  },
-    )
 }
