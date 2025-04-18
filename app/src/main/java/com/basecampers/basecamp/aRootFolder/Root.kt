@@ -53,15 +53,12 @@ fun Root(
                 Log.d("UserSessionFlow", "Initializing UserSession with userId: $userId")
                 UserSession.initialize(userId)
                 
-                Log.d("UserSessionFlow", "Fetching user profile model")
-                authViewModel.fetchCurrentUserModel()
-                
                 if (hasSelectedCompany) {
                     val companyId = companyViewModel.currentCompanyId.value
                     Log.d("UserSessionFlow", "Has selected company: $companyId")
                     
                     if (companyId != null) {
-                        loadCompanyData(authViewModel, userId, companyId)
+                        loadCompanyData(companyViewModel, userId, companyId)
                     }
                 } else {
                     Log.d("UserSessionFlow", "No company selected - clearing company data")
@@ -101,11 +98,11 @@ fun Root(
     }
 }
 
-private fun loadCompanyData(authViewModel: AuthViewModel, userId: String, companyId: String) {
+private fun loadCompanyData(companyViewModel: CompanyViewModel, userId: String, companyId: String) {
     Log.d("UserSessionFlow", "Loading company data - userId: $userId, companyId: $companyId")
     UserSession.setSelectedCompanyId(companyId)
-    authViewModel.fetchCompanyData(companyId)
-    authViewModel.fetchCompanyProfileData(userId, companyId)
+    companyViewModel.fetchCompanyData(companyId)
+    companyViewModel.fetchCompanyProfileData(userId, companyId)
 }
 
 private fun clearCompanyData() {

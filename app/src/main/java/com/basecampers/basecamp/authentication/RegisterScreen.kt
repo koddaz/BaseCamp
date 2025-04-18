@@ -103,9 +103,10 @@ fun RegisterScreen(authViewModel: AuthViewModel, profileViewModel: ProfileViewMo
                 )
             }.forEach { error ->
                 Text(
-                    text = authViewModel.errorMessages[error] ?: "Unknown error",
+                    text = error.message,
                     color = Color.Red,
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(start = 4.dp)
                 )
             }
             TextField(
@@ -174,8 +175,8 @@ fun RegisterScreen(authViewModel: AuthViewModel, profileViewModel: ProfileViewMo
                         password = password,
                         confirmPassword = confirmPassword,
                         profileViewModel = profileViewModel,
-                        onSuccess = { /* Handle success */ },
-                        onError = { /* Handle error */ }
+                        onSuccess = { isLoading = false },
+                        onError = { isLoading = false }
                     )
                 },
                 modifier = Modifier
