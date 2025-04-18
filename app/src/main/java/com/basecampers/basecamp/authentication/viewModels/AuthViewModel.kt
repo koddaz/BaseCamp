@@ -5,10 +5,11 @@ import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.basecampers.basecamp.aRootFolder.UserSession
-import com.basecampers.basecamp.tabs.profile.models.CompanyModel
-import com.basecampers.basecamp.tabs.profile.models.CompanyProfileModel
+import com.basecampers.basecamp.company.models.CompanyModel
+import com.basecampers.basecamp.company.models.CompanyProfileModel
 import com.basecampers.basecamp.tabs.profile.models.ProfileModel
-import com.basecampers.basecamp.tabs.profile.models.UserStatus
+import com.basecampers.basecamp.company.models.UserStatus
+import com.basecampers.basecamp.tabs.profile.viewModel.ProfileViewModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.ktx.database
 import com.google.firebase.firestore.DocumentSnapshot
@@ -33,9 +34,6 @@ class AuthViewModel : ViewModel() {
 
     private val _loggedin = MutableStateFlow(false)
     val loggedin = _loggedin.asStateFlow()
-
-    private val _profile = MutableStateFlow<ProfileModel?>(null)
-    val profile = _profile.asStateFlow()
     
     //User in SOCIAL
     // Current user's super user status
@@ -72,12 +70,15 @@ class AuthViewModel : ViewModel() {
     val hasEmailError = registerErrorMessage.map { errors ->
         errors.any { it in listOf(
             RegisterErrors.EMAIL_EMPTY,
-            RegisterErrors.EMAIL_NOT_VALID)
-        } }.stateIn(viewModelScope, SharingStarted.Lazily, false)
+            RegisterErrors.EMAIL_NOT_VALID,
+            RegisterErrors.EMAIL_ALREADY_IN_USE
+        ) }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     var errorMessages = mapOf(
         RegisterErrors.EMAIL_EMPTY to "Email cannot be empty",
         RegisterErrors.EMAIL_NOT_VALID to "Email is not valid",
+        RegisterErrors.EMAIL_ALREADY_IN_USE to "This email is already registered",
         RegisterErrors.PASSWORD_EMPTY to "Password cannot be empty",
         RegisterErrors.PASSWORD_TOO_SHORT to "Password must be at least 6 characters long",
         RegisterErrors.PASSWORD_NO_SPECIAL_CHAR to "Password must contain at least one special character",
@@ -98,7 +99,8 @@ class AuthViewModel : ViewModel() {
         CONFIRM_PASSWORD_EMPTY,
         CONFIRM_PASSWORD_MISMATCH,
         EMAIL_EMPTY,
-        EMAIL_NOT_VALID
+        EMAIL_NOT_VALID,
+        EMAIL_ALREADY_IN_USE
     }
 
     enum class LoginErrors {
@@ -211,7 +213,8 @@ class AuthViewModel : ViewModel() {
         val currentErrors = registerErrorMessage.value.toMutableList()
         currentErrors.removeAll { it in listOf(
             RegisterErrors.EMAIL_EMPTY,
-            RegisterErrors.EMAIL_NOT_VALID
+            RegisterErrors.EMAIL_NOT_VALID,
+            RegisterErrors.EMAIL_ALREADY_IN_USE
         )}
         _registerErrorMessage.value = currentErrors
     }
@@ -248,52 +251,23 @@ class AuthViewModel : ViewModel() {
             // Initialize UserSession with user ID
             UserSession.setUserId(user.uid)
             
-            // Fetch complete user info
-            firestore.collection("users").document(user.uid).get()
-                .addOnSuccessListener { document ->
-                    if (document.exists()) {
-                        // Map all fields from Firestore document to ProfileInfo
-                        val profileModel = document.toObject(ProfileModel::class.java)
-                            ?: ProfileModel(
-                                email = document.getString("email") ?: "",
-                                id = user.uid
-                            )
-                        
-                        // Update both ViewModel state and UserSession
-                        _profile.value = profileModel
-                        UserSession.setProfile(profileModel)
-                        _loggedin.value = true
-                        
-                        Log.i("CHECKLOGINDEBUG", "Logged in = ${loggedin.value}")
-                    } else {
-                        // Clear profile data
-                        _profile.value = null
-                        Log.i("CHECKLOGINDEBUG", "User document not found")
-                    }
-                }
-                .addOnFailureListener {
-                    // Handle failure
-                    _profile.value = null
-                    _loggedin.value = false
-                    Log.e("CHECKLOGINDEBUG", "Failed to fetch user info", it)
-                }
         } else {
-            // Clear both ViewModel state and UserSession
-            _profile.value = null
             UserSession.clearSession()
         }
     }
-
-    private fun searchUserInCompanies(userId: String, ) {
+    
+    private fun searchUserInCompanies(userId: String) {
         firestore.collection("companies")
             .get()
             .addOnSuccessListener { companySnap ->
                 var userFound = false
-
+                val foundCompanyIds = mutableListOf<String>()
+                
                 if (companySnap.isEmpty) {
                     Log.e("AuthViewModel", "No companies found")
                     return@addOnSuccessListener
                 }
+                
                 for (companyDoc in companySnap.documents) {
                     val companyId = companyDoc.id
                     Log.d("AuthViewModel", "Checking company: $companyId")
@@ -302,19 +276,37 @@ class AuthViewModel : ViewModel() {
                         .collection("users")
                         .document(userId)
                         .get()
-                        .addOnSuccessListener {
-                            userSnap ->
+                        .addOnSuccessListener { userSnap ->
                             if (userSnap.exists()) {
                                 userFound = true
+                                foundCompanyIds.add(companyId)
                                 Log.d("AuthViewModel", "Found user in company: $companyId")
                                 createUserModel(userSnap, userId, companyId)
                             }
                         }
                 }
+                
                 viewModelScope.launch {
                     delay(1000)
-                    if(!userFound) {
+                    if (!userFound) {
                         Log.e("AuthViewModel", "User not found in any company")
+                    } else {
+                        Log.d("AuthViewModel", "Found user in ${foundCompanyIds.size} companies")
+                        
+                        // Here, ensure the profile in UserSession has the correct company list
+                        val currentProfile = UserSession.profile.value
+                        if (currentProfile != null && currentProfile.companyList != foundCompanyIds) {
+                            Log.d("AuthViewModel", "Updating user profile with companies: $foundCompanyIds")
+                            
+                            // Update profile in Firestore and UserSession
+                            val updatedProfile = currentProfile.copy(companyList = foundCompanyIds)
+                            firestore.collection("users").document(userId)
+                                .update("companyList", foundCompanyIds)
+                                .addOnSuccessListener {
+                                    UserSession.setProfile(updatedProfile)
+                                    Log.d("AuthViewModel", "Profile updated with companies")
+                                }
+                        }
                     }
                 }
             }
@@ -322,6 +314,7 @@ class AuthViewModel : ViewModel() {
                 Log.e("AuthViewModel", "Failed to fetch companies", e)
             }
     }
+    
     private fun createUserModel(userDoc: DocumentSnapshot, userId: String, companyId: String?) {
         try {
             val email = userDoc.getString("email") ?: ""
@@ -417,7 +410,52 @@ class AuthViewModel : ViewModel() {
                 Log.e("AuthViewModel", "Failed to create user: ${e.message}")
             }
     }
-
+    //AUTH (borde heta: Authenticate)
+    fun registerAsUser(
+        email: String,
+        password: String,
+        confirmPassword: String,
+        profileViewModel: ProfileViewModel,
+        onSuccess: () -> Unit = {},
+        onError: (String) -> Unit = {}
+    ) {
+        val checkError = validateAll(email, password, confirmPassword)
+        
+        if(checkError.isEmpty()) {
+            Firebase.auth.createUserWithEmailAndPassword(email, password)
+                .addOnSuccessListener { authResult ->
+                    val userId = authResult.user?.uid
+                    if (userId != null) {
+                        // Use ProfileViewModel to create the profile
+                        profileViewModel.createProfile(
+                            email = email,
+                            userId = userId,
+                            onSuccess = {
+                                // Update login state
+                                checkLoggedin()
+                                onSuccess()
+                            },
+                            onError = { error ->
+                                Log.e("AuthViewModel", "Failed to create profile: $error")
+                                onError(error)
+                            }
+                        )
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e("AuthViewModel", "Failed to create user account: ${e.message}")
+                    if (e.message?.contains("email address is already in use") == true) {
+                        _registerErrorMessage.value = listOf(RegisterErrors.EMAIL_ALREADY_IN_USE)
+                        _emailValid.value = false
+                    } else {
+                        _registerErrorMessage.value = listOf(RegisterErrors.EMAIL_NOT_VALID)
+                    }
+                    onError(e.message ?: "Registration failed")
+                }
+        } else {
+            onError("Validation failed")
+        }
+    }
 
     fun registerAsCompany(
         email: String,
@@ -514,47 +552,6 @@ class AuthViewModel : ViewModel() {
             }
     }
 
-    fun registerAsUser(
-        email: String,
-        password: String,
-        confirmPassword: String,
-        ) {
-
-        val checkError = mutableListOf<RegisterErrors>().apply {
-            addAll(validateEmail(email))
-            addAll(validatePassword(password))
-            addAll(validateConfirmPassword(password, confirmPassword))
-        }
-        _registerErrorMessage.value = checkError
-
-        if(checkError.isEmpty()) {
-            Firebase.auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener { authResult ->
-                val userId = authResult.user?.uid
-                if (userId != null) {
-                    // Basic user data
-                    val profileModel = ProfileModel(
-                        email = email,
-                        firstName = "",
-                        lastName = "",
-                        companyList = emptyList()
-                    )
-                    _profile.value = profileModel
-
-                    // Create full profile document right away
-                    firestore.collection("users").document(userId).set(profileModel).addOnSuccessListener {
-                        // Update login state
-                        checkLoggedin()
-                    } .addOnFailureListener {
-                        // Firestore error
-                        Log.e("AuthViewModel", "Failed to create user profile in Firestore")
-                    }
-                }
-            }.addOnFailureListener {
-                // Auth error
-                Log.e("AuthViewModel", "Failed to create user account")
-            }
-        }
-    }
     private fun updateUserCompanyList(userId: String, companyId: String) {
         firestore.collection("users").document(userId).get()
             .addOnSuccessListener { userDoc ->
@@ -646,9 +643,6 @@ class AuthViewModel : ViewModel() {
             // Use existing functions
             checkLoggedin()
             clearLoginErrors()
-            
-            // Fetch user data for UserSession
-            fetchProfileData(userId)
             
             Log.i("LOGINDEBUG", "Checked login")
         }.addOnFailureListener { exception ->
@@ -749,59 +743,6 @@ class AuthViewModel : ViewModel() {
         return Firebase.auth.currentUser?.uid
     }
 
-    //----------------------------------------------------------------------------
-    // PROFILE FUNCTIONALITY
-    //----------------------------------------------------------------------------
-
-    // Suggested rename: getUserInfo
-    fun fetchProfileFirestore(userId: String) {
-        firestore.collection("users").document(userId).get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    // Create a complete ProfileInfo object from the document
-                    val profileModel = ProfileModel(
-                        email = document.getString("email") ?: "",
-                        firstName = document.getString("firstName") ?: "",
-                        lastName = document.getString("lastName") ?: ""
-                    )
-
-                    _profile.value = profileModel
-                    Log.d("ProfileFetch", "Successfully fetched profile for $userId")
-                } else {
-                    _profile.value = null
-                    Log.d("ProfileFetch", "No profile document exists for $userId")
-                }
-            }
-            .addOnFailureListener { e ->
-                _profile.value = null
-                Log.e("ProfileFetch", "Failed to fetch profile", e)
-            }
-    }
-    /**
-     * Fetches user profile data from Firestore and updates UserSession.
-     * @param userId The Firebase Auth UID of the user
-     */
-    fun fetchProfileData(userId: String) {
-        firestore.collection("users").document(userId).get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    val profile = document.toObject(ProfileModel::class.java)
-                    profile?.let {
-                        // Update UserSession
-                        UserSession.setProfile(it)
-                        
-                        // If you still need to update the ViewModel state for compatibility
-                        _profile.value = it
-                        
-                        Log.d("ProfileFetch", "Updated profile in UserSession: $it")
-                    }
-                }
-            }
-            .addOnFailureListener { e ->
-                Log.e("ProfileFetch", "Failed to fetch profile", e)
-            }
-    }
-    
     /**
      * Fetches company data from Firestore and updates UserSession.
      * @param companyId The ID of the company to fetch

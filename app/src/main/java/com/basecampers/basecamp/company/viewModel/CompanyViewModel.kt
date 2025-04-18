@@ -1,10 +1,10 @@
-package com.basecampers.basecamp.company
+package com.basecampers.basecamp.company.viewModel
 
 import androidx.lifecycle.ViewModel
 import com.basecampers.basecamp.aRootFolder.UserSession
-import com.basecampers.basecamp.tabs.profile.models.CompanyModel
-import com.basecampers.basecamp.tabs.profile.models.CompanyProfileModel
-import com.basecampers.basecamp.tabs.profile.models.UserStatus
+import com.basecampers.basecamp.company.models.CompanyModel
+import com.basecampers.basecamp.company.models.CompanyProfileModel
+import com.basecampers.basecamp.company.models.UserStatus
 import com.google.firebase.firestore.FieldValue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,9 +22,7 @@ class CompanyViewModel : ViewModel() {
 
 	private val _companies = MutableStateFlow<List<CompanyModel>>(emptyList())
 	val companies: StateFlow<List<CompanyModel>> = _companies.asStateFlow()
-
-
-
+	
 	private val db = FirebaseFirestore.getInstance()
 
 	init {

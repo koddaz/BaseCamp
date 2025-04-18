@@ -1,4 +1,4 @@
-package com.basecampers.basecamp.tabs.profile.models
+package com.basecampers.basecamp.company.models
 
 import java.net.URL
 

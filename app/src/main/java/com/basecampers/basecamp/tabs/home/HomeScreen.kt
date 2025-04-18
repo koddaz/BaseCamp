@@ -2,9 +2,12 @@ package com.basecampers.basecamp.tabs.home
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Lightbulb
@@ -26,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
-import com.basecampers.basecamp.company.CompanyViewModel
+import com.basecampers.basecamp.company.viewModel.CompanyViewModel
 import com.basecampers.basecamp.ui.theme.CardBackground
 import com.basecampers.basecamp.ui.theme.PrimaryRed
 import com.basecampers.basecamp.ui.theme.SecondaryAqua
@@ -44,206 +47,153 @@ fun HomeScreen(
     val userInfo by authViewModel.companyProfile.collectAsState()
     var showMenu by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.fillMaxSize()) {  // Wrap everything in a Box for FAB overlay
-        Column(
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        // Top Bar
+        Row(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp)
-                .padding(top = 16.dp)
+                .fillMaxWidth()
+                .padding(bottom = 24.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // Top Bar with User Info
+            // User Info
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // User Avatar
+                // Avatar
                 Box(
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
-                        .background(SecondaryAqua)
+                        .background(CardBackground)
+                        .border(
+                            BorderStroke(1.dp, SecondaryAqua),
+                            CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Person,
-                        contentDescription = "Profile",
-                        tint = Color.White,
-                        modifier = Modifier.align(Alignment.Center)
+                        contentDescription = "User Avatar",
+                        tint = TextSecondary
                     )
                 }
                 
-                // Name and Room number with padding
-                Column(
-                    modifier = Modifier.padding(start = 12.dp)
-                ) {
+                // User Name and Room
+                Column {
                     Text(
-                        text = "John Doe",
+                        text = "John Doe", // Placeholder
                         style = MaterialTheme.typography.titleMedium,
                         color = TextPrimary
                     )
                     Text(
-                        text = "Room 101",
-                        style = MaterialTheme.typography.bodyMedium,
+                        text = "Room 101", // Placeholder
+                        style = MaterialTheme.typography.bodySmall,
                         color = TextSecondary
                     )
                 }
             }
 
-            // Vertical Cards Row
-            Row(
+            // Menu Button
+            IconButton(
+                onClick = { showMenu = !showMenu }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Menu,
+                    contentDescription = "Menu",
+                    tint = TextPrimary
+                )
+            }
+        }
+
+        // Main Content
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+        ) {
+            // First Card
+            VerticalCard(
+                title = "Report a Problem",
+                subtitle = "Need help?",
+                description = "Let us know if you're experiencing any issues",
+                buttonText = "Report",
+                onButtonClick = onReportClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            )
+
+            // Second Card
+            VerticalCard(
+                title = "Book a Room",
+                subtitle = "Need a space?",
+                description = "Find and book available rooms",
+                buttonText = "Book Now",
+                onButtonClick = { /* TODO: Implement booking navigation */ },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            )
+
+            // Quick Tips Card
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // First Card (Report Problem)
-                VerticalCard(
-                    title = "Report a problem",
-                    subtitle = "Need help?",
-                    description = "Let us know if something is not working right. We are here to help 24/7!",
-                    buttonText = "Report",
-                    onButtonClick = onReportClick,
-                    modifier = Modifier.weight(1f)
+                colors = CardDefaults.cardColors(
+                    containerColor = CardBackground
+                ),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 0.dp
                 )
-                
-                // Second Card (Book a Room)
-                VerticalCard(
-                    title = "Book a Room",
-                    subtitle = "Quick Booking",
-                    description = "Book a meeting room instantly. Check availability and reserve in seconds!",
-                    buttonText = "Book Now",
-                    onButtonClick = onReportClick,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            // Quick Tips Horizontal Card
-            Card(
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = CardBackground),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp),
-                elevation = CardDefaults.cardElevation(0.dp),
-                border = BorderStroke(1.dp, Color(0xFFE0E0E0))
             ) {
-                Row(
+                Column(
                     modifier = Modifier
+                        .fillMaxWidth()
                         .padding(16.dp)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(modifier = Modifier.weight(1f)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Lightbulb,
+                            contentDescription = "Quick Tips",
+                            tint = SecondaryAqua
+                        )
                         Text(
                             text = "Quick Tips",
                             style = MaterialTheme.typography.titleMedium,
                             color = TextPrimary
                         )
-                        Text(
-                            text = "Helpful information for getting started",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = TextSecondary
-                        )
                     }
-                    Icon(
-                        imageVector = Icons.Default.Lightbulb,
-                        contentDescription = "Tips",
-                        tint = PrimaryRed
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "• Check room availability before booking\n" +
+                               "• Report issues promptly\n" +
+                               "• Keep your profile updated",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TextSecondary
                     )
                 }
             }
         }
-
-        // FAB with dropdown menu
-        Box(
-            modifier = Modifier
-                .padding(16.dp)
-                .align(Alignment.BottomEnd)
-        ) {
-            FloatingActionButton(
-                onClick = { showMenu = !showMenu },
-                containerColor = PrimaryRed,
-                contentColor = Color.White,
-                elevation = FloatingActionButtonDefaults.elevation(4.dp),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Menu,
-                    contentDescription = "More Options"
-                )
-            }
-
-            DropdownMenu(
-                expanded = showMenu,
-                onDismissRequest = { showMenu = false },
-                modifier = Modifier
-                    .width(280.dp)
-                    .background(CardBackground)
-            ) {
-                DropdownMenuItem(
-                    text = { Text("Logout") },
-                    onClick = {
-                        authViewModel.logout()
-                        showMenu = false
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text("Change isLoggedIn to False") },
-                    onClick = {
-                        authViewModel.isLoggedInFalse()
-                        showMenu = false
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text("Register User to Company") },
-                    onClick = {
-                        authViewModel.registerUserToCompany(
-                            companyId = "66a2bdbb-7218-48a3-ab86-4d1bd2de0728"
-                        )
-                        showMenu = false
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text("Change hasSelectedCompany to False") },
-                    onClick = {
-                        companyViewModel.clearSelectedCompany()
-                        showMenu = false
-                    }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun ReportProblemCard(
-    onReportClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = CardBackground),
-        modifier = modifier
-            .wrapContentHeight()
-            .padding(8.dp),
-        elevation = CardDefaults.cardElevation(0.dp)
-    ) {
-        // ... rest of the existing card content ...
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
-    val authViewModel: AuthViewModel = viewModel()
-    val companyViewModel: CompanyViewModel = viewModel()
-    
     HomeScreen(
-        authViewModel = authViewModel,
-        companyViewModel = companyViewModel,
+        authViewModel = viewModel(),
+        companyViewModel = viewModel(),
         onReportClick = {}
     )
 }

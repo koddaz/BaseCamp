@@ -56,21 +56,29 @@ import com.basecampers.basecamp.ui.theme.BaseCampTheme
 
 // Feature imports
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
-import com.basecampers.basecamp.company.CompanyViewModel
+import com.basecampers.basecamp.company.viewModel.CompanyViewModel
 import com.basecampers.basecamp.tabs.booking.user.UserBookingNavHost
 import com.basecampers.basecamp.tabs.home.HomeNavHost
-import com.basecampers.basecamp.tabs.profile.ProfileNavHost
+import com.basecampers.basecamp.tabs.profile.navHost.ProfileNavHost
+import com.basecampers.basecamp.tabs.profile.viewModel.ProfileViewModel
 import com.basecampers.basecamp.tabs.social.navHost.SocialNavHost
 import com.basecampers.basecamp.tabs.social.viewModel.SocialViewModel
 
 @Composable
-fun TabNavigation(authViewModel: AuthViewModel, companyViewModel: CompanyViewModel, socialViewModel: SocialViewModel) {
-    
+fun TabNavigation(
+    authViewModel: AuthViewModel,
+    companyViewModel: CompanyViewModel,
+    socialViewModel: SocialViewModel,
+    profileViewModel: ProfileViewModel
+) {
     // Main tab state
     var selectedTabIndex by remember { mutableIntStateOf(AppState.selectedMainTabIndex) }
     
     // Social tab state
     var selectedSocialTabIndex by remember { mutableIntStateOf(AppState.selectedSocialTabIndex) }
+    
+    // Profile tab state
+    var selectedProfileTabIndex by remember { mutableIntStateOf(AppState.selectedProfileTabIndex) }
     
     Column(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.weight(1f)) {
@@ -82,13 +90,21 @@ fun TabNavigation(authViewModel: AuthViewModel, companyViewModel: CompanyViewMod
                 1 -> UserBookingNavHost(authViewModel)
                 2 -> SocialNavHost(
                     authViewModel = authViewModel,
-	                socialViewModel = socialViewModel,
-	                selectedSocialTabIndex = selectedSocialTabIndex
-                ) { newIndex ->
-                    selectedSocialTabIndex = newIndex
-                    AppState.selectedSocialTabIndex = newIndex
-                }
-                3 -> ProfileNavHost(authViewModel)
+                    socialViewModel = socialViewModel,
+                    selectedSocialTabIndex = selectedSocialTabIndex,
+                    onSocialTabSelected = { newIndex ->
+                        selectedSocialTabIndex = newIndex
+                        AppState.selectedSocialTabIndex = newIndex
+                    }
+                )
+                3 -> ProfileNavHost(
+                    profileViewModel = profileViewModel,
+                    selectedProfileTabIndex = selectedProfileTabIndex,
+                    onProfileTabSelected = { newIndex ->
+                        selectedProfileTabIndex = newIndex
+                        AppState.selectedProfileTabIndex = newIndex
+                    }
+                )
                 else -> Text("Error: Tab not found")
             }
         }
@@ -175,9 +191,10 @@ private data class TabItem(
 fun NavigationBarPreview() {
     BaseCampTheme {
         TabNavigation(
-	        authViewModel = viewModel(),
-	        companyViewModel = viewModel(),
-	        socialViewModel = viewModel()
+            authViewModel = viewModel(),
+            companyViewModel = viewModel(),
+            socialViewModel = viewModel(),
+            profileViewModel = viewModel()
         )
     }
 }

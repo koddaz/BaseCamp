@@ -1,6 +1,7 @@
 package com.basecampers.basecamp.tabs.profile.models
 
 import androidx.room.TypeConverter
+import com.basecampers.basecamp.company.models.UserStatus
 
 class UserStatusConverter {
 	

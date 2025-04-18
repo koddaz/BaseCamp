@@ -1,14 +1,21 @@
 package com.basecampers.basecamp.company.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.Business
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,12 +26,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.basecampers.basecamp.aRootFolder.UserSession
+import com.basecampers.basecamp.aRootFolder.UserSession.selectedCompanyId
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
-import com.basecampers.basecamp.company.CompanyViewModel
-import com.basecampers.basecamp.tabs.profile.models.CompanyModel
+import com.basecampers.basecamp.company.viewModel.CompanyViewModel
+import com.basecampers.basecamp.company.models.CompanyModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
@@ -36,9 +47,20 @@ fun ChooseCompanyScreen(
 ) {
 
 	val companies by companyViewModel.companies.collectAsState()
+	val userProfile by UserSession.profile.collectAsState()
 	var selectedCompany by remember { mutableStateOf<CompanyModel?>(null) }
 	var expanded by remember { mutableStateOf(false) }
 	val userId = Firebase.auth.currentUser?.uid ?: ""
+
+	// Filter companies, show only those that the user is a member of
+	val userCompanies = companies.filter { company ->
+		userProfile?.companyList?.contains(company.companyId) == true
+	}
+	// Filter companies, show only those that the user is not a member of
+	val availableCompanies = companies.filter { company ->
+		userProfile?.companyList?.contains(company.companyId) != true
+	}
+
 
 
 	Column(
@@ -54,6 +76,50 @@ fun ChooseCompanyScreen(
 			textAlign = TextAlign.Center,
 			modifier = Modifier.padding(top = 32.dp)
 		)
+
+		Card(
+			modifier = Modifier
+				.fillMaxWidth()
+				.padding(vertical = 16.dp),
+			elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+		) {
+			Column(modifier = Modifier.padding(16.dp)) {
+				Text(
+					text = "Your Companies",
+					style = MaterialTheme.typography.titleMedium,
+					fontWeight = FontWeight.Bold
+				)
+
+				Spacer(modifier = Modifier.height(8.dp))
+
+				if (userCompanies.isNotEmpty()) {
+					Column {
+						userCompanies.forEach { company ->
+							CompanyListItem(
+								company = company,
+								isSelected = company.companyName == selectedCompanyId.value,
+								onCompanySelected = {
+									companyViewModel.selectCompany(company.companyId, userId)
+								}
+							)
+						}
+					}
+				} else {
+					Box(
+						modifier = Modifier
+							.fillMaxWidth()
+							.padding(vertical = 16.dp),
+						contentAlignment = Alignment.Center
+					) {
+						Text(
+							text = "No companies added yet",
+							style = MaterialTheme.typography.bodyMedium,
+							color = Color.Gray
+						)
+					}
+				}
+			}
+		}
 		
 		Button(
 			onClick = goCreateCompany,
@@ -89,7 +155,7 @@ fun ChooseCompanyScreen(
 				onDismissRequest = { expanded = false },
 				modifier = Modifier.fillMaxWidth()
 			) {
-				companies.forEach { company ->
+				availableCompanies.forEach { company ->
 					DropdownMenuItem(
 						text = { Text(company.companyName) },
 						onClick = {
@@ -102,27 +168,66 @@ fun ChooseCompanyScreen(
 		}
 
 		// Join button (visible only when a company is selected)
-		if (selectedCompany != null) {
-			Button(
-				onClick = {
-					selectedCompany?.let {
-						companyViewModel.joinCompany(it.companyId, userId )
-					}
-				},
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(bottom = 16.dp)
-			) {
-				Text("Join")
-			}
-		}
 		Button(
-			onClick = { authViewModel.registerToTestCompany() },
+			onClick = {
+				selectedCompany?.let {
+					companyViewModel.joinCompany(it.companyId, userId)
+				}
+			},
+			enabled = selectedCompany != null,
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(bottom = 32.dp)
+				.padding(bottom = 16.dp)
 		) {
-			Text("Register to Test Company")
+			Text("Join")
+		}
+	}
+}
+
+@Composable
+fun CompanyListItem(
+	company: CompanyModel,
+	isSelected: Boolean,
+	onCompanySelected: () -> Unit
+) {
+	Row(
+		modifier = Modifier
+			.fillMaxWidth()
+			.clickable { onCompanySelected() }
+			.padding(vertical = 8.dp),
+		verticalAlignment = Alignment.CenterVertically
+	) {
+		// Company Icon placeholder
+		Box(
+			modifier = Modifier
+				.size(32.dp)
+				.background(Color.LightGray, CircleShape),
+			contentAlignment = Alignment.Center
+		) {
+			Icon(
+				imageVector = Icons.Default.Business,
+				contentDescription = null,
+				tint = Color.White,
+				modifier = Modifier.size(16.dp)
+			)
+		}
+
+		Spacer(modifier = Modifier.width(8.dp))
+
+		// Company Name
+		Text(
+			text = company.companyName,
+			style = MaterialTheme.typography.bodyMedium,
+			modifier = Modifier.weight(1f)
+		)
+
+		// Selected indicator
+		if (isSelected) {
+			Icon(
+				imageVector = Icons.Default.Check,
+				contentDescription = "Selected",
+				tint = MaterialTheme.colorScheme.primary
+			)
 		}
 	}
 }
