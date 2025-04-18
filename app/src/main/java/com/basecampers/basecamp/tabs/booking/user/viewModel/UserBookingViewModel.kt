@@ -1,8 +1,12 @@
-package com.basecampers.basecamp.tabs.booking.models
+package com.basecampers.basecamp.tabs.booking.user.viewModel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.basecampers.basecamp.company.models.CompanyProfileModel
+import com.basecampers.basecamp.tabs.booking.models.BookingCategories
+import com.basecampers.basecamp.tabs.booking.models.BookingExtra
+import com.basecampers.basecamp.tabs.booking.models.BookingItem
+import com.basecampers.basecamp.tabs.booking.models.UserBookingModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -11,7 +15,6 @@ import kotlinx.coroutines.flow.StateFlow
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
 
 class UserBookingViewModel : ViewModel() {
 
@@ -62,10 +65,6 @@ class UserBookingViewModel : ViewModel() {
         retrieveCategories()
     }
 
-    fun setSelectedItem(item: BookingItem) {
-        _selectedBookingItem.value = item
-    }
-
     fun setSelectedCategory(category: BookingCategories) {
         _selectedCategory.value = category
     }
@@ -105,29 +104,17 @@ class UserBookingViewModel : ViewModel() {
         _finalPrice.value = 0.0
     }
 
-
-    fun saveUserBooking(userBooking: UserBooking) {
+    fun saveBooking() {
+        val userBookingModel = UserBookingModel(
+            userId = userId,
+            bookingItem = selectedBookingItem.value,
+            extraItems = selectedExtraItems.value,
+            startDate = startDate.value,
+            endDate = endDate.value,
+            totalPrice = finalPrice.value,
+        )
 
         try {
-            // Create a flattened data structure with only essential fields
-            val bookingData = hashMapOf(
-                "userId" to userBooking.userId,
-                "companyId" to userBooking.companyId,
-                "bookingItemId" to userBooking.bookingItem?.id,
-                "bookingItemName" to userBooking.bookingItem?.name,
-                "startDate" to userBooking.startDate,
-                "endDate" to userBooking.endDate,
-                "totalPrice" to userBooking.totalPrice,
-                "createdAt" to userBooking.createdAt,
-                "extraItems" to userBooking.extraItems.map { extra ->
-                    mapOf(
-                        "id" to extra.id,
-                        "name" to extra.name,
-                        "price" to extra.price
-                    )
-                }
-            )
-
             val userRef = db
                 .collection("companies").document(currentCompanyId.value)
                 .collection("users").document(userId)
@@ -139,8 +126,8 @@ class UserBookingViewModel : ViewModel() {
 
             // Use batch write to ensure both writes succeed or fail together
             val batch = db.batch()
-            batch.set(userRef, bookingData)
-            batch.set(companyRef, bookingData)
+            batch.set(userRef, userBookingModel)
+            batch.set(companyRef, userBookingModel)
 
             batch.commit()
                 .addOnSuccessListener {
@@ -155,9 +142,6 @@ class UserBookingViewModel : ViewModel() {
             Log.e("UserBookingViewModel", "Error saving booking", e)
         }
     }
-
-
-
 
     fun retrieveBookingItems(categoryId: String) {
         db
@@ -190,12 +174,14 @@ class UserBookingViewModel : ViewModel() {
         return extras.sumOf { it.price.toDoubleOrNull() ?: 0.0 }
     }
 
-    fun calculateTotalPrice(item: BookingItem, extras: List<BookingExtra>) {
-        val pricePerDay = item.pricePerDay.toDoubleOrNull() ?: 0.0
-        val extraPrice = extras.sumOf {it.price.toDoubleOrNull() ?: 0.0}
-        val totalPrice = (pricePerDay * amountOfDays.value) + extraPrice
+    fun calculateTotalPrice() {
+        val pricePerDay = selectedBookingItem.value?.pricePerDay?.toDoubleOrNull()
+        val extraPrice = calculateExtra(selectedExtraItems.value)
+        val totalPrice = (pricePerDay?.times(amountOfDays.value))?.plus(extraPrice)
 
-        _finalPrice.value = totalPrice
+        if (totalPrice != null) {
+            _finalPrice.value = totalPrice
+        }
     }
 
     fun retrieveExtraItems(

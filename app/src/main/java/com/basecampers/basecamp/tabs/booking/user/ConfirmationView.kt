@@ -12,9 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.basecampers.basecamp.components.CustomButton
 import com.basecampers.basecamp.components.CustomColumn
-import com.basecampers.basecamp.tabs.booking.models.UserBooking
+import com.basecampers.basecamp.tabs.booking.models.UserBookingModel
 
-import com.basecampers.basecamp.tabs.booking.models.UserBookingViewModel
+import com.basecampers.basecamp.tabs.booking.user.viewModel.UserBookingViewModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
@@ -55,9 +55,8 @@ fun ConfirmationView1(
                     val companyId = bookingViewModel.user.value?.companyId
 
                     if (userId != null && companyId != null) {
-                        val userBooking = UserBooking(
+                        val userBookingModel = UserBookingModel(
                             userId = userId.toString(),
-                            companyId = companyId,
                             bookingItem = selectedItem,
                             extraItems = selectedExtraItems,
                             startDate = bookingViewModel.startDate.value,
@@ -66,7 +65,7 @@ fun ConfirmationView1(
                             createdAt = System.currentTimeMillis()
                         )
 
-                        bookingViewModel.saveUserBooking(userBooking)
+                        bookingViewModel.saveBooking()
                         confirmBooking()
                     } else {
                         Log.e("ConfirmationView", "Missing userId or companyId")

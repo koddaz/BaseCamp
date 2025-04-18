@@ -1,4 +1,4 @@
-package com.basecampers.basecamp.tabs.booking.admin
+package com.basecampers.basecamp.tabs.booking.admin.bookingOverview
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,18 +9,24 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.basecampers.basecamp.tabs.booking.models.AdminBookingViewModel
-import com.basecampers.basecamp.tabs.booking.models.UserBooking
+import com.basecampers.basecamp.tabs.booking.admin.viewModel.AdminBookingViewModel
+import com.basecampers.basecamp.tabs.booking.models.UserBookingModel
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-@Composable
-fun AdminCurrentBookings(adminModel : AdminBookingViewModel = viewModel()) {
+class BookingListViewModel: ViewModel() {
+
 }
 
 @Composable
-fun BookingCard(booking: UserBooking) {
+fun AdminCurrentBookings(bookingViewModel: AdminBookingViewModel = viewModel()) {
+
+}
+
+@Composable
+fun BookingCard(booking: UserBookingModel) {
     Card(
         modifier = Modifier
             .fillMaxWidth()

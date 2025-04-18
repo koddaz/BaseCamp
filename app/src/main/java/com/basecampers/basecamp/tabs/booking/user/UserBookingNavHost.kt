@@ -9,8 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -21,14 +19,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.basecampers.basecamp.aRootFolder.UserSession
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.components.CustomButton
-import com.basecampers.basecamp.tabs.booking.admin.AdminNavHost
+import com.basecampers.basecamp.tabs.booking.admin.createBooking.AdminNavHost
 import com.basecampers.basecamp.tabs.booking.models.BookingCategories
 import com.basecampers.basecamp.tabs.booking.models.BookingItem
 
-import com.basecampers.basecamp.tabs.booking.models.UserBookingViewModel
+import com.basecampers.basecamp.tabs.booking.user.viewModel.UserBookingViewModel
 
 @Composable
 fun UserBookingNavHost(authViewModel: AuthViewModel) {
@@ -122,6 +119,7 @@ fun UserBookingNavHost(authViewModel: AuthViewModel) {
                         navBooking = {
                             navController.navigate("start")
                         },
+                        totalPrice = totalPrice,
                     )
                 }
 

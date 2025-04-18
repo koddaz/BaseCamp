@@ -1,9 +1,11 @@
-package com.basecampers.basecamp.tabs.booking.models
-
+package com.basecampers.basecamp.tabs.booking.admin.viewModel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.basecampers.basecamp.company.models.CompanyProfileModel
+import com.basecampers.basecamp.tabs.booking.models.BookingCategories
+import com.basecampers.basecamp.tabs.booking.models.BookingExtra
+import com.basecampers.basecamp.tabs.booking.models.BookingItem
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow

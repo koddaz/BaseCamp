@@ -1,4 +1,4 @@
-package com.basecampers.basecamp.tabs.booking.admin
+package com.basecampers.basecamp.tabs.booking.admin.createBooking
 
 
 import androidx.compose.foundation.layout.Column
@@ -13,7 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
-import com.basecampers.basecamp.tabs.booking.models.AdminBookingViewModel
+import com.basecampers.basecamp.tabs.booking.admin.viewModel.AdminBookingViewModel
 
 object AdminRoutes {
     const val MAIN = "admin_main"

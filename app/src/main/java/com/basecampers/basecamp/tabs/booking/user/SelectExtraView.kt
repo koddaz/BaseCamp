@@ -25,7 +25,7 @@ import com.basecampers.basecamp.components.CustomButton
 import com.basecampers.basecamp.components.CustomColumn
 import com.basecampers.basecamp.tabs.booking.models.BookingExtra
 import com.basecampers.basecamp.tabs.booking.models.BookingItem
-import com.basecampers.basecamp.tabs.booking.models.UserBookingViewModel
+import com.basecampers.basecamp.tabs.booking.user.viewModel.UserBookingViewModel
 import java.util.Locale
 
 @Composable
@@ -41,11 +41,6 @@ fun SelectExtraView(
     modifier: Modifier = Modifier) {
 
 
-    LaunchedEffect(selectedExtraItems, selectedBookingItem, amountOfDays) {
-        selectedBookingItem?.let { item ->
-            bookingViewModel?.calculateTotalPrice(item = item, extras = selectedExtraItems)
-        }
-    }
 
     Column(modifier = modifier.fillMaxSize()) {
         CustomColumn(title = "Booking Summary") {

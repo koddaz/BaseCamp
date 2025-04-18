@@ -1,4 +1,4 @@
-package com.basecampers.basecamp.tabs.booking.admin
+package com.basecampers.basecamp.tabs.booking.admin.createBooking
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,7 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.basecamp.components.CustomButton
 import com.basecampers.basecamp.components.CustomColumn
-import com.basecampers.basecamp.tabs.booking.models.AdminBookingViewModel
+import com.basecampers.basecamp.tabs.booking.admin.viewModel.AdminBookingViewModel
 import com.basecampers.basecamp.tabs.booking.models.BookingCategories
 import com.basecampers.basecamp.tabs.booking.models.BookingExtra
 import com.basecampers.basecamp.tabs.booking.models.BookingItem

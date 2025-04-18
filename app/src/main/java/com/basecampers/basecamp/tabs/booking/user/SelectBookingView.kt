@@ -34,7 +34,7 @@ import com.basecampers.basecamp.tabs.booking.components.CategoriesCard
 import com.basecampers.basecamp.tabs.booking.models.BookingCategories
 import com.basecampers.basecamp.tabs.booking.models.BookingExtra
 import com.basecampers.basecamp.tabs.booking.models.BookingItem
-import com.basecampers.basecamp.tabs.booking.models.UserBookingViewModel
+import com.basecampers.basecamp.tabs.booking.user.viewModel.UserBookingViewModel
 import kotlinx.coroutines.selects.select
 import kotlin.String
 
@@ -157,6 +157,7 @@ fun UserExtraItem(
                 })
         }
         CustomButton(text = "Next", onClick = {
+            bookingViewModel?.calculateTotalPrice()
             navBooking()
         })
     }
@@ -166,6 +167,7 @@ fun UserExtraItem(
 @Composable
 fun UserConfirmationView(
     selectedItem: BookingItem?,
+    totalPrice: Double,
     formattedDateRange: String,
     selectedExtraItems: List<BookingExtra?>,
     bookingViewModel: UserBookingViewModel?,
@@ -176,7 +178,7 @@ fun UserConfirmationView(
             BookingCard(
                 title = selectedItem?.name ?: "",
                 info = selectedItem?.info ?: "",
-                price = "",
+                price = totalPrice.toString(),
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -186,7 +188,7 @@ fun UserConfirmationView(
             Spacer(modifier = Modifier.height(8.dp))
 
 
-            selectedExtraItems.forEachIndexed { index, extra ->
+            selectedExtraItems.forEach { extra ->
                 Card() {
                     Column() {
                 Row(
@@ -205,6 +207,7 @@ fun UserConfirmationView(
                         contentDescription = "Delete",
                         modifier = Modifier.clickable {
                             extra?.id?.let { id ->
+                                bookingViewModel?.calculateTotalPrice()
                                 bookingViewModel?.removeExtraItem(id)
                             }
                         })
@@ -212,6 +215,14 @@ fun UserConfirmationView(
                         }
             }
             }
+            Spacer(modifier = Modifier.height(8.dp))
+            CustomButton(text = "Clear", onClick = {
+                bookingViewModel?.clearAllValues()
+                navBooking("")
+            })
+            CustomButton(text = "Confirm", onClick = {
+                bookingViewModel?.saveBooking()
+            })
         }
     }
 
