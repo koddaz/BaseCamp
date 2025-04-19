@@ -35,7 +35,8 @@ fun AdminCategoriesView(
     modifier : Modifier = Modifier,
     adminBookingViewModel: AdminBookingViewModel? = viewModel(),
     goBack: () -> Unit,
-    navigateToBooking: (String) -> Unit
+    navigateToBooking: (String) -> Unit,
+    navigateOverview: () -> Unit
 ) {
 
     var category by remember { mutableStateOf("") }
@@ -141,6 +142,7 @@ fun AdminCategoriesView(
             CustomButton(text = "Back", onClick = goBack)
             Spacer(modifier = Modifier.weight(1f))
             CustomButton(text = "Add category", onClick = { isAddVisible = !isAddVisible })
+            CustomButton(text = "Overview", onClick = navigateOverview)
 
 
 
@@ -161,7 +163,8 @@ fun CategoriesViewPreview() {
             id = "122",
         ),
         goBack = {},
-        navigateToBooking = {}
+        navigateToBooking = {},
+        navigateOverview = {}
     )
     
 }

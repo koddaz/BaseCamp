@@ -13,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
+import com.basecampers.basecamp.tabs.booking.admin.bookingOverview.AdminCurrentBookings
 import com.basecampers.basecamp.tabs.booking.admin.viewModel.AdminBookingViewModel
 
 object AdminRoutes {
@@ -20,10 +21,14 @@ object AdminRoutes {
     const val BOOKING = "admin_booking"
     const val CATEGORY = "admin_category"
     const val EXTRA = "admin_extra"
+    const val CURRENT = "current"
 }
 
 @Composable
-fun AdminNavHost(authViewModel: AuthViewModel = viewModel(), changeView: () -> Unit) {
+fun AdminNavHost(
+    authViewModel: AuthViewModel = viewModel(),
+    changeView: () -> Unit) {
+
     val adminBookingViewModel = viewModel<AdminBookingViewModel>()
     val navController = rememberNavController()
     val userInfo by authViewModel.companyProfile.collectAsState()
@@ -54,6 +59,9 @@ fun AdminNavHost(authViewModel: AuthViewModel = viewModel(), changeView: () -> U
                     goBack = { navController.popBackStack() },
                     navigateToBooking = { categoryId ->
                         navController.navigate(AdminRoutes.BOOKING)
+                    },
+                    navigateOverview = {
+                        navController.navigate(AdminRoutes.CURRENT)
                     }
                 )
             }
@@ -71,6 +79,12 @@ fun AdminNavHost(authViewModel: AuthViewModel = viewModel(), changeView: () -> U
                     adminBookingViewModel = adminBookingViewModel,
                     goBack = { navController.popBackStack() },
                     navOnConfirm = { navController.navigate(AdminRoutes.MAIN) }
+                )
+            }
+            composable(AdminRoutes.CURRENT) {
+                AdminCurrentBookings(
+                    bookingViewModel = adminBookingViewModel,
+                    goBack = { navController.popBackStack() },
                 )
             }
         }
