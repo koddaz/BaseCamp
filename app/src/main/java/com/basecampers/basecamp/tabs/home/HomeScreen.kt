@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
-import com.basecampers.basecamp.company.CompanyViewModel
+import com.basecampers.basecamp.company.viewModel.CompanyViewModel
 
 @Composable
 fun HomeScreen(authViewModel: AuthViewModel, companyViewModel: CompanyViewModel) {
@@ -35,14 +35,6 @@ fun HomeScreen(authViewModel: AuthViewModel, companyViewModel: CompanyViewModel)
             companyViewModel.clearSelectedCompany()
         }) {
             Text("Change hasSelectedCompany to False")
-        }
-
-        Button(onClick = {
-            authViewModel.registerUserToCompany(
-                companyId = "66a2bdbb-7218-48a3-ab86-4d1bd2de0728"
-            )
-        }) {
-            Text("Register User to Company --> TEST FUNKAR BARA FÖR ETT FÖRETAG")
         }
     }
 }

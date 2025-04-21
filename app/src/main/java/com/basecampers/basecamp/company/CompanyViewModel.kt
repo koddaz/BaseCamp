@@ -1,4 +1,3 @@
-package com.basecampers.basecamp.company
 
 import androidx.lifecycle.ViewModel
 import com.basecampers.basecamp.aRootFolder.UserSession

@@ -1,8 +1,8 @@
 package com.basecampers.basecamp.aRootFolder
 
 import android.util.Log
-import com.basecampers.basecamp.tabs.profile.models.CompanyModel
-import com.basecampers.basecamp.tabs.profile.models.CompanyProfileModel
+import com.basecampers.basecamp.company.models.CompanyModel
+import com.basecampers.basecamp.company.models.CompanyProfileModel
 import com.basecampers.basecamp.tabs.profile.models.ProfileModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

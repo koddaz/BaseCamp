@@ -1,4 +1,4 @@
-package com.basecampers.basecamp.tabs.profile
+package com.basecampers.basecamp.tabs.profile.screens
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
@@ -18,12 +18,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.basecampers.basecamp.aRootFolder.UserSession
-import com.basecampers.basecamp.tabs.profile.models.UserStatus
+import com.basecampers.basecamp.company.models.UserStatus
+import com.basecampers.basecamp.tabs.profile.models.profileRoutes
+import com.basecampers.basecamp.tabs.profile.viewModel.ProfileViewModel
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(onNavigateToEdit: () -> Unit = {}) {
+    
     // Access data from UserSession
     val profile by UserSession.profile.collectAsState()
     val companyProfile by UserSession.companyProfile.collectAsState()
@@ -58,6 +64,13 @@ fun ProfileScreen() {
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold
         )
+        // EDIT BUTTON
+        Button(
+            onClick = { onNavigateToEdit() },
+            modifier = Modifier.padding(top = 8.dp)
+        ) {
+            Text("Edit name")
+        }
         
         // User Email
         Text(

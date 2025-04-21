@@ -3,8 +3,6 @@ package com.basecampers.basecamp.company.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -36,9 +34,8 @@ import androidx.compose.ui.unit.sp
 import com.basecampers.basecamp.aRootFolder.UserSession
 import com.basecampers.basecamp.aRootFolder.UserSession.selectedCompanyId
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
-import com.basecampers.basecamp.company.CompanyViewModel
-import com.basecampers.basecamp.tabs.profile.CompanyListItem
-import com.basecampers.basecamp.tabs.profile.models.CompanyModel
+import com.basecampers.basecamp.company.viewModel.CompanyViewModel
+import com.basecampers.basecamp.company.models.CompanyModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
