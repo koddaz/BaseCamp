@@ -1,9 +1,9 @@
 
 import androidx.lifecycle.ViewModel
 import com.basecampers.basecamp.aRootFolder.UserSession
-import com.basecampers.basecamp.company.models.CompanyModel
-import com.basecampers.basecamp.company.models.CompanyProfileModel
-import com.basecampers.basecamp.company.models.UserStatus
+import com.basecampers.basecamp.tabs.profile.models.CompanyModel
+import com.basecampers.basecamp.tabs.profile.models.CompanyProfileModel
+import com.basecampers.basecamp.tabs.profile.models.UserStatus
 import com.google.firebase.firestore.FieldValue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
