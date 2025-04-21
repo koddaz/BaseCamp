@@ -12,9 +12,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
+import com.basecampers.basecamp.ui.theme.*
 
 @Composable
 fun SocialMenu(
@@ -39,7 +41,9 @@ fun SocialMenu(
 			onClick = onToggleMenu,
 			modifier = Modifier
 				.align(Alignment.BottomEnd)
-				.padding(16.dp)
+				.padding(16.dp),
+			containerColor = SecondaryAqua,
+			contentColor = TextPrimary
 		) {
 			// Animate rotation between + and ×
 			val rotation by animateFloatAsState(
@@ -133,14 +137,9 @@ private fun ArcMenuItem(
 ) {
 	FloatingActionButton(
 		onClick = onClick,
-		containerColor = if (isSelected)
-			MaterialTheme.colorScheme.primary
-		else
-			MaterialTheme.colorScheme.surfaceVariant,
-		contentColor = if (isSelected)
-			MaterialTheme.colorScheme.onPrimary
-		else
-			MaterialTheme.colorScheme.onSurfaceVariant
+		containerColor = CardBackground,
+		contentColor = TextPrimary,
+		modifier = Modifier.size(40.dp)
 	) {
 		BadgedBox(
 			badge = {
@@ -151,7 +150,8 @@ private fun ArcMenuItem(
 		) {
 			Icon(
 				imageVector = if (isSelected) item.selectedIcon else item.unselectedIcon,
-				contentDescription = item.label
+				contentDescription = item.label,
+				modifier = Modifier.size(20.dp)
 			)
 		}
 	}

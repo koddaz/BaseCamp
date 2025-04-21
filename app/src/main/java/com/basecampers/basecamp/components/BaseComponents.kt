@@ -9,17 +9,21 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Payment
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -510,99 +514,122 @@ fun VerticalCard(
     onButtonClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val TopBoxColor = Color(0xFFB6E4E6)
+
     Card(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = CardBackground),
         modifier = modifier
+            .width(180.dp)
             .wrapContentHeight()
             .padding(8.dp),
-        elevation = CardDefaults.cardElevation(0.dp),
+        elevation = CardDefaults.cardElevation(2.dp),
         border = BorderStroke(1.dp, Color(0xFFE0E0E0))
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Top Image + Tag
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(SecondaryAqua),
+                    .height(120.dp)
+                    .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
+                    .background(TopBoxColor),
                 contentAlignment = Alignment.TopEnd
             ) {
                 Icon(
                     imageVector = Icons.Default.Image,
                     contentDescription = null,
                     modifier = Modifier
-                        .size(32.dp)
+                        .size(36.dp)
                         .align(Alignment.Center),
-                    tint = Color.White
+                    tint = CardBackground
                 )
 
-                Text(
-                    text = "TAG",
-                    fontSize = 12.sp,
-                    color = Color.White,
+                Box(
                     modifier = Modifier
-                        .background(PrimaryRed, shape = RoundedCornerShape(50))
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                        .padding(top = 8.dp, end = 8.dp)
-                )
+                        .padding(top = 12.dp, end = 12.dp) // ← move it in from edges
+                        .align(Alignment.TopEnd)
+                ) {
+                    Text(
+                        text = "TAG",
+                        fontSize = 12.sp,
+                        color = Color.White,
+                        modifier = Modifier
+                            .background(PrimaryRed, shape = RoundedCornerShape(50))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = title,
-                color = TextPrimary,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Text(
-                text = subtitle,
-                color = TextSecondary,
-                fontSize = 14.sp
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = description,
-                color = TextSecondary,
-                fontSize = 13.sp
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedButton(
-                onClick = onButtonClick,
-                shape = RoundedCornerShape(8.dp),
-                border = BorderStroke(1.dp, PrimaryRed),
-                modifier = Modifier.fillMaxWidth()
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.Start
             ) {
                 Text(
-                    text = buttonText,
-                    color = PrimaryRed
+                    text = title,
+                    color = TextPrimary,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
                 )
+
+                Text(
+                    text = subtitle,
+                    color = TextSecondary,
+                    fontSize = 14.sp
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = description,
+                    color = TextSecondary,
+                    fontSize = 13.sp
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedButton(
+                    onClick = onButtonClick,
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, PrimaryRed),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = buttonText,
+                        color = PrimaryRed
+                    )
+                }
             }
         }
     }
 }
 
+@Composable
+fun Width(x0: Dp) {
+    TODO("Not yet implemented")
+}
+
 @Preview(showBackground = true)
 @Composable
 fun VerticalCardPreview() {
-    VerticalCard(
-        title = "Report a problem",
-        subtitle = "Need help?",
-        description = "Let us know if something is not working right. We are here to help 24/7!",
-        buttonText = "Report",
-        onButtonClick = { /* Do nothing for preview */ },
-        modifier = Modifier.padding(16.dp) // Add some padding for the preview
-    )
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+            .padding(vertical = 24.dp)
+    ) {
+        VerticalCard(
+            title = "Report a problem",
+            subtitle = "Need help?",
+            description = "Let us know if something is not working right. We are here to help 24/7!",
+            buttonText = "Report",
+            onButtonClick = { /* Preview only */ }
+        )
+    }
 }
 
 @Preview(showBackground = true)
@@ -622,7 +649,13 @@ fun VerticalCardBookRoomPreview() {
 fun HorizontalOptionCard(
     title: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    icon: ImageVector = Icons.Default.Payment,
+    iconTint: Color = Color.White,
+    iconBackground: Color = SecondaryAqua,
+    textColor: Color = TextPrimary,
+    textSize: Float = 16f,
+    textWeight: FontWeight = FontWeight.Bold
 ) {
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -639,17 +672,17 @@ fun HorizontalOptionCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Circular leading icon with payment icon
+            // Circular leading icon
             Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .background(color = SecondaryAqua, shape = CircleShape),
+                    .background(color = iconBackground, shape = CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Default.Payment,
-                    contentDescription = "Payment",
-                    tint = Color.White
+                    imageVector = icon,
+                    contentDescription = title,
+                    tint = iconTint
                 )
             }
 
@@ -658,13 +691,13 @@ fun HorizontalOptionCard(
             // Title
             Text(
                 text = title,
-                color = TextPrimary,
-                fontSize = 16.sp,
+                color = textColor,
+                fontSize = textSize.sp,
                 modifier = Modifier.weight(1f),
-                fontWeight = FontWeight.Bold
+                fontWeight = textWeight
             )
 
-            // Updated Arrow
+            // Arrow
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = "Go",
@@ -677,9 +710,87 @@ fun HorizontalOptionCard(
 @Preview(showBackground = true)
 @Composable
 fun HorizontalOptionCardPreview() {
-    HorizontalOptionCard(
-        title = "Payment Options",
-        onClick = { /* Do nothing for preview */ },
-        modifier = Modifier.padding(16.dp) // Add some padding for the preview
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Default preview
+        HorizontalOptionCard(
+            title = "Choose Title",
+            onClick = { /* Do nothing for preview */ }
+        )
+        
+        // Custom icon preview
+        HorizontalOptionCard(
+            title = "Help Center",
+            onClick = { /* Do nothing for preview */ },
+            icon = Icons.Default.Help,
+            iconBackground = PrimaryRed
+        )
+        
+        // Custom text styling preview
+        HorizontalOptionCard(
+            title = "Settings",
+            onClick = { /* Do nothing for preview */ },
+            icon = Icons.Default.Image,
+            textColor = PrimaryRed,
+            textSize = 18f
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BasecampSearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    placeholder: String = "Search",
+    hintColor: Color = TextSecondary,
+    backgroundColor: Color = CardBackground
+) {
+    TextField(
+        value = query,
+        onValueChange = onQueryChange,
+        placeholder = {
+            Text(placeholder,
+                color = hintColor,
+                modifier = Modifier.padding(bottom = 1.dp)
+            )
+        },
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = "Search icon",
+                tint = hintColor,
+                modifier = Modifier.size(20.dp)
+            )
+        },
+        colors = TextFieldDefaults.textFieldColors(
+            containerColor = backgroundColor,
+            cursorColor = TextPrimary,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent
+        ),
+        shape = RoundedCornerShape(50),
+        singleLine = true,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(70.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
     )
-} 
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SearchBarPreview() {
+    var search by remember { mutableStateOf("") }
+
+    BasecampSearchBar(
+        query = search,
+        onQueryChange = { search = it }
+    )
+}

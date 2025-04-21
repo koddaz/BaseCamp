@@ -26,6 +26,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.company.viewModel.CompanyViewModel
+import com.basecampers.basecamp.components.BasecampCard
+import com.basecampers.basecamp.components.HorizontalOptionCard
 import com.basecampers.basecamp.ui.theme.*
 import com.basecampers.basecamp.components.VerticalCard
 import com.google.firebase.auth.FirebaseAuth
@@ -59,13 +61,7 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Home",
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = TextPrimary
-                )
+
                 IconButton(onClick = { showTestButtons = !showTestButtons }) {
                     Icon(
                         imageVector = Icons.Default.Menu,
@@ -132,22 +128,38 @@ fun HomeScreen(
                 }
             }
 
-            // Report Problem Card
-            VerticalCard(
-                title = "Report a Problem",
-                subtitle = "Need help?",
-                description = "Let us know if you're experiencing any issues with the app or have suggestions for improvement.",
-                buttonText = "Report",
-                onButtonClick = onReportClick
-            )
+            // Row for Vertical Cards
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                VerticalCard(
+                    title = "Report a Problem",
+                    subtitle = "Need help?",
+                    description = "Let us know if something is not working right. We are here to help 24/7!",
+                    buttonText = "Report",
+                    onButtonClick = { /* Handle report click */ },
+                    modifier = Modifier.weight(1f) // Take equal space
+                )
 
-            // Quick Tips Card
-            VerticalCard(
+                Spacer(modifier = Modifier.width(16.dp)) // Space between cards
+
+                VerticalCard(
+                    title = "Book a Room",
+                    subtitle = "Quick Booking",
+                    description = "Book a meeting room instantly. Check availability and reserve in seconds!",
+                    buttonText = "Book Now",
+                    onButtonClick = { /* Handle booking click */ },
+                    modifier = Modifier.weight(1f) // Take equal space
+                )
+            }
+
+            // Basecamp Card under the Vertical Cards
+            BasecampCard(
                 title = "Quick Tips",
-                subtitle = "Get Started",
-                description = "Learn how to make the most of Basecamp with our quick tips and tutorials.",
-                buttonText = "View Tips",
-                onButtonClick = { /* TODO: Implement tips navigation */ }
+                content = {
+                    Text("Know more about your residency with our quick tips and tutorials.")
+                }
             )
         }
     }

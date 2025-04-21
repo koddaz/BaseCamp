@@ -3,18 +3,21 @@ package com.basecampers.basecamp.tabs.social.forum
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.basecampers.basecamp.components.BasecampSearchBar
+import com.basecampers.basecamp.ui.theme.SecondaryAqua
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ForumScreen(
 	isSuper: Boolean,
 ) {
+	var searchQuery by remember { mutableStateOf("") }
+	
 	Box(modifier = Modifier.fillMaxSize()) {
 		Column(
 			modifier = Modifier
@@ -22,20 +25,13 @@ fun ForumScreen(
 				.padding(horizontal = 16.dp)
 		) {
 			// Search and filter section
-			OutlinedTextField(
-				value = "",
-				onValueChange = { /* TODO: Implement search */ },
+			BasecampSearchBar(
+				query = searchQuery,
+				onQueryChange = { searchQuery = it },
 				modifier = Modifier
 					.fillMaxWidth()
 					.padding(top = 16.dp, bottom = 16.dp),
-				placeholder = { Text("Search in forum...") },
-				leadingIcon = {
-					Icon(
-						imageVector = Icons.Default.Search,
-						contentDescription = "Search"
-					)
-				},
-				singleLine = true
+				placeholder = "Search in forum..."
 			)
 			
 			// Placeholder forum content
@@ -55,10 +51,31 @@ fun ForumScreen(
 				onClick = { /* TODO: Implement create post */ },
 				modifier = Modifier
 					.align(Alignment.BottomStart)
-					.padding(16.dp)
-			) {
-				Icon(Icons.Default.Add, contentDescription = "Create Post")
-			}
+					.padding(16.dp),
+				containerColor = SecondaryAqua,
+				elevation = FloatingActionButtonDefaults.elevation(
+					defaultElevation = 6.dp,
+					pressedElevation = 12.dp,
+					focusedElevation = 8.dp
+				),
+				content = {
+					Row(
+						modifier = Modifier.padding(horizontal = 16.dp),
+						verticalAlignment = Alignment.CenterVertically
+					) {
+						Icon(
+							imageVector = Icons.Default.Add,
+							contentDescription = "Create new post",
+							modifier = Modifier.size(24.dp)
+						)
+						Spacer(modifier = Modifier.width(8.dp))
+						Text(
+							text = "New Post",
+							style = MaterialTheme.typography.labelLarge
+						)
+					}
+				}
+			)
 		}
 	}
 }

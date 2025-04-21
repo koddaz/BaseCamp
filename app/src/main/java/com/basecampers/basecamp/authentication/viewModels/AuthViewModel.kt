@@ -22,34 +22,34 @@ import kotlinx.coroutines.flow.stateIn
  */
 class AuthViewModel : ViewModel() {
     private val tag = this::class.java.simpleName
-    
+
     // General state values
     private val _loggedin = MutableStateFlow(false)
     val loggedin = _loggedin.asStateFlow()
-    
+
     // SOCIAL tab user state
     private val _isSuper = MutableStateFlow(false)
     val isSuper: StateFlow<Boolean> = _isSuper.asStateFlow()
-    
+
     private val _companyProfile = MutableStateFlow<CompanyProfileModel?>(null)
     val companyProfile = _companyProfile.asStateFlow()
-    
+
     // Validation state values
     private val _registerErrorMessage = MutableStateFlow(listOf<RegisterErrors>())
     val registerErrorMessage = _registerErrorMessage.asStateFlow()
-    
+
     private val _loginErrorMessage = MutableStateFlow(listOf<LoginErrors>())
     val loginErrorMessage = _loginErrorMessage.asStateFlow()
-    
+
     private val _emailValid = MutableStateFlow(false)
     val emailValid = _emailValid.asStateFlow()
-    
+
     private val _passwordValid = MutableStateFlow(false)
     val passwordValid = _passwordValid.asStateFlow()
-    
+
     private val _confirmPasswordValid = MutableStateFlow(false)
     val confirmPasswordValid = _confirmPasswordValid.asStateFlow()
-    
+
     val hasEmailError = registerErrorMessage.map { errors ->
         errors.any { it in listOf(
             RegisterErrors.EMAIL_EMPTY,
@@ -100,11 +100,11 @@ class AuthViewModel : ViewModel() {
                 PASSWORD_NOT_VALID -> "Password is incorrect"
             }
     }
-    
+
     init {
         checkLoggedin()
     }
-    
+
     //=== AUTH FUNCTIONS ===//
     
     /**
@@ -303,21 +303,21 @@ class AuthViewModel : ViewModel() {
     fun validateEmailLive(email: String) {
         _emailValid.value = validateEmail(email).isEmpty()
     }
-    
+
     /**
      * Sets UI state for whether password is valid.
      */
     fun validatePasswordLive(password: String) {
         _passwordValid.value = validatePassword(password).isEmpty()
     }
-    
+
     /**
      * Sets UI state for whether confirmation password is valid.
      */
     fun validateConfirmPasswordLive(password: String, confirmPassword: String) {
         _confirmPasswordValid.value = validateConfirmPassword(password, confirmPassword).isEmpty()
     }
-    
+
     /**
      * Validates all registration fields and returns a list of errors.
      */
@@ -330,7 +330,7 @@ class AuthViewModel : ViewModel() {
         _registerErrorMessage.value = checkError
         return checkError
     }
-    
+
     /**
      * Validates password format and returns a list of errors.
      */
@@ -339,7 +339,7 @@ class AuthViewModel : ViewModel() {
         val specialCharPattern = Regex("[!@#\$%^&*()\\-+=\\[\\]{}|;:,.<>?/]")
         val uppercaseRegex = Regex("[A-Z]")
         val digitRegex = Regex("[0-9]")
-        
+
         if(password.isEmpty()) {
             checkError.add(RegisterErrors.PASSWORD_EMPTY)
         }
@@ -357,13 +357,13 @@ class AuthViewModel : ViewModel() {
         }
         return checkError
     }
-    
+
     /**
      * Validates confirmation password match and returns a list of errors.
      */
     fun validateConfirmPassword(password: String, confirmPassword: String) : List<RegisterErrors> {
         val checkError = mutableListOf<RegisterErrors>()
-        
+
         if(confirmPassword != password) {
             checkError.add(RegisterErrors.CONFIRM_PASSWORD_MISMATCH)
         }
@@ -372,13 +372,13 @@ class AuthViewModel : ViewModel() {
         }
         return checkError
     }
-    
+
     /**
      * Validates email format and returns a list of errors.
      */
     fun validateEmail(email: String) : List<RegisterErrors> {
         val checkError = mutableListOf<RegisterErrors>()
-        
+
         if(email.isEmpty()) {
             checkError.add(RegisterErrors.EMAIL_EMPTY)
         }
@@ -387,14 +387,14 @@ class AuthViewModel : ViewModel() {
         }
         return checkError
     }
-    
+
     /**
      * Clears login error messages.
      */
     fun clearLoginErrors() {
         _loginErrorMessage.value = emptyList()
     }
-    
+
     /**
      * Clears password validation error messages.
      */
@@ -409,7 +409,7 @@ class AuthViewModel : ViewModel() {
         )}
         _registerErrorMessage.value = currentErrors
     }
-    
+
     /**
      * Clears confirm password validation error messages.
      */
@@ -421,7 +421,7 @@ class AuthViewModel : ViewModel() {
         )}
         _registerErrorMessage.value = currentErrors
     }
-    
+
     /**
      * Clears email validation error messages.
      */
@@ -434,7 +434,7 @@ class AuthViewModel : ViewModel() {
         )}
         _registerErrorMessage.value = currentErrors
     }
-    
+
     /**
      * Checks if the provided email has a valid format.
      */
@@ -447,7 +447,7 @@ class AuthViewModel : ViewModel() {
         val tld = email.substringAfterLast(".")
         return tld.length >= 2
     }
-    
+
     /**
      * Sets logged in state to true.
      */
@@ -455,7 +455,7 @@ class AuthViewModel : ViewModel() {
         _loggedin.value = true
         Log.i("isLoggedInTrueDEBUG", "Logged in = ${loggedin.value}")
     }
-    
+
     /**
      * Sets logged in state to false.
      */
