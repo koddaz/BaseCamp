@@ -2,7 +2,8 @@ package com.basecampers.basecamp.tabs.booking.models
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.basecampers.basecamp.tabs.profile.models.CompanyProfileModel
+import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
+import com.basecampers.basecamp.company.models.CompanyProfileModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -14,14 +15,25 @@ import java.util.Locale
 
 
 class UserBookingViewModel : ViewModel() {
-
+    val userId = Firebase.auth.currentUser?.uid
     val db = Firebase.firestore
+    val authViewModel = AuthViewModel()
+
+
     private val _selectedItemId = MutableStateFlow("")
     private val _selectedDateRange = MutableStateFlow<Pair<Long?, Long?>>(Pair(null, null))
     private val _startDate = MutableStateFlow<Long?>(null)
     private val _endDate = MutableStateFlow<Long?>(null)
 
-    val selectedItemId : StateFlow<String> = _selectedItemId
+
+    val _selectedCategory = MutableStateFlow<BookingCategories?>(null)
+    val selectedCategory: StateFlow<BookingCategories?> = _selectedCategory
+
+    val _selectedExtraItems = MutableStateFlow<List<BookingExtra>>(emptyList())
+    val selectedExtraItems: StateFlow<List<BookingExtra>> = _selectedExtraItems
+
+    private val _selectedBookingItem = MutableStateFlow<BookingItem?>(null)
+    val selectedBookingItem: StateFlow<BookingItem?> = _selectedBookingItem
 
     private val _bookingItemsList = MutableStateFlow<List<BookingItem>>(emptyList())
     val bookingItemsList: StateFlow<List<BookingItem>> = _bookingItemsList
@@ -29,23 +41,18 @@ class UserBookingViewModel : ViewModel() {
     private val _bookingExtraList = MutableStateFlow<List<BookingExtra>>(emptyList())
     val bookingExtraList: StateFlow<List<BookingExtra>> = _bookingExtraList
 
-    private val _categories = MutableStateFlow<List<BookingCategories>>(emptyList())
-    val categories: StateFlow<List<BookingCategories>> = _categories
+    private val _categoriesList = MutableStateFlow<List<BookingCategories>>(emptyList())
+    val categoriesList: StateFlow<List<BookingCategories>> = _categoriesList
 
-    private val _formattedDateRange = MutableStateFlow<String>("")
-    val formattedDateRange: StateFlow<String> = _formattedDateRange
-
-    private val _selectedBookingItem = MutableStateFlow<BookingItem?>(null)
-    val selectedBookingItem: StateFlow<BookingItem?> = _selectedBookingItem
-
-    private val _selectedExtraItems = MutableStateFlow<List<BookingExtra>>(emptyList())
-    val selectedExtraItems: StateFlow<List<BookingExtra>> = _selectedExtraItems
 
     private val _amountOfDays = MutableStateFlow<Int>(0)
-    val amountOfDays: StateFlow<Int> = _amountOfDays
-
-    val currentUserId = Firebase.auth.currentUser?.uid
+    private val _formattedDateRange = MutableStateFlow<String>("")
     val _finalPrice = MutableStateFlow<Double>(0.0)
+
+    val startDate: StateFlow<Long?> = _startDate
+    val endDate: StateFlow<Long?> = _endDate
+    val amountOfDays: StateFlow<Int> = _amountOfDays
+    val formattedDateRange: StateFlow<String> = _formattedDateRange
     val finalPrice: StateFlow<Double> = _finalPrice
 
     private val _user = MutableStateFlow<CompanyProfileModel?>(null)
@@ -63,11 +70,13 @@ class UserBookingViewModel : ViewModel() {
         Log.d("UserBookingViewModel", "Company ID: ${_user.value?.companyId}")
     }
 
-
+    fun setSelectedCategory(category: BookingCategories) {
+        _selectedCategory.value = category
+    }
 
     fun retrieveCategories() {
        val companyId = getCompanyId().toString()
-        if (currentUserId != null) {
+        if (userId != null) {
             if (companyId.isEmpty()) {
                 Log.d("UserBookingViewModel", "Company ID is empty")
                 return
@@ -83,13 +92,80 @@ class UserBookingViewModel : ViewModel() {
                         val createdBy = doc.getString("createdBy") ?: ""
                         BookingCategories(id, name, info, createdBy)
                     }
-                    _categories.value = categoryList
+                    _categoriesList.value = categoryList
                 }
                 .addOnFailureListener { e ->
                     // Log the error
                 }
         }
     }
+    fun clearAllValues() {
+        _selectedItemId.value = ""
+        _selectedDateRange.value = Pair(null, null)
+        _startDate.value = null
+        _endDate.value = null
+        _formattedDateRange.value = ""
+        _selectedBookingItem.value = null
+        _selectedExtraItems.value = emptyList()
+        _amountOfDays.value = 0
+        _finalPrice.value = 0.0
+    }
+
+
+    fun saveUserBooking(userBooking: UserBooking) {
+        val companyId = getCompanyId() ?: return
+        val userId = authViewModel.getCurrentUserUid() ?: return
+
+        try {
+            // Create a flattened data structure with only essential fields
+            val bookingData = hashMapOf(
+                "userId" to userBooking.userId,
+                "companyId" to userBooking.companyId,
+                "bookingItemId" to userBooking.bookingItem?.id,
+                "bookingItemName" to userBooking.bookingItem?.name,
+                "startDate" to userBooking.startDate,
+                "endDate" to userBooking.endDate,
+                "totalPrice" to userBooking.totalPrice,
+                "createdAt" to userBooking.createdAt,
+                "extraItems" to userBooking.extraItems.map { extra ->
+                    mapOf(
+                        "id" to extra.id,
+                        "name" to extra.name,
+                        "price" to extra.price
+                    )
+                }
+            )
+
+            val userRef = db
+                .collection("companies").document(companyId)
+                .collection("users").document(userId)
+                .collection("bookings").document()
+
+            val companyRef = db
+                .collection("companies").document(companyId)
+                .collection("bookings").document()
+
+            // Use batch write to ensure both writes succeed or fail together
+            val batch = db.batch()
+            batch.set(userRef, bookingData)
+            batch.set(companyRef, bookingData)
+
+            batch.commit()
+                .addOnSuccessListener {
+                    Log.d("UserBookingViewModel", "Booking saved successfully")
+                    clearAllValues()
+                }
+                .addOnFailureListener { e ->
+                    Log.e("UserBookingViewModel", "Error saving booking", e)
+                }
+
+        } catch (e: Exception) {
+            Log.e("UserBookingViewModel", "Error saving booking", e)
+        }
+    }
+
+
+
 
     fun retrieveBookingItems(categoryId: String) {
         val companyId = getCompanyId() ?: return

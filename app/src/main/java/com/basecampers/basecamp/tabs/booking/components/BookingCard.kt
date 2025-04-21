@@ -38,7 +38,6 @@ fun BookingCard(
             modifier = Modifier.padding(16.dp)
         )
         Column(modifier = Modifier
-            .height(200.dp)
             .fillMaxWidth()) {
             Text("Place for picture",
                 style = typography.titleMedium,

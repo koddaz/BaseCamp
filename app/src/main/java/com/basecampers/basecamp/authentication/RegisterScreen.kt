@@ -26,15 +26,15 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
-import com.basecampers.basecamp.components.*
+import com.basecampers.basecamp.components.ConfirmPasswordTextField
+import com.basecampers.basecamp.components.PasswordInfoButton
+import com.basecampers.basecamp.components.PasswordPolicyInfo
+import com.basecampers.basecamp.components.PasswordTextField
+import com.basecampers.basecamp.tabs.profile.viewModel.ProfileViewModel
 import com.basecampers.basecamp.ui.theme.*
 
 @Composable
-fun RegisterScreen(
-    goLogin: () -> Unit,
-    authViewModel: AuthViewModel
-) {
-    var name by remember { mutableStateOf("") }
+fun RegisterScreen(authViewModel: AuthViewModel, profileViewModel: ProfileViewModel, goLogin: () -> Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -44,34 +44,28 @@ fun RegisterScreen(
     var isLoading by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
+    var showPasswordPolicy by remember { mutableStateOf(false) }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(AppBackground)
-            .padding(horizontal = 16.dp)
-    ) {
-        // Background Pattern
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .align(Alignment.TopCenter)
-        ) {
-            Text(
-                text = "Pattern Placeholder",
-                color = SecondaryAqua,
-                fontSize = 14.sp,
-                modifier = Modifier.align(Alignment.Center)
-            )
-        }
+    // Observe auth state
+    val registerErrors by authViewModel.registerErrorMessage.collectAsState()
+    val emailValid by authViewModel.emailValid.collectAsState()
+    val passwordValid by authViewModel.passwordValid.collectAsState()
+    val confirmPasswordValid by authViewModel.confirmPasswordValid.collectAsState()
+    val hasEmailError by authViewModel.hasEmailError.collectAsState()
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        PasswordPolicyInfo(
+            visible = showPasswordPolicy,
+            onDismiss = { showPasswordPolicy = false },
+            modifier = Modifier.zIndex(10f)
+        )
 
         // Content
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(top = 180.dp, bottom = 24.dp), // Space for pattern and bottom padding
+                .padding(top = 180.dp, bottom = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Title
@@ -86,114 +80,82 @@ fun RegisterScreen(
                     .padding(bottom = 24.dp)
             )
 
-            // Admin Checkbox
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Checkbox(
-                    checked = isAdmin,
-                    onCheckedChange = { isAdmin = it },
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = PrimaryRed,
-                        uncheckedColor = BorderColor
-                    )
-                )
-                Text(
-                    text = "Register as admin",
-                    color = TextSecondary,
-                    fontSize = 14.sp
-                )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(checked = isAdmin, onCheckedChange = { isAdmin = it })
+                Text("Register as Admin")
             }
 
-            // Company Name Field (visible only when isAdmin is true)
             if (isAdmin) {
-                BasecampTextField(
+                TextField(
+                    label = { Text("Company Name") },
                     value = companyName,
                     onValueChange = { companyName = it },
-                    label = "Company Name",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
 
-            // Name Field
-            BasecampTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = "Name",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
-            )
-
-            // Email Field
-            BasecampTextField(
+            // Display email error messages
+            registerErrors.filter { error ->
+                error in listOf(
+                    AuthViewModel.RegisterErrors.EMAIL_ALREADY_IN_USE,
+                    AuthViewModel.RegisterErrors.EMAIL_EMPTY,
+                    AuthViewModel.RegisterErrors.EMAIL_NOT_VALID
+                )
+            }.forEach { error ->
+                Text(
+                    text = error.message,
+                    color = Color.Red,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+            }
+            TextField(
+                label = { Text("Email") },
                 value = email,
-                onValueChange = { email = it },
-                label = "Email",
+                onValueChange = {
+                    if (hasEmailError && it != email) {
+                        authViewModel.clearEmailErrors()
+                    }
+                    email = it
+                    authViewModel.validateEmailLive(it)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                    .border(
+                        1.dp,
+                        when {
+                            hasEmailError -> Color.Red
+                            emailValid && email.isNotEmpty() -> Color.Green
+                            else -> Color.LightGray
+                        }
+                    )
             )
 
             // Password Field
-            BasecampTextField(
-                value = password,
+            PasswordTextField(
+                password = password,
                 onValueChange = { password = it },
                 label = "Password",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                trailingIcon = {
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(
-                            imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                            contentDescription = if (passwordVisible) "Hide password" else "Show password",
-                            tint = TextSecondary
-                        )
-                    }
-                }
+                modifier = Modifier.fillMaxWidth(),
+                authViewModel = authViewModel
             )
 
             // Confirm Password Field
-            BasecampTextField(
-                value = confirmPassword,
+            ConfirmPasswordTextField(
+                password = confirmPassword,
                 onValueChange = { confirmPassword = it },
                 label = "Confirm Password",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                trailingIcon = {
-                    IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
-                        Icon(
-                            imageVector = if (confirmPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                            contentDescription = if (confirmPasswordVisible) "Hide password" else "Show password",
-                            tint = TextSecondary
-                        )
-                    }
-                }
+                modifier = Modifier.fillMaxWidth(),
+                authViewModel = authViewModel
             )
 
-            // Phone Field (placeholder)
-            BasecampTextField(
+            // Phone Field
+            TextField(
+                label = { Text("Phone") },
                 value = phone,
-                onValueChange = { /* No-op to prevent editing */ },
-                label = "Phone",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
+                onValueChange = { phone = it },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                modifier = Modifier.fillMaxWidth()
             )
 
             // Terms & Conditions Text
@@ -205,40 +167,41 @@ fun RegisterScreen(
             )
 
             // Sign Up Button
-            BasecampButton(
-                text = "Sign Up",
+            Button(
                 onClick = {
                     isLoading = true
                     authViewModel.registerAsUser(
                         email = email,
                         password = password,
-                        confirmPassword = confirmPassword
+                        confirmPassword = confirmPassword,
+                        profileViewModel = profileViewModel,
+                        onSuccess = { isLoading = false },
+                        onError = { isLoading = false }
                     )
                 },
-                isLoading = isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 24.dp)
-            )
-
-            // Already have an account text
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
+                    .height(50.dp),
+                enabled = !isLoading && email.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty()
             ) {
-                Text(
-                    text = "Already have an account? ",
-                    color = TextSecondary,
-                    fontSize = 14.sp
-                )
-                Text(
-                    text = "Sign In",
-                    color = SecondaryAqua,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable { goLogin() }
-                )
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = Color.White
+                    )
+                } else {
+                    Text("Sign Up")
+                }
             }
+
+            // Login Link
+            Text(
+                text = "Already have an account? Login",
+                color = TextSecondary,
+                modifier = Modifier
+                    .padding(top = 16.dp)
+                    .clickable(onClick = goLogin)
+            )
         }
     }
 }
@@ -246,5 +209,9 @@ fun RegisterScreen(
 @Preview(showBackground = true)
 @Composable
 fun RegisterScreenPreview() {
-    RegisterScreen(goLogin = {}, authViewModel = viewModel())
+    RegisterScreen(
+        authViewModel = viewModel(),
+        profileViewModel = viewModel(),
+        goLogin = {}
+    )
 }

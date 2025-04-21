@@ -1,6 +1,6 @@
 package com.basecampers.basecamp.authentication.models
 
-object authRoutes {
+object AuthRoutes {
     const val REGISTER = "register"
     const val LOGIN = "login"
     const val FORGOTPASS = "forgotpass"

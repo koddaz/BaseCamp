@@ -2,16 +2,19 @@ package com.basecampers.basecamp.tabs.home
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Lightbulb
-import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,294 +23,144 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
+import com.basecampers.basecamp.company.viewModel.CompanyViewModel
+import com.basecampers.basecamp.components.BasecampCard
+import com.basecampers.basecamp.components.HorizontalOptionCard
 import com.basecampers.basecamp.ui.theme.*
+import com.basecampers.basecamp.components.VerticalCard
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 
 @Composable
 fun HomeScreen(
     authViewModel: AuthViewModel,
+    companyViewModel: CompanyViewModel,
     onReportClick: () -> Unit
 ) {
     val userInfo by authViewModel.companyProfile.collectAsState()
+    var showTestButtons by remember { mutableStateOf(false) }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(AppBackground)
-            .padding(16.dp)
+            .padding(horizontal = 16.dp)
     ) {
-        // User Profile Section
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 24.dp),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
+                .verticalScroll(rememberScrollState())
+                .padding(top = 16.dp, bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Surface(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(24.dp)),
-                color = SecondaryAqua
+            // Top Bar
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Placeholder for user avatar
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = userInfo?.id?.take(2)?.uppercase() ?: "PJ",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
+
+                IconButton(onClick = { showTestButtons = !showTestButtons }) {
+                    Icon(
+                        imageVector = Icons.Default.Menu,
+                        contentDescription = "Menu",
+                        tint = TextPrimary
                     )
                 }
             }
-            Column(
-                horizontalAlignment = Alignment.Start,
-                modifier = Modifier.padding(start = 8.dp)
+
+            // Test Buttons (only shown when menu is clicked)
+            if (showTestButtons) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = CardBackground),
+                    shape = RoundedCornerShape(8.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Button(
+                            onClick = {
+                                authViewModel.logout()
+                                companyViewModel.clearSelectedCompany()
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Logout")
+                        }
+
+                        Button(
+                            onClick = { authViewModel.isLoggedInFalse() },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Change isLoggedIn to False")
+                        }
+                        
+                        Button(
+                            onClick = { companyViewModel.clearSelectedCompany() },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Change hasSelectedCompany to False")
+                        }
+
+                        Button(
+                            onClick = {
+                                companyViewModel.registerUserToCompany(
+                                    userId = FirebaseAuth.getInstance().currentUser?.uid ?: "",
+                                    companyId = "66a2bdbb-7218-48a3-ab86-4d1bd2de0728",
+                                    onSuccess = {
+                                        // Handle success
+                                    },
+                                    onError = { error ->
+                                        // Handle error
+                                    }
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Register User to Company")
+                        }
+                    }
+                }
+            }
+
+            // Row for Vertical Cards
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = userInfo?.id ?: "Pretty Jones",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = TextPrimary
-                )
-                Text(
-                    text = userInfo?.companyId ?: "Room 1012",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = TextSecondary
-                )
-            }
-        }
-
-        // Cards Row
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            // Report Problem Card
-            ReportProblemCard(onReportClick = onReportClick)
-
-            // My Bookings Card
-            MyBookingsCard()
-        }
-
-        // Quick Tips Card
-        QuickTipsHorizontalCard()
-    }
-}
-
-@Composable
-fun ReportProblemCard(
-    onReportClick: () -> Unit
-) {
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = CardBackground),
-        modifier = Modifier
-            .width(200.dp)
-            .wrapContentHeight()
-            .padding(8.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Top Image + Tag
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(100.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(SecondaryAqua),
-                contentAlignment = Alignment.TopEnd
-            ) {
-                // Placeholder image icon
-                Icon(
-                    imageVector = Icons.Default.Image,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(32.dp)
-                        .align(Alignment.Center),
-                    tint = Color.White
+                VerticalCard(
+                    title = "Report a Problem",
+                    subtitle = "Need help?",
+                    description = "Let us know if something is not working right. We are here to help 24/7!",
+                    buttonText = "Report",
+                    onButtonClick = { /* Handle report click */ },
+                    modifier = Modifier.weight(1f) // Take equal space
                 )
 
-                // Tag
-                Text(
-                    text = "TAG",
-                    fontSize = 12.sp,
-                    color = Color.White,
-                    modifier = Modifier
-                        .background(PrimaryRed, shape = RoundedCornerShape(50))
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                        .padding(top = 8.dp, end = 8.dp)
+                Spacer(modifier = Modifier.width(16.dp)) // Space between cards
+
+                VerticalCard(
+                    title = "Book a Room",
+                    subtitle = "Quick Booking",
+                    description = "Book a meeting room instantly. Check availability and reserve in seconds!",
+                    buttonText = "Book Now",
+                    onButtonClick = { /* Handle booking click */ },
+                    modifier = Modifier.weight(1f) // Take equal space
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Text Content
-            Text(
-                text = "Report a problem",
-                color = TextPrimary,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
+            // Basecamp Card under the Vertical Cards
+            BasecampCard(
+                title = "Quick Tips",
+                content = {
+                    Text("Know more about your residency with our quick tips and tutorials.")
+                }
             )
-
-            Text(
-                text = "Need help?",
-                color = TextSecondary,
-                fontSize = 14.sp
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "Let us know if something is not working right. We are here to help 24/7!",
-                color = TextSecondary,
-                fontSize = 13.sp
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Outlined Button
-            OutlinedButton(
-                onClick = onReportClick,
-                shape = RoundedCornerShape(8.dp),
-                border = BorderStroke(1.dp, PrimaryRed),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = "Report",
-                    color = PrimaryRed
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun MyBookingsCard() {
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = CardBackground),
-        modifier = Modifier
-            .width(200.dp)
-            .wrapContentHeight()
-            .padding(8.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Top Image
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(100.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(PrimaryRed),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.CalendarMonth,
-                    contentDescription = null,
-                    modifier = Modifier.size(32.dp),
-                    tint = Color.White
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Text Content
-            Text(
-                text = "My Bookings",
-                color = TextPrimary,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Text(
-                text = "Quick Access",
-                color = TextSecondary,
-                fontSize = 14.sp
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "Access all your booking and make quick changes in reservations or rooms.",
-                color = TextSecondary,
-                fontSize = 13.sp
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Outlined Button
-            OutlinedButton(
-                onClick = { /* TODO: Implement bookings action */ },
-                shape = RoundedCornerShape(8.dp),
-                border = BorderStroke(1.dp, SecondaryAqua),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = "Open",
-                    color = SecondaryAqua
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun QuickTipsHorizontalCard() {
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = CardBackground),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Icon
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(SecondaryAqua),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Lightbulb,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = Color.White
-                )
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            // Text Content
-            Column {
-                Text(
-                    text = "Quick Tips",
-                    color = TextPrimary,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "Helpful guides and tips for your stay",
-                    color = TextSecondary,
-                    fontSize = 14.sp
-                )
-            }
         }
     }
 }
@@ -316,7 +169,8 @@ fun QuickTipsHorizontalCard() {
 @Composable
 fun HomeScreenPreview() {
     HomeScreen(
-        authViewModel = AuthViewModel(),
+        authViewModel = viewModel(),
+        companyViewModel = viewModel(),
         onReportClick = {}
     )
 }

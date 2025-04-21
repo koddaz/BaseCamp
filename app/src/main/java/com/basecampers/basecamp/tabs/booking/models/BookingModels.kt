@@ -12,11 +12,14 @@ data class BookingItems(
 
 
 data class UserBooking(
-    val id: String,
-    val bookingItem: BookingItems?,
+    val id: String = "",
+    val userId: String,
+    val companyId: String,
+    val bookingItem: BookingItem?,
     val extraItems: List<BookingExtra>,
-    val timestamp: Date?,
-    val timeRange: String,
+    val startDate: Long?,
+    val endDate: Long?,
+    val timestamp: Date = Date(),
     val totalPrice: Double,
-    val userId: String
+    val createdAt: Long = System.currentTimeMillis()
 )

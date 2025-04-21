@@ -1,57 +1,60 @@
 package com.basecampers.basecamp.aRootFolder
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.basecampers.R
+import com.basecampers.basecamp.ui.theme.SecondaryAqua
 
+/**
+ * Simple loading screen with a progress indicator.
+ * Does not handle any logic - purely for display.
+ */
 @Composable
-fun LoadingScreen(tempFunction: () -> Unit, isLoggedIn: Boolean = false) {
-
-    
-    val progress = remember { Animatable(0f) }
-    
-    LaunchedEffect(Unit) {
-        progress.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(durationMillis = 2000)
-        )
-        tempFunction()
-    }
+fun LoadingScreen() {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Basecamp Logo
+        Box(
+            modifier = Modifier
+                .size(200.dp)
+                .padding(16.dp)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.basecamp_logo),
+                contentDescription = "Basecamp Logo",
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(32.dp))
+        
         Text(
-            text = "Loading...",
-            style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-        LinearProgressIndicator(
-            progress = {progress.value},
-            modifier = Modifier.fillMaxWidth(0.7f).height(8.dp),
+            text = "Basecamp",
+            style = MaterialTheme.typography.headlineMedium.copy(
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp
+            ),
             color = MaterialTheme.colorScheme.primary
         )
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        LinearProgressIndicator(
+            modifier = Modifier
+                .width(200.dp)
+                .height(4.dp),
+            color = SecondaryAqua
+        )
     }
-    
-}
-
-@Preview(showBackground = true)
-@Composable
-fun LoadingScreenPreview() {
-    LoadingScreen(tempFunction = {})
 }

@@ -6,11 +6,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
+import com.basecampers.basecamp.company.viewModel.CompanyViewModel
+import com.basecampers.basecamp.tabs.home.models.homeRoutes
 import com.basecampers.basecamp.tabs.home.routes.HomeRoutes
 
 @Composable
 fun HomeNavHost(
     authViewModel: AuthViewModel,
+    companyViewModel: CompanyViewModel,
     navController: NavHostController = rememberNavController()
 ) {
     NavHost(
@@ -20,6 +23,7 @@ fun HomeNavHost(
         composable(HomeRoutes.HOME) {
             HomeScreen(
                 authViewModel = authViewModel,
+                companyViewModel = companyViewModel,
                 onReportClick = {
                     navController.navigate(HomeRoutes.REPORT_PROBLEM)
                 }
