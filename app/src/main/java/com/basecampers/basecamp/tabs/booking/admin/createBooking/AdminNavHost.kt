@@ -28,22 +28,11 @@ object AdminRoutes {
 fun AdminNavHost(
     authViewModel: AuthViewModel = viewModel(),
     changeView: () -> Unit) {
-
     val adminBookingViewModel = viewModel<AdminBookingViewModel>()
     val navController = rememberNavController()
-    val userInfo by authViewModel.companyProfile.collectAsState()
-    val categories by adminBookingViewModel.categories.collectAsState()
 
 
 
-    LaunchedEffect(userInfo) {
-        userInfo?.let { user ->
-            adminBookingViewModel.setUser(user)
-        }
-        categories.let {
-            adminBookingViewModel.retrieveCategories()
-        }
-    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         NavHost(
@@ -54,8 +43,6 @@ fun AdminNavHost(
             composable(AdminRoutes.MAIN) {
                 AdminCategoriesView(
                     adminBookingViewModel = adminBookingViewModel,
-                    authViewModel = authViewModel,
-                    userInfo = userInfo,
                     goBack = { navController.popBackStack() },
                     navigateToBooking = { categoryId ->
                         navController.navigate(AdminRoutes.BOOKING)
@@ -68,7 +55,6 @@ fun AdminNavHost(
             composable(AdminRoutes.BOOKING) {
                 AdminBookingView(
                     adminBookingViewModel = adminBookingViewModel,
-                    userInfo = userInfo,
                     goBack = { navController.popBackStack() },
                     navigateToExtra = { itemId ->
                         navController.navigate(AdminRoutes.EXTRA) }

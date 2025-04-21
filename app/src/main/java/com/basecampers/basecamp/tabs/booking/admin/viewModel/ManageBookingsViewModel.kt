@@ -70,7 +70,7 @@ class ManageBookingsViewModel() : ViewModel() {
                         UserBookingModel(
                             userId = document.getString("userId") ?: document.id,
                             bookingId = document.getString("bookingId") ?: document.id,
-                            bookingItem = (document.get("bookingItem")) as String,
+                            bookingItem = document.getString("bookingItem") ?: "",
                             extraItems = retrieveExtraList(document),
                             startDate = document.getLong("startDate"),
                             endDate = document.getLong("endDate"),

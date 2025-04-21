@@ -34,19 +34,18 @@ import java.util.Locale
 @Composable
 fun CurrentBookingCard(
     booking: UserBookingModel,
+    bookingViewModel: UserBookingViewModel? = null,
     manageViewModel: ManageBookingsViewModel? = null,
-    bookingViewModel: UserBookingViewModel? = null
+    navToEditBooking: () -> Unit = {}
 ) {
     var isVisible by remember { mutableStateOf(false) }
     val isAdmin = manageViewModel != null
 
     Card(
         modifier = Modifier
-            .fillMaxWidth()
             .padding(vertical = 8.dp)
     ) {
         Column(modifier = Modifier
-            .fillMaxSize()
             .background(
                 when (booking.status) {
                     BookingStatus.CONFIRMED -> Color.Green.copy(alpha = 0.3f)
@@ -116,6 +115,16 @@ fun CurrentBookingCard(
                         })
                         CustomButton(text = "Cancel", onClick = {
                             manageViewModel.cancelStatus(booking)
+                        })
+                    }
+                } else {
+                    Row {
+                        CustomButton(text = "Edit", onClick = {
+                            bookingViewModel?.setSelectedBooking(booking)
+                            navToEditBooking()
+                        })
+                        CustomButton(text = "Cancel", onClick = {
+
                         })
                     }
                 }

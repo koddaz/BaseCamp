@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.basecampers.basecamp.aRootFolder.UserSession
 import com.basecampers.basecamp.company.models.CompanyProfileModel
 import com.basecampers.basecamp.company.models.UserStatus
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
@@ -37,35 +38,19 @@ import com.basecampers.basecamp.tabs.booking.models.BookingItem
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminBookingView(
-    authViewModel: AuthViewModel? = viewModel(),
     modifier: Modifier = Modifier,
-    userInfo: CompanyProfileModel?,
-    adminBookingViewModel: AdminBookingViewModel?,
+    adminBookingViewModel: AdminBookingViewModel,
     goBack: () -> Unit,
     navigateToExtra: (String) -> Unit = {},
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var userId = authViewModel?.getCurrentUserUid()
-    val categories by adminBookingViewModel?.categories?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
+
+    val userId = UserSession.userId
+    val categories by adminBookingViewModel.categories.collectAsState()
     val bookingId = "${System.currentTimeMillis()}_${(1000..9999).random()}"
 
-    val selectedItem by adminBookingViewModel?.selectedItem?.collectAsState() ?: remember { mutableStateOf(
-        BookingItem(
-            id = "",
-            name = "",
-            info = "",
-            pricePerDay = "",
-            quantity = "",
-            categoryId = "",
-            createdBy = ""
-        )) }
-    val selectedCategory by adminBookingViewModel?.selectedCategory?.collectAsState() ?: remember { mutableStateOf(
-        BookingCategories(
-            id = "",
-            name = "",
-            info = "",
-            createdBy = ""
-        )) }
+    val selectedItem by adminBookingViewModel.selectedItem.collectAsState()
+    val selectedCategory by adminBookingViewModel.selectedCategory.collectAsState()
 
     var name by remember { mutableStateOf("") }
     var info by remember { mutableStateOf("") }
@@ -84,7 +69,7 @@ fun AdminBookingView(
                 onExpandedChange = { expanded = !expanded },
                 onCategorySelected = { category ->
 
-                    adminBookingViewModel?.updateCategoriesValues(
+                    adminBookingViewModel.updateCategoriesValues(
                         id = category.id,
                         name = category.name,
                         info = category.info,
@@ -110,7 +95,7 @@ fun AdminBookingView(
                     onAddItemClick = {
                         if (name.isNotEmpty() && pricePerDay.isNotEmpty() && selectedCategory != null) {
 
-                            adminBookingViewModel?.updateBookingItemValues(
+                            adminBookingViewModel.updateBookingItemValues(
                                 id = bookingId,
                                 name = name,
                                 info = info,
@@ -118,7 +103,7 @@ fun AdminBookingView(
                                 quantity = quantity,
                             )
 
-                            adminBookingViewModel?.addBookingItem(
+                            adminBookingViewModel.addBookingItem(
                                 selectedCategory = selectedCategory?.id ?: "",
                                 bookingItem = BookingItem(
                                     id = bookingId,
@@ -127,7 +112,7 @@ fun AdminBookingView(
                                     pricePerDay = pricePerDay,
                                     quantity = quantity,
                                     categoryId = selectedCategory?.id ?: "",
-                                    createdBy = userId ?: ""
+                                    createdBy = userId.value.toString()
                                 ),
                             )
                             name = ""
@@ -137,7 +122,7 @@ fun AdminBookingView(
                         }
                     },
                     onAddExtrasClick = {
-                        adminBookingViewModel?.updateBookingItemValues(
+                        adminBookingViewModel.updateBookingItemValues(
                             id = bookingId,
                             name = name,
                             info = info,
@@ -259,13 +244,7 @@ fun BookingItemForm(
 @Composable
 fun AdminBookingViewPreview() {
     AdminBookingView(
-        userInfo = CompanyProfileModel(
-            imageUrl = null,
-            bio = "",
-            status = UserStatus.ADMIN,
-            id = "",
-        ),
-        adminBookingViewModel = null,
+        adminBookingViewModel = viewModel(),
         goBack = {},
     )
 

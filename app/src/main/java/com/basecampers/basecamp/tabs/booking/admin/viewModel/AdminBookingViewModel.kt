@@ -2,6 +2,7 @@ package com.basecampers.basecamp.tabs.booking.admin.viewModel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.basecampers.basecamp.aRootFolder.UserSession
 import com.basecampers.basecamp.company.models.CompanyProfileModel
 import com.basecampers.basecamp.tabs.booking.models.BookingCategories
 import com.basecampers.basecamp.tabs.booking.models.BookingExtra
@@ -14,6 +15,8 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class AdminBookingViewModel : ViewModel() {
     val db = Firebase.firestore
+    val userId = UserSession.userId
+    val currentCompanyId = UserSession.companyProfile.value?.companyId
 
     private val _bookingExtras = MutableStateFlow<List<BookingExtra>>(emptyList())
     val bookingExtras: StateFlow<List<BookingExtra>> = _bookingExtras
@@ -40,15 +43,7 @@ class AdminBookingViewModel : ViewModel() {
     private val _selectedExtraItem = MutableStateFlow<BookingExtra?>(null)
     val selectedExtraItem = _selectedExtraItem.asStateFlow()
 
-    private fun getCompanyId(): String? {
-        return _user.value?.companyId
-    }
 
-    fun setUser(companyProfileModel: CompanyProfileModel) {
-        _user.value = companyProfileModel
-        // Fetch categories whenever the user is set
-        retrieveCategories()
-    }
 
     fun addExtraList(extraList: List<BookingExtra>) {
         _bookingExtras.value = extraList + _bookingExtras.value
@@ -105,10 +100,9 @@ class AdminBookingViewModel : ViewModel() {
 
 
     fun addBookingCategory(bookingCategory: BookingCategories) {
-        val companyId = getCompanyId() ?: return
 
         val categoryRef = db
-            .collection("companies").document(companyId)
+            .collection("companies").document(currentCompanyId.toString())
             .collection("categories").document(bookingCategory.id)
 
         categoryRef.set(bookingCategory)
@@ -121,9 +115,8 @@ class AdminBookingViewModel : ViewModel() {
     }
 
     fun retrieveCategories() {
-        val companyId = getCompanyId() ?: return
         db
-            .collection("companies").document(companyId)
+            .collection("companies").document(currentCompanyId.toString())
             .collection("categories").get()
             .addOnSuccessListener { snapshot ->
                 val categoryList = snapshot.documents.mapNotNull { doc ->
@@ -138,7 +131,6 @@ class AdminBookingViewModel : ViewModel() {
     }
 
     fun addBookingItem(bookingItem: BookingItem, selectedCategory: String) {
-        val companyId = getCompanyId() ?: return
 
         if (selectedCategory.isEmpty()) {
             Log.e("AdminBookingViewModel", "Selected category is empty")
@@ -147,7 +139,7 @@ class AdminBookingViewModel : ViewModel() {
 
         try {
             val documentRef = db
-                .collection("companies").document(companyId)
+                .collection("companies").document(currentCompanyId.toString())
                 .collection("categories").document(selectedCategory)
                 .collection("bookings").document(bookingItem.id)
 
@@ -166,8 +158,13 @@ class AdminBookingViewModel : ViewModel() {
         }
     }
 
+
+    fun editBooking(bookingItem: BookingItem, category: BookingCategories, extraItems: List<BookingExtra>) {
+
+
+    }
+
     fun addBookingWithExtra(bookingItem: BookingItem, bookingExtras: List<BookingExtra>, selectedCategory: String) {
-        val companyId = getCompanyId() ?: return
 
         if (selectedCategory.isEmpty()) {
             Log.e("AdminBookingViewModel", "Selected category is empty")
@@ -178,7 +175,7 @@ class AdminBookingViewModel : ViewModel() {
             val batch = db.batch()
 
             val itemRef = db
-                .collection("companies").document(companyId)
+                .collection("companies").document(currentCompanyId.toString())
                 .collection("categories").document(selectedCategory)
                 .collection("bookings").document(bookingItem.id)
 
@@ -212,7 +209,6 @@ class AdminBookingViewModel : ViewModel() {
     }
 
     fun addBookingExtra(bookingItem: BookingItem, bookingExtras: List<BookingExtra>, selectedCategory: String) {
-        val companyId = getCompanyId() ?: return
 
         if (selectedCategory.isEmpty() || bookingItem.id.isEmpty()) {
             Log.e("AdminBookingViewModel", "Category or bookingItem ID is empty")
@@ -222,7 +218,7 @@ class AdminBookingViewModel : ViewModel() {
         try {
             val batch = db.batch()
             val baseRef = db
-                .collection("companies").document(companyId)
+                .collection("companies").document(currentCompanyId.toString())
                 .collection("categories").document(selectedCategory)
                 .collection("bookings").document(bookingItem.id)
                 .collection("extras")
@@ -250,10 +246,9 @@ class AdminBookingViewModel : ViewModel() {
     }
 
     fun retrieveBookingItems(selectedCategory: String) {
-        val companyId = getCompanyId() ?: return
 
         db
-            .collection("companies").document(companyId)
+            .collection("companies").document(currentCompanyId.toString())
             .collection("categories").document(selectedCategory)
             .collection("bookings").get()
             .addOnSuccessListener { snapshot ->
@@ -284,9 +279,8 @@ class AdminBookingViewModel : ViewModel() {
     }
 
     fun retrieveBookingExtras(categoryId: String, bookingItemId: String) {
-        val companyId = getCompanyId() ?: return
 
-        db.collection("companies").document(companyId)
+        db.collection("companies").document(currentCompanyId.toString())
             .collection("categories").document(categoryId)
             .collection("bookings").document(bookingItemId)
             .collection("extras").get()
@@ -304,9 +298,8 @@ class AdminBookingViewModel : ViewModel() {
 
     // Function to delete an extra
     fun deleteBookingExtra(categoryId: String, bookingItemId: String, extraId: String) {
-        val companyId = getCompanyId() ?: return
 
-        db.collection("companies").document(companyId)
+        db.collection("companies").document(currentCompanyId.toString())
             .collection("categories").document(categoryId)
             .collection("bookings").document(bookingItemId)
             .collection("extras").document(extraId)
