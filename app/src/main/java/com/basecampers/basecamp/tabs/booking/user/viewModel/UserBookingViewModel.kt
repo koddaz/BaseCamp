@@ -3,11 +3,13 @@ package com.basecampers.basecamp.tabs.booking.user.viewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.basecampers.basecamp.company.models.CompanyProfileModel
+import com.basecampers.basecamp.tabs.booking.admin.viewModel.BookingStatus
 import com.basecampers.basecamp.tabs.booking.models.BookingCategories
 import com.basecampers.basecamp.tabs.booking.models.BookingExtra
 import com.basecampers.basecamp.tabs.booking.models.BookingItem
 import com.basecampers.basecamp.tabs.booking.models.UserBookingModel
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +23,9 @@ class UserBookingViewModel : ViewModel() {
     val userId = Firebase.auth.currentUser?.uid ?: ""
     private val _currentCompanyId = MutableStateFlow("")
     val currentCompanyId: StateFlow<String> = _currentCompanyId
+
+    private val _currentBookings = MutableStateFlow<List<UserBookingModel>>(emptyList())
+    val currentBookings: StateFlow<List<UserBookingModel>> = _currentBookings
 
     private val db = Firebase.firestore
 
@@ -56,6 +61,9 @@ class UserBookingViewModel : ViewModel() {
     private val _user = MutableStateFlow<CompanyProfileModel?>(null)
     val user: StateFlow<CompanyProfileModel?> = _user
 
+    init {
+        retrieveCurrentBookings()
+    }
 
     fun setUser(companyProfileModel: CompanyProfileModel) {
         _user.value = companyProfileModel
@@ -105,26 +113,29 @@ class UserBookingViewModel : ViewModel() {
     }
 
     fun saveBooking() {
+        val bookingId = db.collection("bookings").document().id
+
         val userBookingModel = UserBookingModel(
             userId = userId,
-            bookingItem = selectedBookingItem.value,
+            bookingId = bookingId,
+            bookingItem = selectedBookingItem.value?.name ?: "",
             extraItems = selectedExtraItems.value,
             startDate = startDate.value,
             endDate = endDate.value,
             totalPrice = finalPrice.value,
+            status = BookingStatus.PENDING
         )
 
         try {
             val userRef = db
                 .collection("companies").document(currentCompanyId.value)
                 .collection("users").document(userId)
-                .collection("bookings").document()
+                .collection("bookings").document(bookingId)  // Use specific bookingId
 
             val companyRef = db
                 .collection("companies").document(currentCompanyId.value)
-                .collection("bookings").document()
+                .collection("bookings").document(bookingId)  // Use same bookingId
 
-            // Use batch write to ensure both writes succeed or fail together
             val batch = db.batch()
             batch.set(userRef, userBookingModel)
             batch.set(companyRef, userBookingModel)
@@ -137,7 +148,6 @@ class UserBookingViewModel : ViewModel() {
                 .addOnFailureListener { e ->
                     Log.e("UserBookingViewModel", "Error saving booking", e)
                 }
-
         } catch (e: Exception) {
             Log.e("UserBookingViewModel", "Error saving booking", e)
         }
@@ -259,5 +269,74 @@ class UserBookingViewModel : ViewModel() {
     fun removeSelectedBookingItem() {
         _selectedBookingItem.value = null
     }
+    private fun retrieveExtraList(document: DocumentSnapshot): List<BookingExtra> {
+        return try {
+            val extrasList = document.get("extraItems") as? List<*>
+            extrasList?.mapNotNull { item ->
+                when (item) {
+                    is Map<*, *> -> {
+                        @Suppress("UNCHECKED_CAST")
+                        val map = item as Map<String, Any>
+                        BookingExtra(
+                            id = map["id"] as? String ?: "",
+                            name = map["name"] as? String ?: "",
+                            info = map["info"] as? String ?: "",
+                            price = map["price"] as? String ?: "0.0"
+                        )
+                    }
+                    else -> null
+                }
+            } ?: emptyList()
+        } catch (e: Exception) {
+            Log.e("ManageBookingsViewModel", "Error parsing extraItems", e)
+            emptyList()
+        }
+    }
 
-}
+    fun retrieveCurrentBookings() {
+        Log.d("ManageBookingsViewModel", "Retrieving bookings for company: ${currentCompanyId}")
+
+        // Safeguard against empty ID
+        if (currentCompanyId.value.isEmpty()) {
+            Log.e("ManageBookingsViewModel", "Company ID is empty, skipping retrieval")
+            return
+        }
+
+        db.collection("companies").document(currentCompanyId.value)
+            .collection("users").document(userId)
+            .collection("bookings").get()
+            .addOnSuccessListener { snapshot ->
+                val bookingsList = snapshot.documents.mapNotNull { document ->
+                    try {
+                        UserBookingModel(
+                            userId = document.getString("userId") ?: document.id,
+                            bookingId = document.getString("bookingId") ?: document.id,
+                            bookingItem = (document.get("bookingItem")) as String,
+                            extraItems = retrieveExtraList(document),
+                            startDate = document.getLong("startDate"),
+                            endDate = document.getLong("endDate"),
+                            timestamp = document.getDate("timestamp") ?: Date(),
+                            totalPrice = document.getDouble("totalPrice") ?: 0.0,
+                            status = try {
+                                val statusStr = document.getString("status")
+                                if (statusStr != null) BookingStatus.valueOf(statusStr) else BookingStatus.PENDING
+                            } catch (e: Exception) {
+                                Log.e("ManageBookingsViewModel", "Error parsing status", e)
+                                BookingStatus.PENDING
+                            }
+                        )
+                    } catch (e: Exception) {
+                        Log.e("ManageBookingsViewModel", "Error parsing booking document", e)
+                        null
+
+                    }
+                }
+                _currentBookings.value = bookingsList
+            }
+            .addOnFailureListener { exception ->
+                Log.e("ManageBookingsViewModel", "Error retrieving bookings", exception)
+                _currentBookings.value = emptyList()
+            }
+    }
+    }
+

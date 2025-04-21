@@ -83,8 +83,6 @@ fun AdminNavHost(
             }
             composable(AdminRoutes.CURRENT) {
                 AdminCurrentBookings(
-                    bookingViewModel = adminBookingViewModel,
-                    goBack = { navController.popBackStack() },
                 )
             }
         }

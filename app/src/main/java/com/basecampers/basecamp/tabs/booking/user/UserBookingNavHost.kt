@@ -123,10 +123,14 @@ fun UserBookingNavHost(authViewModel: AuthViewModel) {
                     )
                 }
 
-
-
-
-
+                composable("currentBookings") {
+                    UserCurrentBookings(
+                        bookingViewModel = bookingViewModel,
+                        goBack = {
+                            navController.popBackStack()
+                        }
+                    )
+                }
             }
         }
         Row(modifier = Modifier.fillMaxWidth()) {
@@ -135,6 +139,9 @@ fun UserBookingNavHost(authViewModel: AuthViewModel) {
         }
     }
 }
+
+
+
 
 @Preview
 @Composable
