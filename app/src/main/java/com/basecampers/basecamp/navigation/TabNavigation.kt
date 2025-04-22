@@ -104,6 +104,8 @@ fun TabNavigation(
                 )
                 3 -> ProfileNavHost(
                     profileViewModel = profileViewModel,
+                    authViewModel = authViewModel,
+                    companyViewModel = companyViewModel,
                     selectedProfileTabIndex = selectedProfileTabIndex,
                     onProfileTabSelected = { newIndex ->
                         selectedProfileTabIndex = newIndex

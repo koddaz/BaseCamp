@@ -19,6 +19,7 @@ val BorderColor = Color(0xFFE0E0E0)  // #E0E0E0
 
 // Status Colors
 val Green = Color(0xFF5FD385)  // Used for validation states and selected items
+val ErrorRed = Color(0xFFE53935)  // Used for error states and destructive actions
 
 // Additional Colors
 val BackGround = Color(0xFFFFFFFF)

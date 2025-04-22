@@ -44,7 +44,6 @@ fun RegisterScreen(authViewModel: AuthViewModel, profileViewModel: ProfileViewMo
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
-    var phone by remember { mutableStateOf("") }
     var companyName by remember { mutableStateOf("") }
     var isAdmin by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
@@ -227,22 +226,6 @@ fun RegisterScreen(authViewModel: AuthViewModel, profileViewModel: ProfileViewMo
                         )
                     }
                 },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = SecondaryAqua,
-                    unfocusedBorderColor = Color.Gray
-                )
-            )
-
-            // Phone Field
-            OutlinedTextField(
-                value = phone,
-                onValueChange = { phone = it },
-                label = { Text("Phone") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = SecondaryAqua,
                     unfocusedBorderColor = Color.Gray

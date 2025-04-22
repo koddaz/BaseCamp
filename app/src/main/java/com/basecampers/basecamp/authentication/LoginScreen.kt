@@ -227,19 +227,13 @@ fun LoginScreen(
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)
                 ) {
-                    TestButton("Admin Account") {
-                        authViewModel.login(email = "admin@admin.se", password = "Test123!")
-                    }
-                    TestButton("User Account") {
-                        authViewModel.login(email = "user9182@example.com", password = "Test123!")
-                    }
-                    TestButton("User 1 (User)") {
+                    TestButton("User 1 (Admin)") {
                         authViewModel.loginUser1()
                     }
                     TestButton("User 2 (SuperUser)") {
                         authViewModel.loginUser2()
                     }
-                    TestButton("User 3 (Admin)") {
+                    TestButton("User 3 (User)") {
                         authViewModel.loginUser3()
                     }
                 }
