@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,6 +39,7 @@ fun AdminCategoriesView(
     navigateOverview: () -> Unit
 ) {
 
+    val scrollState = rememberScrollState()
     val companyId = UserSession.companyProfile.value?.companyId ?: ""
 
     var category by remember { mutableStateOf("") }
@@ -52,7 +55,7 @@ fun AdminCategoriesView(
     Column(Modifier
         .fillMaxSize()
         .padding(16.dp)) {
-        Column(Modifier.weight(1f)) {
+        Column(Modifier.weight(1f).verticalScroll(scrollState)) {
         CustomColumn(
             title = "Categories",
             onClick = { isAddVisible = !isAddVisible },
@@ -107,44 +110,38 @@ fun AdminCategoriesView(
                         maxLines = 3,
                         modifier = Modifier.fillMaxWidth()
                     )
-                    Row(Modifier.fillMaxWidth()) {
-                        Spacer(Modifier.weight(1f))
-                        CustomButton(onClick = {
-                            if (category.isNotEmpty()) {
-                                val categoryId =
-                                    "${System.currentTimeMillis()}_${(1000..9999).random()}"
-
-                                companyId.let { user ->
-                                    adminBookingViewModel.addBookingCategory(
-                                        bookingCategory = BookingCategories(
-                                            id = categoryId,
-                                            name = category,
-                                            info = info,
-                                            createdBy = companyId.toString()
-                                        )
-                                    )
-                                }
-                                category = ""
-                                info = ""
-                                error = ""
-                            } else {
-                                error = "Category name is required"
-                            }
-                        }, text = "Save")
-                        CustomButton(onClick = {
-                            category = ""
-                            info = ""
-                            error = ""
-                            isAddVisible = !isAddVisible
-                                               },
-                            text = "Cancel")
-                    }
                 }
             }
         }
         Column() {
-            CustomButton(text = "Add category", onClick = { isAddVisible = !isAddVisible })
-            CustomButton(text = "Overview", onClick = navigateOverview)
+            CustomButton(onClick = {
+                if (category.isNotEmpty()) {
+                    val categoryId = "${System.currentTimeMillis()}_${(1000..9999).random()}"
+
+                    companyId.let { user ->
+                        adminBookingViewModel.addBookingCategory(
+                            bookingCategory = BookingCategories(
+                                id = categoryId,
+                                name = category,
+                                info = info,
+                                createdBy = companyId.toString()
+                            )
+                        )
+                    }
+                    category = ""
+                    info = ""
+                    error = ""
+                } else {
+                    error = "Category name is required"
+                }
+            }, text = "Save")
+            CustomButton(onClick = {
+                category = ""
+                info = ""
+                error = ""
+                isAddVisible = !isAddVisible
+            },
+                text = "Cancel")
             CustomButton(text = "Back", onClick = goBack)
         }
     }

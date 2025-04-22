@@ -186,60 +186,66 @@ fun ExtraItemForm(
     onAddExtraClick: () -> Unit,
     onSaveClick: () -> Unit,
 ) {
-    Column {
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("Name") },
-            value = name,
-            onValueChange = {
-                onNameChange(it) // Call the function with the updated value
-            },
-            maxLines = 1
-        )
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("Info") },
-            maxLines = 5,
-            minLines = 3,
-            value = info,
-            onValueChange = {
+    val scrollState = rememberScrollState()
 
-                if (it.length <= 300) {
-                    onInfoChange(it)
+    Column(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.weight(1f).verticalScroll(scrollState)) {
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Name") },
+                value = name,
+                onValueChange = {
+                    onNameChange(it) // Call the function with the updated value
+                },
+                maxLines = 1
+            )
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Info") },
+                maxLines = 5,
+                minLines = 3,
+                value = info,
+                onValueChange = {
+
+                    if (it.length <= 300) {
+                        onInfoChange(it)
+                    }
+                },
+                supportingText = { Text("${info.length}/300 characters") }
+            )
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Price") },
+                value = price,
+                onValueChange = {
+                    onPriceChange(it)
+                },
+                maxLines = 1
+            )
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Quantity") },
+                value = quantity,
+                onValueChange = onQuantityChange,
+                maxLines = 1
+            )
+        }
+        Column() {
+            CustomButton(
+                onClick = {
+                    if (name.isNotBlank() && price.isNotBlank() && info.isNotBlank() && quantity.isNotBlank()) {
+                        onAddExtraClick()
+                    }
+                },
+                text = "Add"
+            )
+            CustomButton(
+                text = "Save",
+                onClick = {
+                    onSaveClick()
                 }
-                     },
-            supportingText = { Text("${info.length}/300 characters") }
-        )
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("Price") },
-            value = price,
-            onValueChange = {
-                onPriceChange(it)
-            },
-            maxLines = 1
-        )
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("Quantity") },
-            value = quantity,
-            onValueChange = onQuantityChange,
-            maxLines = 1
-        )
-        CustomButton(
-            onClick = {
-                if (name.isNotBlank() && price.isNotBlank() && info.isNotBlank() && quantity.isNotBlank()) {
-                    onAddExtraClick()
-                }
-            },
-            text = "Add"
-        )
-        CustomButton(
-            text = "Save",
-            onClick = {
-                onSaveClick()
-            }
-        )
+            )
+        }
     }
 }
 @Preview(showBackground = true)

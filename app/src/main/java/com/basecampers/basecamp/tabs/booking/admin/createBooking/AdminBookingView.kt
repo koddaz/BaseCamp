@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -56,9 +58,9 @@ fun AdminBookingView(
     var pricePerDay by remember { mutableStateOf("") }
     var quantity by remember { mutableStateOf("") }
 
+    val scrollState = rememberScrollState()
 
-
-    Column(modifier.fillMaxSize()) {
+    Column(modifier.fillMaxSize().verticalScroll(scrollState)) {
         Column(modifier.weight(1f)) {
             CustomColumn(title = "Add Booking Item") {
             CategoryDropdown(
@@ -197,6 +199,7 @@ fun BookingItemForm(
     onAddItemClick: () -> Unit,
     onAddExtrasClick: () -> Unit
 ) {
+
     CustomColumn {
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
@@ -232,7 +235,7 @@ fun BookingItemForm(
         )
     }
     Spacer(Modifier.height(8.dp))
-    Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
         Spacer(Modifier.weight(1f))
         CustomButton(onClick = onAddItemClick, text = "Save")
         CustomButton(text = "Add Extras", onClick = onAddExtrasClick)
@@ -246,6 +249,4 @@ fun AdminBookingViewPreview() {
         adminBookingViewModel = viewModel(),
         goBack = {},
     )
-
-
 }
