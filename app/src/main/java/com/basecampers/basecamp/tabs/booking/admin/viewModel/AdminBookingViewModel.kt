@@ -56,6 +56,10 @@ class AdminBookingViewModel : ViewModel() {
         _bookingExtras.value = extraList + _bookingExtras.value
     }
 
+    fun setSelectedItem(item: BookingItem) {
+        _selectedItem.value = item
+    }
+
     fun updateExtraValue(
         id: String = _selectedExtraItem.value?.id ?: "",
         name: String = _selectedExtraItem.value?.name ?: "",
@@ -212,6 +216,12 @@ class AdminBookingViewModel : ViewModel() {
 
         } catch (e: Exception) {
             Log.e("AdminBookingViewModel", "Error adding booking item and extras", e)
+        }
+    }
+
+    fun loadAllBookingItems() {
+        categories.value.forEach { category ->
+            retrieveBookingItems(category.id)
         }
     }
 
