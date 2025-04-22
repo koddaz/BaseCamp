@@ -1,8 +1,9 @@
 package com.basecampers.basecamp.company.viewModel
 
 import android.util.Log
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.basecampers.basecamp.aRootFolder.AppPreferences
 import com.basecampers.basecamp.aRootFolder.UserSession
 import com.basecampers.basecamp.company.models.CompanyModel
 import com.basecampers.basecamp.company.models.CompanyProfileModel
@@ -22,8 +23,10 @@ import java.util.UUID
 /**
  * ViewModel handling all company-related operations.
  */
-class CompanyViewModel : ViewModel() {
+class CompanyViewModel(private val application: android.app.Application) : AndroidViewModel(application) {
 	private val TAG = "CompanyViewModel"
+	
+	private val appPreferences = AppPreferences(application)
 	
 	// Company state flows
 	private val _hasSelectedCompany = MutableStateFlow(false)
@@ -58,6 +61,21 @@ class CompanyViewModel : ViewModel() {
 					}
 				}
 			}
+			
+			// Try to load saved company ID
+			val savedCompanyId = getStoredCompanyId()
+			if (savedCompanyId != null) {
+				Log.d(TAG, "Found saved company ID: $savedCompanyId")
+				_currentCompanyId.value = savedCompanyId
+				_hasSelectedCompany.value = true
+				
+				// Update UserSession
+				UserSession.setSelectedCompanyId(savedCompanyId)
+				
+				// Load company data
+				fetchCompanyData(savedCompanyId)
+				fetchCompanyProfileData(userId, savedCompanyId)
+			}
 		}
 	}
 	
@@ -87,6 +105,44 @@ class CompanyViewModel : ViewModel() {
 				} ?: emptyList()
 				_companies.value = companyList
 			}
+	}
+	
+	
+	/**
+	 * Selects a company for the current user and updates all related data.
+	 */
+	fun selectCompany(companyId: String, userId: String) {
+		_currentCompanyId.value = companyId
+		_hasSelectedCompany.value = true
+		
+		// Store in preferences
+		storeCompanyId(companyId)
+		
+		// Update UserSession
+		UserSession.setSelectedCompanyId(companyId)
+		
+		// Update in Firestore
+		db.collection("users")
+			.document(userId)
+			.update("lastSelectedCompany", companyId)
+		
+		// Fetch company data
+		fetchCompanyData(companyId)
+		
+		// Fetch user's role in this company
+		fetchCompanyProfileData(userId, companyId)
+		
+		Log.d(TAG, "Selected company: $companyId")
+	}
+	
+	/**
+	 * Clears the currently selected company.
+	 */
+	fun clearSelectedCompany() {
+		_currentCompanyId.value = null
+		_hasSelectedCompany.value = false
+		UserSession.setSelectedCompanyId(null)
+		clearStoredCompanyId()
 	}
 	
 	/**
@@ -235,43 +291,6 @@ class CompanyViewModel : ViewModel() {
 		} catch (e: Exception) {
 			_hasSelectedCompany.value = false
 		}
-	}
-	
-	/**
-	 * Selects a company for the current user and updates all related data.
-	 */
-	fun selectCompany(companyId: String, userId: String) {
-		_currentCompanyId.value = companyId
-		_hasSelectedCompany.value = true
-		
-		// Store in preferences
-		storeCompanyId(companyId)
-		
-		// Update UserSession
-		UserSession.setSelectedCompanyId(companyId)
-		
-		// Update in Firestore
-		db.collection("users")
-			.document(userId)
-			.update("lastSelectedCompany", companyId)
-		
-		// Fetch company data
-		fetchCompanyData(companyId)
-		
-		// Fetch user's role in this company
-		fetchCompanyProfileData(userId, companyId)
-		
-		Log.d(TAG, "Selected company: $companyId")
-	}
-	
-	/**
-	 * Clears the currently selected company.
-	 */
-	fun clearSelectedCompany() {
-		_currentCompanyId.value = null
-		_hasSelectedCompany.value = false
-		UserSession.setSelectedCompanyId(null)
-		clearStoredCompanyId()
 	}
 	
 	//=== COMPANY DATA FUNCTIONS ===//
@@ -695,21 +714,20 @@ class CompanyViewModel : ViewModel() {
 	 * Gets stored company ID from local storage.
 	 */
 	private fun getStoredCompanyId(): String? {
-		// Implement using SharedPreferences or DataStore
-		return null // Replace with actual implementation
+		return appPreferences.getSelectedCompanyId()
 	}
 	
 	/**
 	 * Stores company ID in local storage.
 	 */
 	private fun storeCompanyId(companyId: String) {
-		// Implement using SharedPreferences or DataStore
+		appPreferences.saveSelectedCompanyId(companyId)
 	}
 	
 	/**
 	 * Clears stored company ID from local storage.
 	 */
 	private fun clearStoredCompanyId() {
-		// Implement using SharedPreferences or DataStore
+		appPreferences.clearSelectedCompanyId()
 	}
 }
