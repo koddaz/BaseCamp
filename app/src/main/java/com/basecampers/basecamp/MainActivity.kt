@@ -19,8 +19,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val authViewModel = AuthViewModel()
-        val companyViewModel = CompanyViewModel()
+        val authViewModel = AuthViewModel(application)
+        val companyViewModel = CompanyViewModel(application)
         val socialViewModel = SocialViewModel()
         val profileViewModel = ProfileViewModel()
 

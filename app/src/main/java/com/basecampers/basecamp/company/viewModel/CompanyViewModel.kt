@@ -1,8 +1,10 @@
 package com.basecampers.basecamp.company.viewModel
 
+import android.app.Application
 import android.util.Log
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.basecampers.basecamp.aRootFolder.AppPreferences
 import com.basecampers.basecamp.aRootFolder.UserSession
 import com.basecampers.basecamp.company.models.CompanyModel
 import com.basecampers.basecamp.company.models.CompanyProfileModel
@@ -22,8 +24,9 @@ import java.util.UUID
 /**
  * ViewModel handling all company-related operations.
  */
-class CompanyViewModel : ViewModel() {
+class CompanyViewModel(private val application: Application) : AndroidViewModel(application) {
 	private val TAG = "CompanyViewModel"
+	private val appPreferences = AppPreferences(application)
 	
 	// Company state flows
 	private val _hasSelectedCompany = MutableStateFlow(false)
@@ -57,6 +60,21 @@ class CompanyViewModel : ViewModel() {
 						Log.d(TAG, "Initial company list loaded: ${profile.companyList}")
 					}
 				}
+			}
+			
+			// Try to load saved company ID
+			val savedCompanyId = getStoredCompanyId()
+			if (savedCompanyId != null) {
+				Log.d(TAG, "Found saved company ID: $savedCompanyId")
+				_currentCompanyId.value = savedCompanyId
+				_hasSelectedCompany.value = true
+				
+				// Update UserSession
+				UserSession.setSelectedCompanyId(savedCompanyId)
+				
+				// Load company data
+				fetchCompanyData(savedCompanyId)
+				fetchCompanyProfileData(userId, savedCompanyId)
 			}
 		}
 	}
@@ -695,21 +713,20 @@ class CompanyViewModel : ViewModel() {
 	 * Gets stored company ID from local storage.
 	 */
 	private fun getStoredCompanyId(): String? {
-		// Implement using SharedPreferences or DataStore
-		return null // Replace with actual implementation
+		return appPreferences.getSelectedCompanyId()
 	}
 	
 	/**
 	 * Stores company ID in local storage.
 	 */
 	private fun storeCompanyId(companyId: String) {
-		// Implement using SharedPreferences or DataStore
+		appPreferences.saveSelectedCompanyId(companyId)
 	}
 	
 	/**
 	 * Clears stored company ID from local storage.
 	 */
 	private fun clearStoredCompanyId() {
-		// Implement using SharedPreferences or DataStore
+		appPreferences.clearSelectedCompanyId()
 	}
 }
