@@ -9,13 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -24,56 +21,30 @@ import androidx.navigation.compose.rememberNavController
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.components.CustomButton
 import com.basecampers.basecamp.tabs.booking.admin.AdminNavHost
-import com.basecampers.basecamp.tabs.booking.models.BookingCategories
-import com.basecampers.basecamp.tabs.booking.models.BookingItem
+import com.basecampers.basecamp.tabs.booking.user.bookingOverview.UserCurrentBookings
+import com.basecampers.basecamp.tabs.booking.user.bookingOverview.UserEditBookingView
+import com.basecampers.basecamp.tabs.booking.user.createBooking.UserCategoryView
+import com.basecampers.basecamp.tabs.booking.user.createBooking.UserConfirmationView
+import com.basecampers.basecamp.tabs.booking.user.createBooking.UserExtraItem
+import com.basecampers.basecamp.tabs.booking.user.createBooking.UserItemView
 
-import com.basecampers.basecamp.tabs.booking.models.UserBookingViewModel
+import com.basecampers.basecamp.tabs.booking.user.viewModel.UserBookingViewModel
 
 @Composable
-fun UserBookingNavHost(authViewModel: AuthViewModel) {
+fun UserBookingNavHost() {
+
     val navController = rememberNavController()
     val bookingViewModel: UserBookingViewModel = viewModel()
-
-    val categoryList by bookingViewModel.categoriesList.collectAsState()
-    val currentUser by authViewModel.companyProfile.collectAsState()
-    val itemList: List<BookingItem> by bookingViewModel.bookingItemsList.collectAsState()
-
-    val selectedExtraItems by bookingViewModel.selectedExtraItems.collectAsState()
-    val selectedBookingItem by bookingViewModel.selectedBookingItem.collectAsState()
-    val formattedDateRange by bookingViewModel.formattedDateRange.collectAsState()
-    val amountOfDays by bookingViewModel.amountOfDays.collectAsState()
-    val extraItems by bookingViewModel.bookingExtraList.collectAsState()
-    val totalPrice by bookingViewModel.finalPrice.collectAsState()
-
     var isAdmin by remember { mutableStateOf(false) }
 
 
-
-    LaunchedEffect(currentUser) {
-        currentUser?.let { user ->
-            bookingViewModel.setUser(user)
-        }
-    }
-
-    // Fix the category/item loading
-    LaunchedEffect(Unit) {
-        bookingViewModel.retrieveCategories()
-    }
-
-    // Separate LaunchedEffect to react when categories change
-    LaunchedEffect(categoryList) {
-        if (categoryList.isNotEmpty()) {
-            categoryList.forEach { category ->
-                bookingViewModel.retrieveBookingItems(category.id)
-            }
-        }
-    }
-
-
     Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            CustomButton(text = (if (isAdmin) "User" else "Admin"), onClick = { isAdmin = !isAdmin })
+        }
         if (isAdmin) {
             Column(modifier = Modifier.weight(1f)) {
-                AdminNavHost(authViewModel = authViewModel, changeView = { isAdmin = false })
+                AdminNavHost(changeView = { isAdmin = false })
             }
         } else {
             NavHost(
@@ -82,6 +53,17 @@ fun UserBookingNavHost(authViewModel: AuthViewModel) {
                 modifier = Modifier.weight(1f)
             ) {
                 composable("start") {
+                    UserBookingMainView(
+                        navToBooking = {
+                            navController.navigate("categoryView")
+                        },
+                        navToCurrentBookings = {
+                            navController.navigate("currentBookings")
+                        }
+                    )
+                }
+
+                composable("categoryView") {
                     UserCategoryView(
                         bookingViewModel = bookingViewModel,
                         navBooking = { categoryId ->
@@ -89,11 +71,12 @@ fun UserBookingNavHost(authViewModel: AuthViewModel) {
                         },
                     )
                 }
+
                 composable("itemView") {
                     UserItemView(
                         bookingViewModel = bookingViewModel,
                         navExtra = { itemId ->
-                            navController.navigate("selectExtra")
+                            navController.navigate("extrasView")
                         }
                     )
                 }
@@ -101,115 +84,62 @@ fun UserBookingNavHost(authViewModel: AuthViewModel) {
                 composable("extrasView") {
                     UserExtraItem(
                         bookingViewModel = bookingViewModel,
-                        navBooking = { extraItems ->
-                            navController.navigate("confirmation")
+                        navBooking = {
+                            navController.navigate("confirmationView")
                         }
                     )
                 }
 
-                composable("vieew") {
-                    SelectBookingView(
-                        categoryList = categoryList,
-                        itemList = itemList,
+                composable("confirmationView") {
+                    UserConfirmationView(
                         bookingViewModel = bookingViewModel,
-                        navExtra = { navController.navigate("selectExtra") })
-                }
-                composable("selectExtra") {
-                    SelectExtraView(
-                        bookingViewModel = bookingViewModel,
-                        navConfirmation = {
-                            navController.navigate("confirmation")
+                        navBooking = {
+                            navController.navigate("start")
                         },
-                        selectedExtraItems = selectedExtraItems,
-                        selectedBookingItem = selectedBookingItem,
-                        formattedDateRange = formattedDateRange,
-                        amountOfDays = amountOfDays,
-                        extraItems = extraItems,
-                        totalPrice = totalPrice,
                     )
                 }
-                composable("confirmation") {
-                    ConfirmationView(
+                composable("editBooking") {
+                    UserEditBookingView(
                         bookingViewModel = bookingViewModel,
-                        confirmBooking = {
-                            navController.navigate("start")
+                        goBack = {
+                            navController.popBackStack()
+                        },
+                        navConfirm = {
+                            navController.navigate("currentBookings")
+                        }
+                    )
+                }
+                composable("currentBookings") {
+                    UserCurrentBookings(
+                        bookingViewModel = bookingViewModel,
+                        goBack = {
+                            navController.popBackStack()
                         }
                     )
                 }
             }
         }
-        Row(modifier = Modifier.fillMaxWidth()) {
-            CustomButton(text = "Admin", onClick = { isAdmin = !isAdmin })
-            CustomButton(text = "User", onClick = { isAdmin = false })
-        }
+
     }
 }
 
-@Preview
 @Composable
-fun BookingViewPreview() {
-    // Sample categories
-    val dummyCategories = listOf(
-        BookingCategories(
-            id = "cat1",
-            name = "Equipment",
-            info = "Professional equipment for rent",
-            createdBy = "admin"
-        ),
-        BookingCategories(
-            id = "cat2",
-            name = "Vehicles",
-            info = "Cars and trucks available",
-            createdBy = "admin"
-        ),
-        BookingCategories(
-            id = "cat3",
-            name = "Tools",
-            info = "Hand and power tools",
-            createdBy = "admin"
+fun UserBookingMainView(
+    navToBooking: () -> Unit,
+    navToCurrentBookings: () -> Unit
+) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        CustomButton(
+            text = "Book an item",
+            onClick = {
+                navToBooking()
+            }
         )
-    )
-
-    // Sample items linked to categories
-    val dummyItems = listOf(
-        BookingItem(
-            id = "item1",
-            categoryId = "cat1",
-            pricePerDay = "24.99",
-            name = "Professional Camera",
-            info = "High resolution DSLR camera",
-            quantity = "3"
-        ),
-        BookingItem(
-            id = "item2",
-            categoryId = "cat1",
-            pricePerDay = "15.99",
-            name = "Drone",
-            info = "4K recording capability",
-            quantity = "2"
-        ),
-        BookingItem(
-            id = "item3",
-            categoryId = "cat2",
-            pricePerDay = "99.99",
-            name = "SUV",
-            info = "All terrain vehicle with AC",
-            quantity = "1"
-        ),
-        BookingItem(
-            id = "item4",
-            categoryId = "cat3",
-            pricePerDay = "12.50",
-            name = "Power Drill",
-            info = "Cordless with extra batteries",
-            quantity = "5"
+        CustomButton(
+            text = "See current bookings",
+            onClick = {
+                navToCurrentBookings()
+            }
         )
-    )
-
-    SelectBookingView(
-        categoryList = dummyCategories,
-        itemList = dummyItems,
-        bookingViewModel = null,
-        navExtra = {  },
-    )
+    }
 }

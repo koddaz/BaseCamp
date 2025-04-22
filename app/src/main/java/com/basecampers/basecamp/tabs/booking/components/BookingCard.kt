@@ -23,38 +23,45 @@ fun BookingCard(
     info: String,
     price: String,
     selected: Boolean = false,
-    onClick: () -> Unit
+    onClick: () -> Unit = {}
 ) {
     Card(
         modifier = modifier
             .padding(16.dp)
-            .background(color = if (selected) Color.Green else Color.White)
             .clickable(onClick = onClick)
     ) {
-
-        Text(
-            text = title,
-            style = typography.titleMedium,
-            modifier = Modifier.padding(16.dp)
-        )
-        Column(modifier = Modifier
-            .fillMaxWidth()) {
-            Text("Place for picture",
+        Column(
+            modifier = Modifier
+                .background
+                    (color = if (selected) Color.Green else Color.Transparent)) {
+            Text(
+                text = title,
                 style = typography.titleMedium,
-                modifier = Modifier.padding(16.dp))
-        }
-        Row() {
-            Text(
-                text = info,
-                style = typography.bodyMedium,
                 modifier = Modifier.padding(16.dp)
             )
-            Spacer(modifier = Modifier.weight(1f))
-            Text(
-                text = price,
-                style = typography.bodyMedium,
-                modifier = Modifier.padding(16.dp)
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    "Place for picture",
+                    style = typography.titleMedium,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+            Row() {
+                Text(
+                    text = info,
+                    style = typography.bodyMedium,
+                    modifier = Modifier.padding(16.dp)
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = price,
+                    style = typography.bodyMedium,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
         }
     }
 }
