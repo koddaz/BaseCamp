@@ -32,162 +32,119 @@ fun SelectExtraView(
     extraItems: List<BookingExtra>,
     totalPrice: Double
 ) {
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(AppBackground)
     ) {
-        LazyColumn(
+        // Booking Summary Card
+        Card(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
+                .fillMaxWidth()
+                .padding(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = CardBackground
+            ),
+            shape = RoundedCornerShape(16.dp)
         ) {
-            // Booking Summary Section
-            item {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
                 Text(
                     text = "Booking Summary",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
                 )
-
-                BasecampCard(
-                    title = "Selected Item",
-                    subtitle = selectedBookingItem?.name ?: "",
-                    modifier = Modifier.padding(bottom = 16.dp)
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
+                    Column {
                         Text(
-                            text = selectedBookingItem?.info ?: "",
+                            text = selectedBookingItem?.name ?: "",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Text(
+                            text = formattedDateRange,
                             style = MaterialTheme.typography.bodyMedium,
                             color = TextSecondary
                         )
-                        Text(
-                            text = "Date Range: $formattedDateRange",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = TextSecondary
-                        )
-                        Text(
-                            text = "Duration: $amountOfDays days",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = TextSecondary
-                        )
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = SecondaryAqua.copy(alpha = 0.1f),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = "Base Price: €${selectedBookingItem?.pricePerDay}/day",
-                                style = MaterialTheme.typography.titleSmall,
-                                color = SecondaryAqua,
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
-                            )
-                        }
                     }
-                }
-            }
-
-            // Selected Extras Section
-            if (selectedExtraItems.isNotEmpty()) {
-                item {
                     Text(
-                        text = "Selected Extras",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.SemiBold,
-                        color = TextPrimary,
-                        modifier = Modifier.padding(vertical = 16.dp)
-                    )
-                }
-
-                items(selectedExtraItems) { extra ->
-                    ExtrasCard(
-                        extra = extra,
-                        isSelected = true,
-                        onClick = {
-                            bookingViewModel?.removeExtraItem(extra)
-                            bookingViewModel?.calculateExtra(extraItems)
-                        }
+                        text = "€${selectedBookingItem?.pricePerDay}/day",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = SecondaryAqua
                     )
                 }
             }
+        }
 
-            // Available Extras Section
+        // Available Extras
+        LazyColumn(
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
             item {
                 Text(
                     text = "Available Extras",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
-                    color = TextPrimary,
-                    modifier = Modifier.padding(vertical = 16.dp)
+                    modifier = Modifier.padding(vertical = 8.dp)
                 )
             }
 
-            if (extraItems.isNotEmpty()) {
-                items(extraItems.filter { it !in selectedExtraItems }) { extra ->
-                    ExtrasCard(
-                        extra = extra,
-                        isSelected = false,
-                        onClick = {
+            items(extraItems) { extra ->
+                ExtrasCard(
+                    extra = extra,
+                    isSelected = selectedExtraItems.contains(extra),
+                    onClick = {
+                        if (selectedExtraItems.contains(extra)) {
+                            bookingViewModel?.removeExtraItem(extra)
+                        } else {
                             bookingViewModel?.addExtraItem(extra)
-                            bookingViewModel?.calculateExtra(extraItems)
                         }
-                    )
-                }
-            } else {
-                item {
-                    BasecampCard(
-                        title = "No Extras",
-                        subtitle = "No extra items available",
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    ) {
-                        Text(
-                            text = "No additional items available for this booking",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = TextSecondary,
-                            modifier = Modifier.padding(16.dp)
-                        )
+                        bookingViewModel?.calculateExtra(extraItems)
                     }
-                }
+                )
             }
+        }
 
-            // Total Price Section
-            item {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 24.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    color = SecondaryAqua
+        // Total and Proceed Button
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = AppBackground,
+            shadowElevation = 8.dp
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp, vertical = 16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Total Price",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = Color.White
-                        )
-                        Text(
-                            text = "€${String.format(Locale.getDefault(), "%.2f", totalPrice)}",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                    }
+                    Text(
+                        text = "Total",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Text(
+                        text = "€${String.format(Locale.getDefault(), "%.2f", totalPrice)}",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = SecondaryAqua,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
 
                 Button(
-                    onClick = navConfirmation,
-                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { navConfirmation() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = SecondaryAqua
                     ),

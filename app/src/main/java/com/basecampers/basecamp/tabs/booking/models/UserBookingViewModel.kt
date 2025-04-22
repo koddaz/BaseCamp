@@ -15,7 +15,10 @@ import java.util.Locale
 
 
 class UserBookingViewModel : ViewModel() {
-    val userId = Firebase.auth.currentUser?.uid
+    private val TAG = "UserBookingViewModel"
+    val userId = Firebase.auth.currentUser?.uid.also { 
+        Log.d(TAG, "Current user ID: $it") 
+    }
     val db = Firebase.firestore
     val authViewModel = AuthViewModel()
 
@@ -58,16 +61,71 @@ class UserBookingViewModel : ViewModel() {
     private val _user = MutableStateFlow<CompanyProfileModel?>(null)
     val user: StateFlow<CompanyProfileModel?> = _user
 
-
-    fun setUser(companyProfileModel: CompanyProfileModel) {
-        _user.value = companyProfileModel
-        retrieveCategories()
+    init {
+        Log.d(TAG, "Initializing UserBookingViewModel")
     }
 
+    fun setUser(companyProfileModel: CompanyProfileModel) {
+        Log.d(TAG, "Setting user profile - Company ID: ${companyProfileModel.companyId}, User ID: ${companyProfileModel.id}")
+        _user.value = companyProfileModel
+        retrieveCategories()
+        ensureDefaultCategories()
+    }
+
+    private fun ensureDefaultCategories() {
+        val companyId = getCompanyId() ?: return
+        val defaultCategories = listOf(
+            BookingCategories(
+                id = "gym_category",
+                name = "Gym",
+                info = "Fitness and workout facilities",
+                createdBy = userId ?: ""
+            ),
+            BookingCategories(
+                id = "room_category",
+                name = "Room",
+                info = "Meeting and conference rooms",
+                createdBy = userId ?: ""
+            ),
+            BookingCategories(
+                id = "event_category",
+                name = "Event",
+                info = "Event spaces and venues",
+                createdBy = userId ?: ""
+            )
+        )
+
+        val batch = db.batch()
+        defaultCategories.forEach { category ->
+            val docRef = db.collection("companies").document(companyId)
+                .collection("categories").document(category.id)
+            
+            // First check if the category exists
+            docRef.get().addOnSuccessListener { doc ->
+                if (!doc.exists()) {
+                    val categoryData = hashMapOf(
+                        "name" to category.name,
+                        "info" to category.info,
+                        "createdBy" to category.createdBy
+                    )
+                    docRef.set(categoryData)
+                        .addOnSuccessListener {
+                            Log.d(TAG, "Created default category: ${category.name}")
+                            // Refresh categories after creating defaults
+                            retrieveCategories()
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e(TAG, "Error creating default category: ${category.name}", e)
+                        }
+                }
+            }
+        }
+    }
 
     private fun getCompanyId(): String? {
-        return _user.value?.companyId
-        Log.d("UserBookingViewModel", "Company ID: ${_user.value?.companyId}")
+        val companyId = _user.value?.companyId
+        Log.d(TAG, "Getting company ID: $companyId")
+        return companyId
     }
 
     fun setSelectedCategory(category: BookingCategories) {
@@ -75,28 +133,41 @@ class UserBookingViewModel : ViewModel() {
     }
 
     fun retrieveCategories() {
-       val companyId = getCompanyId().toString()
+        val companyId = getCompanyId().toString()
+        Log.d(TAG, "Retrieving categories for company: $companyId")
+        
         if (userId != null) {
-            if (companyId.isEmpty()) {
-                Log.d("UserBookingViewModel", "Company ID is empty")
+            if (companyId.isEmpty() || companyId == "null") {
+                Log.e(TAG, "Company ID is empty or null")
                 return
             }
-            db
-                .collection("companies").document(companyId)
+            
+            Log.d(TAG, "Starting Firestore query for categories at path: companies/$companyId/categories")
+            db.collection("companies").document(companyId)
                 .collection("categories").get()
                 .addOnSuccessListener { snapshot ->
+                    Log.d(TAG, "Categories query success. Documents count: ${snapshot.size()}")
                     val categoryList = snapshot.documents.mapNotNull { doc ->
-                        val id = doc.id
-                        val name = doc.getString("name") ?: ""
-                        val info = doc.getString("info") ?: ""
-                        val createdBy = doc.getString("createdBy") ?: ""
-                        BookingCategories(id, name, info, createdBy)
+                        try {
+                            val id = doc.id
+                            val name = doc.getString("name") ?: ""
+                            val info = doc.getString("info") ?: ""
+                            val createdBy = doc.getString("createdBy") ?: ""
+                            Log.d(TAG, "Parsed category - ID: $id, Name: $name")
+                            BookingCategories(id, name, info, createdBy)
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error parsing category document: ${doc.id}", e)
+                            null
+                        }
                     }
+                    Log.d(TAG, "Final parsed categories count: ${categoryList.size}")
                     _categoriesList.value = categoryList
                 }
                 .addOnFailureListener { e ->
-                    // Log the error
+                    Log.e(TAG, "Error retrieving categories", e)
                 }
+        } else {
+            Log.e(TAG, "User ID is null")
         }
     }
     fun clearAllValues() {

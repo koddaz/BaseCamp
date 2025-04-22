@@ -1,5 +1,6 @@
 package com.basecampers.basecamp.navigation
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -32,8 +33,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -46,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
 
 // Theme imports
 import com.basecampers.basecamp.ui.theme.AppBackground
@@ -57,6 +60,7 @@ import com.basecampers.basecamp.ui.theme.BaseCampTheme
 // Feature imports
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.company.viewModel.CompanyViewModel
+import com.basecampers.basecamp.tabs.booking.models.UserBookingViewModel
 import com.basecampers.basecamp.tabs.booking.user.UserBookingNavHost
 import com.basecampers.basecamp.tabs.home.HomeNavHost
 import com.basecampers.basecamp.tabs.profile.navHost.ProfileNavHost
@@ -87,7 +91,25 @@ fun TabNavigation(
                     authViewModel = authViewModel,
                     companyViewModel = companyViewModel
                 )
-                1 -> UserBookingNavHost(authViewModel)
+                1 -> {
+                    val navController = rememberNavController()
+                    val bookingViewModel = viewModel<UserBookingViewModel>()
+                    val companyProfile by companyViewModel.companyProfile.collectAsState()
+                    
+                    // Initialize booking view model with user profile
+                    LaunchedEffect(companyProfile) {
+                        Log.d("TabNavigation", "Company profile update: $companyProfile")
+                        companyProfile?.let { profile ->
+                            Log.d("TabNavigation", "Setting user profile in BookingViewModel with companyId: ${profile.companyId}")
+                            bookingViewModel.setUser(profile)
+                        }
+                    }
+                    
+                    UserBookingNavHost(
+                        navController = navController,
+                        bookingViewModel = bookingViewModel
+                    )
+                }
                 2 -> SocialNavHost(
                     authViewModel = authViewModel,
                     socialViewModel = socialViewModel,

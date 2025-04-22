@@ -1,12 +1,18 @@
 package com.basecampers.basecamp.tabs.booking.user
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -14,11 +20,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.basecampers.basecamp.components.BasecampCard
 import com.basecampers.basecamp.components.CustomButton
 import com.basecampers.basecamp.components.CustomColumn
 import com.basecampers.basecamp.tabs.booking.components.BookingCard
+import com.basecampers.basecamp.tabs.booking.components.BookingHistoryCard
+import com.basecampers.basecamp.tabs.booking.components.BookingHistoryItem
 import com.basecampers.basecamp.tabs.booking.components.CategoriesCard
 import com.basecampers.basecamp.tabs.booking.models.BookingCategories
 import com.basecampers.basecamp.tabs.booking.models.BookingItem
@@ -26,11 +35,21 @@ import com.basecampers.basecamp.tabs.booking.models.UserBookingViewModel
 import com.basecampers.basecamp.ui.theme.*
 
 @Composable
-fun UserCategoryView(
+fun BookingDashboardView(
     bookingViewModel: UserBookingViewModel?,
     navBooking: (String) -> Unit
 ) {
-    val categoryList by bookingViewModel?.categoriesList?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
+    val categories: List<BookingCategories> by bookingViewModel?.categoriesList?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
+    val user by bookingViewModel?.user?.collectAsState() ?: remember { mutableStateOf(null) }
+    var isLoading by remember { mutableStateOf(true) }
+    var selectedCategory by remember { mutableStateOf<BookingCategories?>(null) }
+    var isDropdownExpanded by remember { mutableStateOf(false) }
+    
+    LaunchedEffect(user) {
+        if (user != null) {
+            isLoading = false
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -48,12 +67,12 @@ fun UserCategoryView(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(16.dp)
         ) {
+            // Header
             item {
                 Text(
-                    text = "Choose Category",
+                    text = "Bookings",
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     color = TextPrimary,
@@ -61,32 +80,219 @@ fun UserCategoryView(
                 )
             }
 
-            items(categoryList) { category ->
-                CategoriesCard(
-                    title = category.name,
-                    info = category.info,
-                    onClick = {
-                        bookingViewModel?.setSelectedCategory(category)
-                        navBooking(category.id)
+            // New Booking Section
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = CardBackground
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "New Booking",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = TextPrimary
+                        )
+                        
+                        Spacer(modifier = Modifier.height(12.dp))
+                        
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            OutlinedTextField(
+                                value = selectedCategory?.name ?: "Select a category",
+                                onValueChange = {},
+                                readOnly = true,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { isDropdownExpanded = true },
+                                trailingIcon = {
+                                    Icon(
+                                        imageVector = if (isDropdownExpanded) 
+                                            Icons.Default.ArrowDropUp 
+                                        else 
+                                            Icons.Default.ArrowDropDown,
+                                        contentDescription = "Toggle dropdown",
+                                        tint = SecondaryAqua
+                                    )
+                                },
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = SecondaryAqua,
+                                    unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f)
+                                )
+                            )
+
+                            DropdownMenu(
+                                expanded = isDropdownExpanded,
+                                onDismissRequest = { isDropdownExpanded = false },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(CardBackground)
+                            ) {
+                                categories.forEach { category ->
+                                    DropdownMenuItem(
+                                        text = {
+                                            Column {
+                                                Text(
+                                                    text = category.name,
+                                                    style = MaterialTheme.typography.bodyLarge,
+                                                    color = TextPrimary
+                                                )
+                                                Text(
+                                                    text = category.info,
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = TextSecondary
+                                                )
+                                            }
+                                        },
+                                        onClick = {
+                                            selectedCategory = category
+                                            isDropdownExpanded = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        Button(
+                onClick = {
+                                selectedCategory?.let { category ->
+                    bookingViewModel?.setSelectedCategory(category)
+                    navBooking(category.id)
+                }
+                            },
+                            enabled = selectedCategory != null,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = SecondaryAqua,
+                                disabledContainerColor = Color.Gray.copy(alpha = 0.3f)
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text("Continue Booking")
+                        }
                     }
+                }
+            }
+
+            // My Bookings Section
+            item {
+                Text(
+                    text = "My Bookings",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = TextPrimary,
+                    modifier = Modifier.padding(vertical = 16.dp)
                 )
             }
 
-            if (categoryList.isEmpty()) {
-                item {
-                    BasecampCard(
-                        title = "No Categories",
-                        subtitle = "No booking categories available",
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    ) {
-                        Text(
-                            text = "Please check back later or contact support",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = TextSecondary,
-                            modifier = Modifier.padding(16.dp)
+            item {
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.padding(bottom = 16.dp)
+                ) {
+                    // Sample active bookings - replace with actual data
+                    items(3) { index ->
+                        ActiveBookingCard(
+                            title = "Sample Booking ${index + 1}",
+                            date = "May ${index + 10}, 2024",
+                            status = if (index == 0) "Active" else "Upcoming"
                         )
                     }
                 }
+            }
+
+            // Booking History Section
+            item {
+                Text(
+                    text = "Booking History",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = TextPrimary,
+                    modifier = Modifier.padding(vertical = 16.dp)
+                )
+            }
+
+            // Sample history items - replace with actual data
+            items(3) { index ->
+                BookingHistoryCard(
+                    booking = BookingHistoryItem(
+                        id = "booking_$index",
+                        itemName = "Sample Booking ${index + 1}",
+                        bookingDate = System.currentTimeMillis(),
+                        startDate = System.currentTimeMillis(),
+                        endDate = System.currentTimeMillis() + (86400000 * 3), // 3 days
+                        totalPrice = 150.0 + (index * 50),
+                        status = when (index) {
+                            0 -> "Confirmed"
+                            1 -> "Pending"
+                            else -> "Cancelled"
+                        }
+                    )
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ActiveBookingCard(
+    title: String,
+    date: String,
+    status: String,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .width(200.dp)
+            .height(120.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = CardBackground
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = TextPrimary
+                )
+                Text(
+                    text = date,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextSecondary
+                )
+            }
+            
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = if (status == "Active") 
+                    Color(0xFF4CAF50).copy(alpha = 0.1f)
+                else 
+                    Color(0xFFFFC107).copy(alpha = 0.1f)
+            ) {
+                Text(
+                    text = status,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (status == "Active") 
+                        Color(0xFF4CAF50)
+                    else 
+                        Color(0xFFFFC107)
+                )
             }
         }
     }
@@ -139,16 +345,16 @@ fun UserItemView(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(itemList) { item ->
-                    BookingCard(
+                BookingCard(
                         selected = item.id == selectedItem?.id,
-                        title = item.name,
-                        info = item.info,
-                        price = item.pricePerDay,
-                        onClick = {
-                            bookingViewModel?.setSelection(item.id, item)
-                        }
-                    )
-                }
+                    title = item.name,
+                    info = item.info,
+                    price = item.pricePerDay,
+                    onClick = {
+                        bookingViewModel?.setSelection(item.id, item)
+                    }
+                )
+            }
 
                 if (itemList.isEmpty()) {
                     item {
@@ -174,16 +380,16 @@ fun UserItemView(
                     .fillMaxWidth()
                     .padding(top = 16.dp)
             ) {
-                OutlinedTextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = formattedDateRange,
-                    onValueChange = {},
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = formattedDateRange,
+                onValueChange = {},
                     enabled = false,
                     label = { Text("Select Dates") },
-                    trailingIcon = {
+                trailingIcon = {
                         IconButton(onClick = { showDatePicker = !showDatePicker }) {
-                            Icon(
-                                imageVector = Icons.Default.DateRange,
+                    Icon(
+                        imageVector = Icons.Default.DateRange,
                                 contentDescription = "Select Dates",
                                 tint = SecondaryAqua
                             )
@@ -196,28 +402,28 @@ fun UserItemView(
                     )
                 )
 
-                if (showDatePicker) {
-                    DatePickerView(
-                        startDate = startDate,
-                        endDate = endDate,
+            if (showDatePicker) {
+                DatePickerView(
+                    startDate = startDate,
+                    endDate = endDate,
                         onDateRangeSelected = { start, end ->
                             bookingViewModel?.updateSelectedDateRange(start, end)
-                        },
-                        onDismiss = {
+                    },
+                    onDismiss = {
                             showDatePicker = false
-                        }
-                    )
-                }
+                    }
+                )
+            }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Button(
                     onClick = {
-                        selectedItem?.let { item ->
-                            bookingViewModel?.setSelection(item.id, item)
-                            bookingViewModel?.retrieveExtraItems(item.categoryId, item.id)
-                            navExtra(item.id)
-                        }
+                selectedItem?.let { item ->
+                    bookingViewModel?.setSelection(item.id, item)
+                    bookingViewModel?.retrieveExtraItems(item.categoryId, item.id)
+                    navExtra(item.id)
+                }
                     },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = selectedItem != null && formattedDateRange.isNotEmpty(),
@@ -232,8 +438,8 @@ fun UserItemView(
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
-                }
-            }
+        }
+    }
         }
     }
 }
@@ -262,79 +468,171 @@ fun UserExtraItem(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelectBookingView(
-    categoryList: List<BookingCategories>,
-    itemList: List<BookingItem>,
     bookingViewModel: UserBookingViewModel?,
-    navExtra: () -> Unit,
+    onNavigateBack: () -> Unit,
+    onNavigateToExtras: (String) -> Unit
 ) {
-    val selectedCategory by bookingViewModel?.selectedCategory?.collectAsState()
-        ?: remember { mutableStateOf<BookingCategories?>(null) }
-    val selectedItem by bookingViewModel?.selectedBookingItem?.collectAsState()
-        ?: remember { mutableStateOf<BookingItem?>(null) }
+    val selectedCategory = bookingViewModel?.selectedCategory?.collectAsState()?.value
+    val selectedItem = bookingViewModel?.selectedBookingItem?.collectAsState()?.value
+    val filteredItems by bookingViewModel?.bookingItemsList?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
+    val dateRange by bookingViewModel?.formattedDateRange?.collectAsState() ?: remember { mutableStateOf("") }
+    var showDatePicker by remember { mutableStateOf(false) }
 
-
-
-    Column(modifier = Modifier
+    Column(
+        modifier = Modifier
         .fillMaxSize()
-        .background(Color.White)) {
-
-        Column(modifier = Modifier.weight(1f)) {
-            CustomColumn(title = "Select a category") {
-                LazyRow {
-                    items(categoryList.size) { index ->
-                        val category = categoryList[index]
-
-                        CategoriesCard(title = category.name, info = category.info, onClick = {
-                            bookingViewModel?.setSelectedCategory(category = category)
-                        })
-                    }
+            .background(AppBackground)
+    ) {
+        // Top App Bar with back button
+        TopAppBar(
+            title = {
+                Text(
+                    text = selectedCategory?.name ?: "Select Item",
+                    style = MaterialTheme.typography.titleLarge
+                )
+            },
+            navigationIcon = {
+                IconButton(onClick = onNavigateBack) {
+                    Icon(Icons.Default.ArrowBack, contentDescription = "Navigate back")
                 }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = AppBackground,
+                titleContentColor = TextPrimary
+            )
+        )
 
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            CustomColumn() {
-
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            CustomColumn(title = "Select an item") {
-
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth()
+        // Date Selection
+        AnimatedVisibility(visible = true) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = CardBackground
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
                 ) {
-                    val filteredItems = itemList.filter { it.categoryId == selectedCategory?.id }
+                    Text(
+                        text = "Select Dates",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    
+                    OutlinedTextField(
+                        value = dateRange,
+                        onValueChange = {},
+                        enabled = false,
+                        label = { Text("Booking Period") },
+                        trailingIcon = {
+                            IconButton(onClick = { showDatePicker = true }) {
+                                Icon(
+                                    Icons.Default.DateRange,
+                                    contentDescription = "Select dates",
+                                    tint = SecondaryAqua
+                                )
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            disabledTextColor = TextPrimary,
+                            disabledBorderColor = Color.Gray.copy(alpha = 0.3f),
+                            disabledLabelColor = TextSecondary
+                        )
+                    )
+                }
+            }
+        }
 
-                    items(filteredItems.size) { index ->
-                        val item = filteredItems[index]
+        if (showDatePicker) {
+            DatePickerView(
+                startDate = null,
+                endDate = null,
+                onDateRangeSelected = { start, end ->
+                    bookingViewModel?.updateSelectedDateRange(start, end)
+                    showDatePicker = false
+                },
+                onDismiss = {
+                    showDatePicker = false
+                }
+            )
+        }
+
+        // Items List
+        LazyColumn(
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(filteredItems) { item ->
                         BookingCard(
-                            selected = item.id == selectedItem?.id,
                             title = item.name,
                             info = item.info,
                             price = item.pricePerDay,
-                            modifier = Modifier.fillParentMaxWidth(),
+                    selected = item.id == selectedItem?.id,
                             onClick = {
-                                bookingViewModel?.setSelection(item.id)
+                        bookingViewModel?.setSelection(item.id, item)
+                    }
+                )
                             }
+
+            if (filteredItems.isEmpty()) {
+                item {
+                    BasecampCard(
+                        title = "No Items Available",
+                        subtitle = "No items found in this category",
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    ) {
+                        Text(
+                            text = "Please try another category or check back later",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextSecondary,
+                            modifier = Modifier.padding(16.dp)
                         )
                     }
                 }
             }
         }
-        CustomColumn() {
-            CustomButton(text = "Next", onClick = {
 
-                val selectedItem = itemList.find { it.id == selectedItem?.id }
+        // Bottom Bar with Next Button
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            color = AppBackground,
+            shadowElevation = 8.dp
+        ) {
+            Button(
+                onClick = { 
                 selectedItem?.let { item ->
-                    bookingViewModel?.setSelection(item.id, item)
-                    bookingViewModel?.retrieveExtraItems(item.categoryId, item.id)
-                    navExtra()
-
-                }
-
-            })
+                        onNavigateToExtras(item.id)
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                enabled = selectedItem != null && dateRange.isNotEmpty(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = SecondaryAqua,
+                    disabledContainerColor = Color.Gray.copy(alpha = 0.3f)
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = "Next",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
         }
-
-
     }
 }

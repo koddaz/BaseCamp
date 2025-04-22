@@ -51,14 +51,6 @@ fun ConfirmationView(
             .fillMaxSize()
             .background(AppBackground)
     ) {
-        // Background Pattern
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .background(SecondaryAqua.copy(alpha = 0.1f))
-        )
-
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -79,116 +71,32 @@ fun ConfirmationView(
                     text = "Confirm Your Booking",
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
-                    color = TextPrimary,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    color = TextPrimary
                 )
 
                 Text(
-                    text = "Please review your booking details before confirming",
+                    text = "Please review your booking details",
                     style = MaterialTheme.typography.bodyLarge,
                     color = TextSecondary,
                     modifier = Modifier.padding(bottom = 32.dp)
                 )
 
                 // Booking Details Card
-                BasecampCard(
-                    title = "Booking Details",
-                    subtitle = "Summary of your reservation",
-                    modifier = Modifier.padding(bottom = 16.dp)
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = CardBackground
+                    ),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
                     Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        modifier = Modifier.padding(16.dp)
                     ) {
-                        selectedBookingItem?.let { item ->
-                            Text(
-                                text = "Item: ${item.name}",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = TextPrimary
-                            )
-                            Text(
-                                text = "Base Price: €${item.pricePerDay}/day",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = TextSecondary
-                            )
-                        }
-
-                        Divider(
-                            modifier = Modifier.padding(vertical = 8.dp),
-                            color = Color.Gray.copy(alpha = 0.2f)
-                        )
-
-                        Text(
-                            text = "Date Range: $formattedDateRange",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = TextSecondary
-                        )
-                        Text(
-                            text = "Duration: $amountOfDays days",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = TextSecondary
-                        )
-                    }
-                }
-
-                // Selected Extras Card
-                if (selectedExtraItems.isNotEmpty()) {
-                    BasecampCard(
-                        title = "Selected Extras",
-                        subtitle = "Additional items for your booking",
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            selectedExtraItems.forEach { extra ->
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(
-                                        text = extra.name,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = TextPrimary
-                                    )
-                                    Text(
-                                        text = "€${extra.price}",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = TextSecondary
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Total Price Card
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 24.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    color = SecondaryAqua
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp, vertical = 16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Total Price",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = Color.White
-                        )
-                        Text(
-                            text = "€${String.format(Locale.getDefault(), "%.2f", calculatedTotalPrice)}",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
+                        BookingSummarySection()
+                        Divider(modifier = Modifier.padding(vertical = 16.dp))
+                        ExtrasSection()
+                        Divider(modifier = Modifier.padding(vertical = 16.dp))
+                        TotalPriceSection()
                     }
                 }
 
@@ -221,19 +129,18 @@ fun ConfirmationView(
                             Log.e("ConfirmationView", "Missing required booking information")
                         }
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 24.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = SecondaryAqua,
-                        disabledContainerColor = Color.Gray.copy(alpha = 0.3f)
+                        containerColor = SecondaryAqua
                     ),
-                    shape = RoundedCornerShape(12.dp),
-                    enabled = !isLoading && selectedBookingItem != null
+                    shape = RoundedCornerShape(12.dp)
                 ) {
                     if (isLoading) {
                         CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
                             color = Color.White,
-                            strokeWidth = 2.dp
+                            modifier = Modifier.size(24.dp)
                         )
                     } else {
                         Text(
@@ -246,4 +153,19 @@ fun ConfirmationView(
             }
         }
     }
+}
+
+@Composable
+fun BookingSummarySection() {
+    // Implementation of BookingSummarySection
+}
+
+@Composable
+fun ExtrasSection() {
+    // Implementation of ExtrasSection
+}
+
+@Composable
+fun TotalPriceSection() {
+    // Implementation of TotalPriceSection
 }

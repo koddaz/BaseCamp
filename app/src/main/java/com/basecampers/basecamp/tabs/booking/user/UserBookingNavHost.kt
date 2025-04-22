@@ -18,198 +18,139 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.components.CustomButton
 import com.basecampers.basecamp.tabs.booking.admin.AdminNavHost
 import com.basecampers.basecamp.tabs.booking.models.BookingCategories
 import com.basecampers.basecamp.tabs.booking.models.BookingItem
-
 import com.basecampers.basecamp.tabs.booking.models.UserBookingViewModel
+import com.basecampers.basecamp.tabs.booking.user.RoomType
+import com.google.gson.Gson
 
 @Composable
-fun UserBookingNavHost(authViewModel: AuthViewModel) {
-    val navController = rememberNavController()
-    val bookingViewModel: UserBookingViewModel = viewModel()
+fun UserBookingNavHost(
+    navController: NavHostController = rememberNavController(),
+    bookingViewModel: UserBookingViewModel?,
+    startDestination: String = "categories"
+) {
+    NavHost(
+        navController = navController,
+        startDestination = startDestination
+    ) {
+        // Categories Screen
+        composable("categories") {
+            BookingDashboardView(
+                bookingViewModel = bookingViewModel,
+                navBooking = { categoryId ->
+                    navController.navigate("room_selection")
+                }
+            )
+        }
 
-    val categoryList by bookingViewModel.categoriesList.collectAsState()
-    val currentUser by authViewModel.companyProfile.collectAsState()
-    val itemList: List<BookingItem> by bookingViewModel.bookingItemsList.collectAsState()
+        composable("room_selection") {
+            RoomSelectionView(
+                onNavigateBack = { navController.popBackStack() },
+                onRoomSelected = { room ->
+                    val roomJson = Gson().toJson(room)
+                    navController.navigate("booking_review/$roomJson")
+                }
+            )
+        }
 
-    val selectedExtraItems by bookingViewModel.selectedExtraItems.collectAsState()
-    val selectedBookingItem by bookingViewModel.selectedBookingItem.collectAsState()
-    val formattedDateRange by bookingViewModel.formattedDateRange.collectAsState()
-    val amountOfDays by bookingViewModel.amountOfDays.collectAsState()
-    val extraItems by bookingViewModel.bookingExtraList.collectAsState()
-    val totalPrice by bookingViewModel.finalPrice.collectAsState()
+        composable(
+            route = "booking_review/{roomJson}",
+            arguments = listOf(
+                navArgument("roomJson") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val roomJson = backStackEntry.arguments?.getString("roomJson")
+            val room = remember(roomJson) {
+                Gson().fromJson(roomJson, RoomType::class.java)
+            }
+            
+            RoomBookingReviewView(
+                room = room,
+                onNavigateBack = { navController.popBackStack() },
+                onProceedToPayment = { room, startDate, endDate ->
+                    val roomJson = Gson().toJson(room)
+                    navController.navigate("payment/$roomJson/$startDate/$endDate")
+                }
+            )
+        }
 
-    var isAdmin by remember { mutableStateOf(false) }
+        composable(
+            route = "payment/{roomJson}/{startDate}/{endDate}",
+            arguments = listOf(
+                navArgument("roomJson") { type = NavType.StringType },
+                navArgument("startDate") { type = NavType.LongType },
+                navArgument("endDate") { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val roomJson = backStackEntry.arguments?.getString("roomJson")
+            val startDate = backStackEntry.arguments?.getLong("startDate") ?: 0L
+            val endDate = backStackEntry.arguments?.getLong("endDate") ?: 0L
+            
+            val room = remember(roomJson) {
+                Gson().fromJson(roomJson, RoomType::class.java)
+            }
+            
+            RoomPaymentView(
+                room = room,
+                startDate = startDate,
+                endDate = endDate,
+                onNavigateBack = { navController.popBackStack() },
+                onPaymentComplete = {
+                    navController.navigate("booking_success") {
+                        popUpTo("categories") { inclusive = true }
+                    }
+                }
+            )
+        }
 
-
-
-    LaunchedEffect(currentUser) {
-        currentUser?.let { user ->
-            bookingViewModel.setUser(user)
+        // Booking Success Screen
+        composable("booking_success") {
+            BookingSuccessView(
+                onDone = {
+                    navController.popBackStack(
+                        route = "categories",
+                        inclusive = true
+                    )
+                }
+            )
         }
     }
+}
 
-    // Fix the category/item loading
-    LaunchedEffect(Unit) {
-        bookingViewModel.retrieveCategories()
-    }
-
-    // Separate LaunchedEffect to react when categories change
-    LaunchedEffect(categoryList) {
-        if (categoryList.isNotEmpty()) {
-            categoryList.forEach { category ->
-                bookingViewModel.retrieveBookingItems(category.id)
-            }
-        }
-    }
-
-
-    Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
-        if (isAdmin) {
-            Column(modifier = Modifier.weight(1f)) {
-                AdminNavHost(authViewModel = authViewModel, changeView = { isAdmin = false })
-            }
-        } else {
-            NavHost(
-                navController = navController,
-                startDestination = "start",
-                modifier = Modifier.weight(1f)
-            ) {
-                composable("start") {
-                    UserCategoryView(
-                        bookingViewModel = bookingViewModel,
-                        navBooking = { categoryId ->
-                            navController.navigate("itemView")
-                        },
-                    )
-                }
-                composable("itemView") {
-                    UserItemView(
-                        bookingViewModel = bookingViewModel,
-                        navExtra = { itemId ->
-                            navController.navigate("selectExtra")
-                        }
-                    )
-                }
-
-                composable("extrasView") {
-                    UserExtraItem(
-                        bookingViewModel = bookingViewModel,
-                        navBooking = { extraItems ->
-                            navController.navigate("confirmation")
-                        }
-                    )
-                }
-
-                composable("vieew") {
-                    SelectBookingView(
-                        categoryList = categoryList,
-                        itemList = itemList,
-                        bookingViewModel = bookingViewModel,
-                        navExtra = { navController.navigate("selectExtra") })
-                }
-                composable("selectExtra") {
-                    SelectExtraView(
-                        bookingViewModel = bookingViewModel,
-                        navConfirmation = {
-                            navController.navigate("confirmation")
-                        },
-                        selectedExtraItems = selectedExtraItems,
-                        selectedBookingItem = selectedBookingItem,
-                        formattedDateRange = formattedDateRange,
-                        amountOfDays = amountOfDays,
-                        extraItems = extraItems,
-                        totalPrice = totalPrice,
-                    )
-                }
-                composable("confirmation") {
-                    ConfirmationView(
-                        bookingViewModel = bookingViewModel,
-                        confirmBooking = {
-                            navController.navigate("start")
-                        }
-                    )
-                }
-            }
-        }
-        Row(modifier = Modifier.fillMaxWidth()) {
-            CustomButton(text = "Admin", onClick = { isAdmin = !isAdmin })
-            CustomButton(text = "User", onClick = { isAdmin = false })
-        }
+@Composable
+fun BookingSuccessView(onDone: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        // Success message and button implementation
+        CustomButton(
+            onClick = onDone,
+            text = "Done",
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 
 @Preview
 @Composable
 fun BookingViewPreview() {
-    // Sample categories
-    val dummyCategories = listOf(
-        BookingCategories(
-            id = "cat1",
-            name = "Equipment",
-            info = "Professional equipment for rent",
-            createdBy = "admin"
-        ),
-        BookingCategories(
-            id = "cat2",
-            name = "Vehicles",
-            info = "Cars and trucks available",
-            createdBy = "admin"
-        ),
-        BookingCategories(
-            id = "cat3",
-            name = "Tools",
-            info = "Hand and power tools",
-            createdBy = "admin"
-        )
-    )
-
-    // Sample items linked to categories
-    val dummyItems = listOf(
-        BookingItem(
-            id = "item1",
-            categoryId = "cat1",
-            pricePerDay = "24.99",
-            name = "Professional Camera",
-            info = "High resolution DSLR camera",
-            quantity = "3"
-        ),
-        BookingItem(
-            id = "item2",
-            categoryId = "cat1",
-            pricePerDay = "15.99",
-            name = "Drone",
-            info = "4K recording capability",
-            quantity = "2"
-        ),
-        BookingItem(
-            id = "item3",
-            categoryId = "cat2",
-            pricePerDay = "99.99",
-            name = "SUV",
-            info = "All terrain vehicle with AC",
-            quantity = "1"
-        ),
-        BookingItem(
-            id = "item4",
-            categoryId = "cat3",
-            pricePerDay = "12.50",
-            name = "Power Drill",
-            info = "Cordless with extra batteries",
-            quantity = "5"
-        )
-    )
-
-    SelectBookingView(
-        categoryList = dummyCategories,
-        itemList = dummyItems,
-        bookingViewModel = null,
-        navExtra = {  },
+    val navController = rememberNavController()
+    val previewViewModel = viewModel<UserBookingViewModel>()
+    
+    UserBookingNavHost(
+        navController = navController,
+        bookingViewModel = previewViewModel
     )
 }
