@@ -32,7 +32,10 @@ fun AuthNavHost(authViewModel : AuthViewModel, profileViewModel: ProfileViewMode
                 goLogin = { navController.navigate(route = AuthRoutes.LOGIN) })
         }
         composable(AuthRoutes.FORGOTPASS) {
-            ForgotPasswordScreen(authViewModel)
+            ForgotPasswordScreen(
+                authViewModel = authViewModel,
+                onBackClick = { navController.popBackStack() }
+            )
         }
     }
 }

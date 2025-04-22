@@ -1,4 +1,4 @@
-package com.basecampers.ui.theme
+package com.basecampers.basecamp.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -10,25 +10,52 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
-)
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = PrimaryRed,
+    onPrimary = AppBackground,
+    primaryContainer = PrimaryRed.copy(alpha = 0.1f),
+    onPrimaryContainer = PrimaryRed,
+    
+    secondary = SecondaryAqua,
+    onSecondary = AppBackground,
+    secondaryContainer = SecondaryAqua.copy(alpha = 0.1f),
+    onSecondaryContainer = SecondaryAqua,
+    
+    background = AppBackground,
+    onBackground = TextPrimary,
+    
+    surface = CardBackground,
+    onSurface = TextPrimary,
+    
+    surfaceVariant = CardBackground,
+    onSurfaceVariant = TextSecondary,
+    
+    outline = BorderColor,
+    outlineVariant = BorderColor.copy(alpha = 0.5f)
+)
 
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+private val DarkColorScheme = darkColorScheme(
+    primary = PrimaryRed,
+    onPrimary = AppBackground,
+    primaryContainer = PrimaryRed.copy(alpha = 0.2f),
+    onPrimaryContainer = PrimaryRed,
+    
+    secondary = SecondaryAqua,
+    onSecondary = AppBackground,
+    secondaryContainer = SecondaryAqua.copy(alpha = 0.2f),
+    onSecondaryContainer = SecondaryAqua,
+    
+    background = TextPrimary,
+    onBackground = AppBackground,
+    
+    surface = TextPrimary,
+    onSurface = AppBackground,
+    
+    surfaceVariant = TextPrimary,
+    onSurfaceVariant = AppBackground,
+    
+    outline = BorderColor,
+    outlineVariant = BorderColor.copy(alpha = 0.5f)
 )
 
 @Composable
@@ -43,7 +70,6 @@ fun BaseCampTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }

@@ -37,7 +37,6 @@ fun UserBookingNavHost() {
     val navController = rememberNavController()
     val bookingViewModel: UserBookingViewModel = viewModel()
 
-
     Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
 
             NavHost(
@@ -61,7 +60,7 @@ fun UserBookingNavHost() {
                         bookingViewModel = bookingViewModel,
                         navBooking = { categoryId ->
                             navController.navigate("itemView")
-                        },
+                        }
                     )
                 }
 
@@ -88,9 +87,10 @@ fun UserBookingNavHost() {
                         bookingViewModel = bookingViewModel,
                         navBooking = {
                             navController.navigate("start")
-                        },
+                        }
                     )
                 }
+
                 composable("editBooking") {
                     UserEditBookingView(
                         bookingViewModel = bookingViewModel,
@@ -102,6 +102,7 @@ fun UserBookingNavHost() {
                         }
                     )
                 }
+
                 composable("currentBookings") {
                     UserCurrentBookings(
                         bookingViewModel = bookingViewModel,

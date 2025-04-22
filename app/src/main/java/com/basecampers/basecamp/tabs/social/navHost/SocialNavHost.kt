@@ -20,7 +20,7 @@ import com.basecampers.basecamp.tabs.social.qna.QnAScreen
 @Composable
 fun SocialNavHost(
 	socialViewModel: SocialViewModel,
-	selectedSocialTabIndex: Int = 1,
+	selectedSocialTabIndex: Int,
 	onSocialTabSelected: (Int) -> Unit = {}
 ) {
 	val companyProfile by UserSession.companyProfile.collectAsState()
@@ -57,14 +57,14 @@ fun SocialNavHost(
 			Box(modifier = Modifier.weight(1f)) {
 				when (currentSocialTabIndex) {
 					0 -> QnAScreen(
-						isSuper = isPrivilegedUser
+						isPrivilegedUser = isPrivilegedUser
 					)
 					1 -> ForumScreen(
-						isSuper = isPrivilegedUser
+						isPrivilegedUser = isPrivilegedUser
 					)
 					2 -> MessagingNavHost(
 						socialViewModel = socialViewModel,
-						isSuper = isPrivilegedUser,
+						isPrivilegedUser = isPrivilegedUser,
 						unreadCount = unreadCount
 					)
 					else -> Text("Error: Social tab not found")

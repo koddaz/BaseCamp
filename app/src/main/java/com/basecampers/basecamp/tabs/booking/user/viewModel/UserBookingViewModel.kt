@@ -79,6 +79,12 @@ class UserBookingViewModel : ViewModel() {
         }
     }
 
+    fun setUser(profile: CompanyProfileModel) {
+        Log.d("UserBookingViewModel", "Setting user profile: $profile")
+        // Update any necessary state based on the user profile
+        retrieveCurrentBookings()
+    }
+
     fun setSelectedBookingItem(item: BookingItem?) {
         _selectedBookingItem.value = item
     }
