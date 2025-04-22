@@ -27,10 +27,6 @@ class AuthViewModel : ViewModel() {
     private val _loggedin = MutableStateFlow(false)
     val loggedin = _loggedin.asStateFlow()
     
-    // SOCIAL tab user state
-    private val _isSuper = MutableStateFlow(false)
-    val isSuper: StateFlow<Boolean> = _isSuper.asStateFlow()
-    
     private val _companyProfile = MutableStateFlow<CompanyProfileModel?>(null)
     val companyProfile = _companyProfile.asStateFlow()
     
@@ -279,14 +275,14 @@ class AuthViewModel : ViewModel() {
         val password = "aQ!2345"
         login(email, password)
     }
-    
-    /**
+    /*
+    *//**
      * Test function: Toggles super user status for testing in SOCIAL tab.
-     */
+     *//*
     fun toggleSuperUser() {
         _isSuper.value = !_isSuper.value
     }
-    
+    */
     //=== VALIDATION FUNCTIONS ===//
     
     /**
