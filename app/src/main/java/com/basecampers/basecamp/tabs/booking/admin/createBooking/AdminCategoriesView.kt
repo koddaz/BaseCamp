@@ -102,8 +102,7 @@ fun AdminCategoriesView(
                         label = { Text("Info") },
                         value = info,
                         onValueChange = { newInfo ->
-                            val filteredValue = newInfo.replace("\\s".toRegex(), "")
-                            info = filteredValue
+                            info = newInfo
                         },
                         maxLines = 3,
                         modifier = Modifier.fillMaxWidth()
@@ -143,14 +142,10 @@ fun AdminCategoriesView(
                 }
             }
         }
-        Row() {
-            CustomButton(text = "Back", onClick = goBack)
-            Spacer(modifier = Modifier.weight(1f))
+        Column() {
             CustomButton(text = "Add category", onClick = { isAddVisible = !isAddVisible })
             CustomButton(text = "Overview", onClick = navigateOverview)
-
-
-
+            CustomButton(text = "Back", onClick = goBack)
         }
     }
 }

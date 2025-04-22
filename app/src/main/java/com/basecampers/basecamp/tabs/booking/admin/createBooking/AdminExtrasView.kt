@@ -44,8 +44,6 @@ fun AdminExtrasView(
     val selectedItem by adminBookingViewModel.selectedItem.collectAsState()
     val selectedCategory by adminBookingViewModel.selectedCategory.collectAsState()
 
-
-
     var errorMessage by remember { mutableStateOf("") }
 
     Column(Modifier

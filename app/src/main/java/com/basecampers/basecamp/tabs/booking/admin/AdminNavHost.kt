@@ -28,7 +28,8 @@ object AdminRoutes {
 
 @Composable
 fun AdminNavHost(
-    changeView: () -> Unit) {
+    onNavigateBack: () -> Unit = {},
+) {
 
     val adminBookingViewModel = viewModel<AdminBookingViewModel>()
     val navController = rememberNavController()
@@ -43,6 +44,7 @@ fun AdminNavHost(
         ) {
             composable(AdminRoutes.MAIN) {
                 AdminMainView(
+                    onNavigateBack = onNavigateBack,
                     navigateCat = { navController.navigate(AdminRoutes.CATEGORY) },
                     navigateBooking = { navController.navigate(AdminRoutes.BOOKING) },
                     navigateOverview = { navController.navigate(AdminRoutes.CURRENT) }

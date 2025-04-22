@@ -28,7 +28,10 @@ import com.basecampers.basecamp.tabs.profile.viewModel.ProfileViewModel
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun ProfileScreen(onNavigateToEdit: () -> Unit = {}) {
+fun ProfileScreen(
+    onNavigateToEdit: () -> Unit = {},
+    onNavigateToAdmin: () -> Unit = {}
+) {
     
     // Access data from UserSession
     val profile by UserSession.profile.collectAsState()
@@ -78,7 +81,7 @@ fun ProfileScreen(onNavigateToEdit: () -> Unit = {}) {
             style = MaterialTheme.typography.bodyLarge,
             color = Color.Gray
         )
-        
+
         // User Status Badge
         companyProfile?.status?.let { status ->
             val statusColor = when(status) {
@@ -165,6 +168,15 @@ fun ProfileScreen(onNavigateToEdit: () -> Unit = {}) {
                             ModelDataItem("Bio", companyProfile?.bio ?: "")
                             ModelDataItem("Status", companyProfile?.status?.name ?: "")
                             ModelDataItem("Image URL", companyProfile?.imageUrl?.toString() ?: "No image")
+
+                            if (companyProfile?.status == UserStatus.ADMIN) {
+                                Button(
+                                    onClick = onNavigateToAdmin,
+                                    modifier = Modifier.padding(top = 8.dp)
+                                ) {
+                                    Text("Bookings")
+                                }
+                            }
                         } else {
                             Text(
                                 text = "No company profile data found",

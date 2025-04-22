@@ -43,10 +43,10 @@ class CompanyViewModel : ViewModel() {
 	val userCompanyList: StateFlow<List<String>> = _userCompanyList.asStateFlow()
 	
 	private val db = FirebaseFirestore.getInstance()
-	
+
 	init {
 		fetchCompanies()
-		
+
 		// Initialize company list from UserSession
 		val userId = UserSession.userId.value
 		if (userId != null) {
