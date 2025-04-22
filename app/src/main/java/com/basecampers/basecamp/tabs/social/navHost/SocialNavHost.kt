@@ -20,7 +20,7 @@ import com.basecampers.basecamp.tabs.social.qna.QnAScreen
 @Composable
 fun SocialNavHost(
 	socialViewModel: SocialViewModel,
-	selectedSocialTabIndex: Int = 0,
+	selectedSocialTabIndex: Int,
 	onSocialTabSelected: (Int) -> Unit = {}
 ) {
 	val companyProfile by UserSession.companyProfile.collectAsState()
