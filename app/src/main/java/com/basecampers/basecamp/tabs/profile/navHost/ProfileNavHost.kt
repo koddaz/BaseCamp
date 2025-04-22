@@ -33,6 +33,7 @@ fun ProfileNavHost(
         0 -> ProfileScreen(
             onNavigateToEdit = { onProfileTabSelected(1) },
             onNavigateToAdmin = { onProfileTabSelected(2) },
+            authViewModel = authViewModel
             onNavigateToOptions = { onProfileTabSelected(3) }
         )
         1 -> EditProfileScreen(
