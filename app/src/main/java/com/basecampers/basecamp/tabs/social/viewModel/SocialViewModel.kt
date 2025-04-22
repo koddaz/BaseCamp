@@ -10,8 +10,9 @@ import kotlinx.coroutines.flow.asStateFlow
  */
 class SocialViewModel : ViewModel() {
 	
+	//=== MESSAGING SECTION ===//
+	
 	// Number of unread messages
-	// In production, this would be loaded from a messaging repository
 	private val _unreadCount = MutableStateFlow(3)
 	val unreadCount: StateFlow<Int> = _unreadCount.asStateFlow()
 	
@@ -19,6 +20,9 @@ class SocialViewModel : ViewModel() {
 	fun updateUnreadCount(count: Int) {
 		_unreadCount.value = count
 	}
+	
+	//=== NAVIGATION SECTION ===//
+	
 	// Show/hide menu state
 	private val _showMenu = MutableStateFlow(false)
 	val showMenu = _showMenu.asStateFlow()
@@ -31,4 +35,3 @@ class SocialViewModel : ViewModel() {
 		_showMenu.value = false
 	}
 }
-
