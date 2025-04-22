@@ -1,13 +1,19 @@
 package com.basecampers.basecamp.authentication
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -53,64 +59,92 @@ fun RegisterScreen(authViewModel: AuthViewModel, profileViewModel: ProfileViewMo
     val confirmPasswordValid by authViewModel.confirmPasswordValid.collectAsState()
     val hasEmailError by authViewModel.hasEmailError.collectAsState()
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AppBackground)
+    ) {
+        // Password Policy Info
         PasswordPolicyInfo(
             visible = showPasswordPolicy,
             onDismiss = { showPasswordPolicy = false },
             modifier = Modifier.zIndex(10f)
         )
 
+        // Background Pattern
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .background(SecondaryAqua.copy(alpha = 0.1f))
+        )
+
         // Content
         Column(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(top = 180.dp, bottom = 24.dp),
+                .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Title
+            Spacer(modifier = Modifier.height(120.dp))
+
+            // Logo/App Name
             Text(
-                text = "Sign Up",
-                style = MaterialTheme.typography.titleLarge.copy(
+                text = "Basecamp",
+                style = MaterialTheme.typography.headlineLarge.copy(
                     fontWeight = FontWeight.Bold
                 ),
-                color = TextPrimary,
-                modifier = Modifier
-                    .align(Alignment.Start)
-                    .padding(bottom = 24.dp)
+                color = TextPrimary
             )
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = isAdmin, onCheckedChange = { isAdmin = it })
-                Text("Register as Admin")
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Admin Checkbox
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = isAdmin,
+                    onCheckedChange = { isAdmin = it },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = SecondaryAqua,
+                        uncheckedColor = Color.Gray
+                    )
+                )
+                Text(
+                    text = "Register as Admin",
+                    color = TextPrimary,
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
 
-            if (isAdmin) {
-                TextField(
-                    label = { Text("Company Name") },
+            // Company Name Field (Admin only)
+            AnimatedVisibility(
+                visible = isAdmin,
+                enter = fadeIn() + slideInVertically(),
+                exit = fadeOut() + slideOutVertically()
+            ) {
+                OutlinedTextField(
                     value = companyName,
                     onValueChange = { companyName = it },
-                    modifier = Modifier.fillMaxWidth()
+                    label = { Text("Company Name") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = SecondaryAqua,
+                        unfocusedBorderColor = Color.Gray
+                    )
                 )
             }
 
-            // Display email error messages
-            registerErrors.filter { error ->
-                error in listOf(
-                    AuthViewModel.RegisterErrors.EMAIL_ALREADY_IN_USE,
-                    AuthViewModel.RegisterErrors.EMAIL_EMPTY,
-                    AuthViewModel.RegisterErrors.EMAIL_NOT_VALID
-                )
-            }.forEach { error ->
-                Text(
-                    text = error.message,
-                    color = Color.Red,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(start = 4.dp)
-                )
-            }
-            TextField(
-                label = { Text("Email") },
+            // Email Field
+            OutlinedTextField(
                 value = email,
                 onValueChange = {
                     if (hasEmailError && it != email) {
@@ -119,51 +153,110 @@ fun RegisterScreen(authViewModel: AuthViewModel, profileViewModel: ProfileViewMo
                     email = it
                     authViewModel.validateEmailLive(it)
                 },
+                label = { Text("Email") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(
-                        1.dp,
-                        when {
-                            hasEmailError -> Color.Red
-                            emailValid && email.isNotEmpty() -> Color.Green
-                            else -> Color.LightGray
-                        }
-                    )
+                    .padding(bottom = 16.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = if (emailValid && email.isNotEmpty()) Color.Green else SecondaryAqua,
+                    unfocusedBorderColor = if (hasEmailError) Color.Red else Color.Gray
+                ),
+                isError = hasEmailError
             )
 
+            // Display email error messages
+            if (hasEmailError) {
+                registerErrors.filter { error ->
+                    error in listOf(
+                        AuthViewModel.RegisterErrors.EMAIL_ALREADY_IN_USE,
+                        AuthViewModel.RegisterErrors.EMAIL_EMPTY,
+                        AuthViewModel.RegisterErrors.EMAIL_NOT_VALID
+                    )
+                }.forEach { error ->
+                    Text(
+                        text = error.message,
+                        color = Color.Red,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier
+                            .align(Alignment.Start)
+                            .padding(bottom = 8.dp)
+                    )
+                }
+            }
+
             // Password Field
-            PasswordTextField(
-                password = password,
+            OutlinedTextField(
+                value = password,
                 onValueChange = { password = it },
-                label = "Password",
-                modifier = Modifier.fillMaxWidth(),
-                authViewModel = authViewModel
+                label = { Text("Password") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                shape = RoundedCornerShape(12.dp),
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                        )
+                    }
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = SecondaryAqua,
+                    unfocusedBorderColor = Color.Gray
+                )
             )
 
             // Confirm Password Field
-            ConfirmPasswordTextField(
-                password = confirmPassword,
+            OutlinedTextField(
+                value = confirmPassword,
                 onValueChange = { confirmPassword = it },
-                label = "Confirm Password",
-                modifier = Modifier.fillMaxWidth(),
-                authViewModel = authViewModel
+                label = { Text("Confirm Password") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                shape = RoundedCornerShape(12.dp),
+                visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                        Icon(
+                            imageVector = if (confirmPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = if (confirmPasswordVisible) "Hide password" else "Show password"
+                        )
+                    }
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = SecondaryAqua,
+                    unfocusedBorderColor = Color.Gray
+                )
             )
 
             // Phone Field
-            TextField(
-                label = { Text("Phone") },
+            OutlinedTextField(
                 value = phone,
                 onValueChange = { phone = it },
+                label = { Text("Phone") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = SecondaryAqua,
+                    unfocusedBorderColor = Color.Gray
+                )
             )
 
             // Terms & Conditions Text
             Text(
-                text = "By signing up, you are agree to our Terms & Conditions and Policies",
+                text = "By signing up, you agree to our Terms & Conditions and Policies",
                 color = TextSecondary,
                 fontSize = 12.sp,
-                modifier = Modifier.padding(bottom = 24.dp)
+                modifier = Modifier
+                    .padding(bottom = 24.dp)
+                    .align(Alignment.Start)
             )
 
             // Sign Up Button
@@ -181,8 +274,9 @@ fun RegisterScreen(authViewModel: AuthViewModel, profileViewModel: ProfileViewMo
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp),
-                enabled = !isLoading && email.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty()
+                    .height(56.dp),
+                enabled = !isLoading && email.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty(),
+                shape = RoundedCornerShape(12.dp)
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(
@@ -190,18 +284,19 @@ fun RegisterScreen(authViewModel: AuthViewModel, profileViewModel: ProfileViewMo
                         color = Color.White
                     )
                 } else {
-                    Text("Sign Up")
+                    Text("Sign Up", fontSize = 16.sp)
                 }
             }
 
+            Spacer(modifier = Modifier.height(16.dp))
+
             // Login Link
-            Text(
-                text = "Already have an account? Login",
-                color = TextSecondary,
-                modifier = Modifier
-                    .padding(top = 16.dp)
-                    .clickable(onClick = goLogin)
-            )
+            TextButton(
+                onClick = goLogin,
+                modifier = Modifier.padding(bottom = 32.dp)
+            ) {
+                Text("Already have an account? Sign In", color = SecondaryAqua)
+            }
         }
     }
 }

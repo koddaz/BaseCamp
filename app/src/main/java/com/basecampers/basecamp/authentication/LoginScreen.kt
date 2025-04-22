@@ -1,6 +1,12 @@
 package com.basecampers.basecamp.authentication
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -10,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -17,6 +24,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -46,6 +54,7 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
+    var showTestButtons by remember { mutableStateOf(false) }
     val isLoggedIn by authViewModel.loggedin.collectAsState()
     val loginErrorMessage by authViewModel.loginErrorMessage.collectAsState()
 
@@ -59,119 +68,186 @@ fun LoginScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(AppBackground)
-            .padding(horizontal = 16.dp)
     ) {
         // Background Pattern
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp)
-                .align(Alignment.TopCenter)
-        ) {
-            Text(
-                text = "Pattern Placeholder",
-                color = SecondaryAqua,
-                fontSize = 14.sp,
-                modifier = Modifier.align(Alignment.Center)
-            )
-        }
+                .background(SecondaryAqua.copy(alpha = 0.1f))
+        )
 
         // Content
         Column(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(top = 180.dp, bottom = 24.dp),
+                .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Title
+            Spacer(modifier = Modifier.height(120.dp))
+
+            // Logo/App Name
             Text(
-                text = "Sign In",
-                style = MaterialTheme.typography.titleLarge.copy(
+                text = "Basecamp",
+                style = MaterialTheme.typography.headlineLarge.copy(
                     fontWeight = FontWeight.Bold
                 ),
-                color = TextPrimary,
-                modifier = Modifier
-                    .align(Alignment.Start)
-                    .padding(bottom = 8.dp)
+                color = TextPrimary
             )
 
-            PasswordTextFieldLogin(
-                password = password,
-                onValueChange = {
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Email Field
+            OutlinedTextField(
+                value = email,
+                onValueChange = { 
+                    email = it
+                    if(loginErrorMessage.isNotEmpty()) {
+                        authViewModel.clearLoginErrors()
+                    }
+                },
+                label = { Text("Email") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = SecondaryAqua,
+                    unfocusedBorderColor = Color.Gray
+                )
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Password Field
+            OutlinedTextField(
+                value = password,
+                onValueChange = { 
                     password = it
                     if(loginErrorMessage.isNotEmpty()) {
                         authViewModel.clearLoginErrors()
                     }
                 },
-                label = "Password",
-                authViewModel = authViewModel,
-                modifier = Modifier
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = { authViewModel.login(email, password) },
+                label = { Text("Password") },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = email.isNotBlank() && password.isNotBlank()
-            ) {
-                Text("Login")
-            }
+                shape = RoundedCornerShape(12.dp),
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                        )
+                    }
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = SecondaryAqua,
+                    unfocusedBorderColor = Color.Gray
+                )
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Button(onClick = {
-                authViewModel.login(email = "admin@admin.se", password = "Test123!")
-            }) {
-                Text("admin@admin.se & Test123!")
-            }
-
-            Button(onClick = {
-                authViewModel.login(email = "user9182@example.com", password = "Test123!")
-            }) {
-                Text("user9182@example.com & Test123!")
-            }
-
-            Button(
+            // Forgot Password
+            TextButton(
                 onClick = { goForgotPass() },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.align(Alignment.End)
             ) {
-                Text("Forgot Password")
+                Text("Forgot Password?", color = SecondaryAqua)
             }
 
-            Button(onClick = {
-                authViewModel.isLoggedInTrue()
-            }) {
-                Text("Change isLoggedIn to True")
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Login Button
+            Button(
+                onClick = { authViewModel.login(email, password) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                enabled = email.isNotBlank() && password.isNotBlank(),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Sign In", fontSize = 16.sp)
             }
 
-            Button(onClick = {
-                authViewModel.loginUser1()
-            }) {
-                Text("User 1 (User)")
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Test Buttons Toggle
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showTestButtons = !showTestButtons }
+                    .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Test Accounts",
+                    color = SecondaryAqua,
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = "Toggle test accounts",
+                    tint = SecondaryAqua
+                )
             }
 
-            Button(onClick = {
-                authViewModel.loginUser2()
-            }) {
-                Text("User 2 (SuperUser)")
-            }
-
-            Button(onClick = {
-                authViewModel.loginUser3()
-            }) {
-                Text("User 3 (Admin)")
+            // Test Buttons
+            AnimatedVisibility(
+                visible = showTestButtons,
+                enter = fadeIn() + slideInVertically(),
+                exit = fadeOut() + slideOutVertically()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                ) {
+                    TestButton("Admin Account") {
+                        authViewModel.login(email = "admin@admin.se", password = "Test123!")
+                    }
+                    TestButton("User Account") {
+                        authViewModel.login(email = "user9182@example.com", password = "Test123!")
+                    }
+                    TestButton("User 1 (User)") {
+                        authViewModel.loginUser1()
+                    }
+                    TestButton("User 2 (SuperUser)") {
+                        authViewModel.loginUser2()
+                    }
+                    TestButton("User 3 (Admin)") {
+                        authViewModel.loginUser3()
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.weight(1f))
 
-            Button(
+            // Register Button
+            TextButton(
                 onClick = { goRegister() },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.padding(bottom = 32.dp)
             ) {
-                Text("Go to Register")
+                Text("Don't have an account? Sign Up", color = SecondaryAqua)
             }
         }
+    }
+}
+
+@Composable
+private fun TestButton(
+    text: String,
+    onClick: () -> Unit
+) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        shape = RoundedCornerShape(8.dp),
+        colors = ButtonDefaults.outlinedButtonColors(
+            contentColor = SecondaryAqua
+        )
+    ) {
+        Text(text)
     }
 }

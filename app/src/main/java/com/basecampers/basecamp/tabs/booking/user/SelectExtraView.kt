@@ -1,137 +1,205 @@
 package com.basecampers.basecamp.tabs.booking.user
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme.typography
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.basecampers.basecamp.components.CustomButton
-import com.basecampers.basecamp.components.CustomColumn
+import com.basecampers.basecamp.components.BasecampCard
+import com.basecampers.basecamp.tabs.booking.components.ExtrasCard
 import com.basecampers.basecamp.tabs.booking.models.BookingExtra
 import com.basecampers.basecamp.tabs.booking.models.BookingItem
 import com.basecampers.basecamp.tabs.booking.models.UserBookingViewModel
-import java.util.Locale
+import com.basecampers.basecamp.ui.theme.*
+import java.util.*
 
 @Composable
 fun SelectExtraView(
+    modifier: Modifier = Modifier,
+    bookingViewModel: UserBookingViewModel?,
+    navConfirmation: () -> Unit,
     selectedExtraItems: List<BookingExtra>,
     selectedBookingItem: BookingItem?,
     formattedDateRange: String,
     amountOfDays: Int,
     extraItems: List<BookingExtra>,
-    totalPrice: Double,
-    navConfirmation: () -> Unit,
-    bookingViewModel: UserBookingViewModel?,
-    modifier: Modifier = Modifier) {
-
-
-    LaunchedEffect(selectedExtraItems, selectedBookingItem, amountOfDays) {
-        selectedBookingItem?.let { item ->
-            bookingViewModel?.calculateTotalPrice(item = item, extras = selectedExtraItems)
-        }
-    }
-
-    Column(modifier = modifier.fillMaxSize()) {
-        CustomColumn(title = "Booking Summary") {
-            selectedBookingItem?.let { item ->
-                Text(text = "Selected Item: ${item.name}")
-                Text(text = "Date Range: $formattedDateRange")
-                Text(text = "Total Days: $amountOfDays")
-                if (totalPrice > 0) {
-                    "€${String.format(Locale.getDefault(), "%.2f", totalPrice)}"
-                } else "FREE!"
+    totalPrice: Double
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AppBackground)
+    ) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            // Booking Summary Section
+            item {
                 Text(
-                    text = "Total price: $totalPrice",
-                    style = typography.bodyLarge,
-                    modifier = Modifier.padding(vertical = 4.dp)
+                    text = "Booking Summary",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary,
+                    modifier = Modifier.padding(bottom = 16.dp)
                 )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            selectedExtraItems.forEach { extra ->
-                Text(text = "Selected Extra: ${extra.name}")
-                Text(text = "Price: ${extra.price}")
-            }
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        CustomColumn(title = "Extra Items") {
-            if (extraItems.isNotEmpty()) {
 
-                extraItems.forEach { extra ->
+                BasecampCard(
+                    title = "Selected Item",
+                    subtitle = selectedBookingItem?.name ?: "",
+                    modifier = Modifier.padding(bottom = 16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = selectedBookingItem?.info ?: "",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextSecondary
+                        )
+                        Text(
+                            text = "Date Range: $formattedDateRange",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextSecondary
+                        )
+                        Text(
+                            text = "Duration: $amountOfDays days",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextSecondary
+                        )
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = SecondaryAqua.copy(alpha = 0.1f),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "Base Price: €${selectedBookingItem?.pricePerDay}/day",
+                                style = MaterialTheme.typography.titleSmall,
+                                color = SecondaryAqua,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Selected Extras Section
+            if (selectedExtraItems.isNotEmpty()) {
+                item {
+                    Text(
+                        text = "Selected Extras",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextPrimary,
+                        modifier = Modifier.padding(vertical = 16.dp)
+                    )
+                }
+
+                items(selectedExtraItems) { extra ->
                     ExtrasCard(
                         extra = extra,
+                        isSelected = true,
                         onClick = {
-                            if (selectedExtraItems.contains(extra)) {
-                                bookingViewModel?.removeExtraItem(extra)
-                            } else {
-                                bookingViewModel?.addExtraItem(extra)
-                                bookingViewModel?.calculateExtra(extraItems)
-                            }
+                            bookingViewModel?.removeExtraItem(extra)
+                            bookingViewModel?.calculateExtra(extraItems)
                         }
                     )
                 }
             }
-        }
 
-        Row() {
-            CustomButton(
-                text = "Back",
-                onClick = {
-                    bookingViewModel?.clearSelectedExtras()
+            // Available Extras Section
+            item {
+                Text(
+                    text = "Available Extras",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = TextPrimary,
+                    modifier = Modifier.padding(vertical = 16.dp)
+                )
+            }
+
+            if (extraItems.isNotEmpty()) {
+                items(extraItems.filter { it !in selectedExtraItems }) { extra ->
+                    ExtrasCard(
+                        extra = extra,
+                        isSelected = false,
+                        onClick = {
+                            bookingViewModel?.addExtraItem(extra)
+                            bookingViewModel?.calculateExtra(extraItems)
+                        }
+                    )
                 }
-            )
-            CustomButton(
-                text = "Next",
-                onClick = {
-                    navConfirmation()
+            } else {
+                item {
+                    BasecampCard(
+                        title = "No Extras",
+                        subtitle = "No extra items available",
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    ) {
+                        Text(
+                            text = "No additional items available for this booking",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextSecondary,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
                 }
-            )
-        }
-    }
-}
+            }
 
-@Composable
-fun ExtrasCard(
-    extra: BookingExtra,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .clickable(onClick = { onClick() })
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+            // Total Price Section
+            item {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 24.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    color = SecondaryAqua
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Total Price",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = Color.White
+                        )
+                        Text(
+                            text = "€${String.format(Locale.getDefault(), "%.2f", totalPrice)}",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    }
+                }
 
-
-            Text(
-                text = extra.name,
-                style = typography.titleMedium
-            )
-            Text(
-                text = extra.info,
-                style = typography.bodyMedium,
-                modifier = Modifier.padding(vertical = 4.dp)
-            )
-            Text(
-                text = extra.price,
-                style = typography.bodyLarge
-            )
+                Button(
+                    onClick = navConfirmation,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = SecondaryAqua
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = "Proceed to Confirmation",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
+            }
         }
     }
 }
