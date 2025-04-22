@@ -13,7 +13,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -21,41 +20,31 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.components.CustomButton
-import com.basecampers.basecamp.tabs.booking.admin.createBooking.AdminNavHost
-import com.basecampers.basecamp.tabs.booking.models.BookingCategories
-import com.basecampers.basecamp.tabs.booking.models.BookingItem
+import com.basecampers.basecamp.tabs.booking.admin.AdminNavHost
+import com.basecampers.basecamp.tabs.booking.user.bookingOverview.UserCurrentBookings
+import com.basecampers.basecamp.tabs.booking.user.bookingOverview.UserEditBookingView
+import com.basecampers.basecamp.tabs.booking.user.createBooking.UserCategoryView
+import com.basecampers.basecamp.tabs.booking.user.createBooking.UserConfirmationView
+import com.basecampers.basecamp.tabs.booking.user.createBooking.UserExtraItem
+import com.basecampers.basecamp.tabs.booking.user.createBooking.UserItemView
 
 import com.basecampers.basecamp.tabs.booking.user.viewModel.UserBookingViewModel
 
 @Composable
-fun UserBookingNavHost(authViewModel: AuthViewModel) {
+fun UserBookingNavHost() {
 
     val navController = rememberNavController()
     val bookingViewModel: UserBookingViewModel = viewModel()
-    val categoryList by bookingViewModel.categoriesList.collectAsState()
     var isAdmin by remember { mutableStateOf(false) }
 
 
-
-    // Fix the category/item loading
-    LaunchedEffect(Unit) {
-        bookingViewModel.retrieveCategories()
-    }
-
-    // Separate LaunchedEffect to react when categories change
-    LaunchedEffect(categoryList) {
-        if (categoryList.isNotEmpty()) {
-            categoryList.forEach { category ->
-                bookingViewModel.retrieveBookingItems(category.id)
-            }
-        }
-    }
-
-
     Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            CustomButton(text = (if (isAdmin) "User" else "Admin"), onClick = { isAdmin = !isAdmin })
+        }
         if (isAdmin) {
             Column(modifier = Modifier.weight(1f)) {
-                AdminNavHost(authViewModel = authViewModel, changeView = { isAdmin = false })
+                AdminNavHost(changeView = { isAdmin = false })
             }
         } else {
             NavHost(
@@ -64,7 +53,7 @@ fun UserBookingNavHost(authViewModel: AuthViewModel) {
                 modifier = Modifier.weight(1f)
             ) {
                 composable("start") {
-                    TESTVIEW(
+                    UserBookingMainView(
                         navToBooking = {
                             navController.navigate("categoryView")
                         },
@@ -109,7 +98,17 @@ fun UserBookingNavHost(authViewModel: AuthViewModel) {
                         },
                     )
                 }
-
+                composable("editBooking") {
+                    UserEditBookingView(
+                        bookingViewModel = bookingViewModel,
+                        goBack = {
+                            navController.popBackStack()
+                        },
+                        navConfirm = {
+                            navController.navigate("currentBookings")
+                        }
+                    )
+                }
                 composable("currentBookings") {
                     UserCurrentBookings(
                         bookingViewModel = bookingViewModel,
@@ -120,15 +119,12 @@ fun UserBookingNavHost(authViewModel: AuthViewModel) {
                 }
             }
         }
-        Row(modifier = Modifier.fillMaxWidth()) {
-            CustomButton(text = "Admin", onClick = { isAdmin = !isAdmin })
-            CustomButton(text = "User", onClick = { isAdmin = false })
-        }
+
     }
 }
 
 @Composable
-fun TESTVIEW(
+fun UserBookingMainView(
     navToBooking: () -> Unit,
     navToCurrentBookings: () -> Unit
 ) {

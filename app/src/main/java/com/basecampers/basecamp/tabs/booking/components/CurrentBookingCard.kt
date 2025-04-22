@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.typography
@@ -36,7 +37,8 @@ fun CurrentBookingCard(
     booking: UserBookingModel,
     bookingViewModel: UserBookingViewModel? = null,
     manageViewModel: ManageBookingsViewModel? = null,
-    navToEditBooking: () -> Unit = {}
+    navToEditBooking: () -> Unit = {},
+    edit: Boolean = false
 ) {
     var isVisible by remember { mutableStateOf(false) }
     val isAdmin = manageViewModel != null
@@ -67,7 +69,17 @@ fun CurrentBookingCard(
                         )
                         Text(text = " (${booking.status})")
                         Spacer(modifier = Modifier.weight(1f))
-                        Icon(Icons.Default.ArrowDropDown, contentDescription = "Drop-down Arrow")
+                        if(!isVisible) {
+                            Icon(
+                                Icons.Default.ArrowDropDown,
+                                contentDescription = "Drop-down Arrow"
+                            )
+                        } else {
+                            Icon(
+                                Icons.Default.ArrowDropUp,
+                                contentDescription = "Drop-up Arrow"
+                            )
+                        }
                     }
                     Text(
                         text = "Booked on: ${
@@ -94,10 +106,7 @@ fun CurrentBookingCard(
                         }
                     }
                 }
-                Text(
-                    text = "Booked by: ${booking.userId}",
-                    style = typography.bodySmall
-                )
+
 
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Spacer(modifier = Modifier.weight(1f))
@@ -106,10 +115,14 @@ fun CurrentBookingCard(
                         style = typography.bodyMedium
                     )
                 }
+                Text(
+                    text = "Booked by: ${booking.userId}",
+                    style = typography.bodySmall
+                )
 
                 // Only show admin actions when using ManageBookingsViewModel
                 if (isAdmin && manageViewModel != null) {
-                    Row {
+                    Column {
                         CustomButton(text = "Confirm", onClick = {
                             manageViewModel.confirmStatus(booking)
                         })
@@ -118,11 +131,13 @@ fun CurrentBookingCard(
                         })
                     }
                 } else {
-                    Row {
-                        CustomButton(text = "Edit", onClick = {
-                            bookingViewModel?.setSelectedBooking(booking)
-                            navToEditBooking()
-                        })
+                    Column {
+                        if (edit) {
+                            CustomButton(text = "Edit", onClick = {
+                                bookingViewModel?.setSelectedBooking(booking)
+                                navToEditBooking()
+                            })
+                        }
                         CustomButton(text = "Cancel", onClick = {
 
                         })

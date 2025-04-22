@@ -2,6 +2,7 @@ package com.basecampers.basecamp.tabs.booking.admin.viewModel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.basecampers.basecamp.aRootFolder.UserSession
 import com.basecampers.basecamp.company.models.CompanyProfileModel
 import com.basecampers.basecamp.tabs.booking.models.BookingCategories
@@ -12,6 +13,7 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class AdminBookingViewModel : ViewModel() {
     val db = Firebase.firestore
@@ -44,6 +46,11 @@ class AdminBookingViewModel : ViewModel() {
     val selectedExtraItem = _selectedExtraItem.asStateFlow()
 
 
+    init {
+        viewModelScope.launch {
+            retrieveCategories()
+        }
+    }
 
     fun addExtraList(extraList: List<BookingExtra>) {
         _bookingExtras.value = extraList + _bookingExtras.value

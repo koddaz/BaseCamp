@@ -37,7 +37,7 @@ fun AdminCategoriesView(
     navigateOverview: () -> Unit
 ) {
 
-    val companyProfile = UserSession.companyProfile.value
+    val companyId = UserSession.companyProfile.value?.companyId ?: ""
 
     var category by remember { mutableStateOf("") }
     val categories by adminBookingViewModel.categories.collectAsState()
@@ -98,6 +98,16 @@ fun AdminCategoriesView(
                         maxLines = 1,
                         modifier = Modifier.fillMaxWidth()
                     )
+                    OutlinedTextField(
+                        label = { Text("Info") },
+                        value = info,
+                        onValueChange = { newInfo ->
+                            val filteredValue = newInfo.replace("\\s".toRegex(), "")
+                            info = filteredValue
+                        },
+                        maxLines = 3,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                     Row(Modifier.fillMaxWidth()) {
                         Spacer(Modifier.weight(1f))
                         CustomButton(onClick = {
@@ -105,13 +115,13 @@ fun AdminCategoriesView(
                                 val categoryId =
                                     "${System.currentTimeMillis()}_${(1000..9999).random()}"
 
-                                companyProfile.let { user ->
+                                companyId.let { user ->
                                     adminBookingViewModel.addBookingCategory(
                                         bookingCategory = BookingCategories(
                                             id = categoryId,
                                             name = category,
                                             info = info,
-                                            createdBy = companyProfile.toString()
+                                            createdBy = companyId.toString()
                                         )
                                     )
                                 }

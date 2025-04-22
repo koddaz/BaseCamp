@@ -52,7 +52,7 @@ fun TabNavigation(authViewModel : AuthViewModel, companyViewModel: CompanyViewMo
         Column(modifier = Modifier.weight(1f)) {
             when (selectedTabIndex) {
                 0 -> HomeNavHost(authViewModel, companyViewModel)
-                1 -> UserBookingNavHost(authViewModel)
+                1 -> UserBookingNavHost()
                 2 -> SocialNavHost(
                     authViewModel = authViewModel,
 	                socialViewModel = socialViewModel,

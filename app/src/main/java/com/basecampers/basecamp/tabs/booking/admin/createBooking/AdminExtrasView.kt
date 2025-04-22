@@ -24,16 +24,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.basecamp.components.CustomButton
 import com.basecampers.basecamp.components.CustomColumn
 import com.basecampers.basecamp.tabs.booking.admin.viewModel.AdminBookingViewModel
-import com.basecampers.basecamp.tabs.booking.models.BookingCategories
 import com.basecampers.basecamp.tabs.booking.models.BookingExtra
-import com.basecampers.basecamp.tabs.booking.models.BookingItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminExtrasView(
     navOnConfirm: () -> Unit,
     goBack: () -> Unit,
-    adminBookingViewModel: AdminBookingViewModel? = viewModel(),
+    adminBookingViewModel: AdminBookingViewModel
 ) {
     val scrollState = rememberScrollState()
 
@@ -42,13 +40,9 @@ fun AdminExtrasView(
     var extraPrice by remember { mutableStateOf("") }
     var extraQuantity by remember { mutableStateOf("") }
 
-    val extraList by adminBookingViewModel?.bookingExtras?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
-    val selectedItem by adminBookingViewModel?.selectedItem?.collectAsState()
-        ?: remember { mutableStateOf<BookingItem?>(null)
-        }
-    val selectedCategory by adminBookingViewModel?.selectedCategory?.collectAsState()
-        ?: remember { mutableStateOf<BookingCategories?>(null)
-        }
+    val extraList by adminBookingViewModel.bookingExtras.collectAsState()
+    val selectedItem by adminBookingViewModel.selectedItem.collectAsState()
+    val selectedCategory by adminBookingViewModel.selectedCategory.collectAsState()
 
 
 
@@ -77,7 +71,7 @@ fun AdminExtrasView(
             onQuantityChange = { extraQuantity = it },
             onSaveClick = {
                 selectedItem?.let { item ->
-                    adminBookingViewModel?.addBookingWithExtra(
+                    adminBookingViewModel.addBookingWithExtra(
                         bookingItem = item,
                         bookingExtras = extraList,
                         selectedCategory = selectedCategory?.id.toString()
@@ -103,14 +97,14 @@ fun AdminExtrasView(
 
 
                             try {
-                                adminBookingViewModel?.updateExtraValue(
+                                adminBookingViewModel.updateExtraValue(
                                     id = "${System.currentTimeMillis()}_${(1000..9999).random()}",
                                     name = extraName,
                                     info = extraInfo,
                                     price = extraPrice
                                 )
                                 // Add the extra to the parent item
-                                adminBookingViewModel?.addExtraList(
+                                adminBookingViewModel.addExtraList(
                                     listOf(BookingExtra(
                                         id = "${System.currentTimeMillis()}_${(1000..9999).random()}",
                                         name = extraName,
@@ -255,7 +249,7 @@ fun ExtraItemForm(
 fun AdminExtrasViewPreview() {
     AdminExtrasView(
         goBack = {},
-        adminBookingViewModel = null,
+        adminBookingViewModel = viewModel(),
         navOnConfirm = {}
     )
 }

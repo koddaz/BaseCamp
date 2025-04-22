@@ -186,6 +186,7 @@ class UserBookingViewModel : ViewModel() {
                 .addOnSuccessListener {
                     Log.d("UserBookingViewModel", "Booking saved successfully")
                     clearAllValues()
+                    retrieveCurrentBookings()
                 }
                 .addOnFailureListener { e ->
                     Log.e("UserBookingViewModel", "Error saving booking", e)

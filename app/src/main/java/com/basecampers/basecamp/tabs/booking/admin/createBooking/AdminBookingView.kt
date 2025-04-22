@@ -43,12 +43,11 @@ fun AdminBookingView(
     goBack: () -> Unit,
     navigateToExtra: (String) -> Unit = {},
 ) {
+    val userId = UserSession.userId
     var expanded by remember { mutableStateOf(false) }
 
-    val userId = UserSession.userId
     val categories by adminBookingViewModel.categories.collectAsState()
     val bookingId = "${System.currentTimeMillis()}_${(1000..9999).random()}"
-
     val selectedItem by adminBookingViewModel.selectedItem.collectAsState()
     val selectedCategory by adminBookingViewModel.selectedCategory.collectAsState()
 
@@ -88,7 +87,7 @@ fun AdminBookingView(
                     pricePerDay = pricePerDay,
                     quantity = quantity,
                     onNameChange = { name = it },
-                    onInfoChange = { if (it.length <= 500) info = it },
+                    onInfoChange = { if (it.length <= 250) info = it },
                     onPricePerDayChange = { pricePerDay = it },
                     onQuantityChange = { quantity = it },
 
@@ -210,11 +209,11 @@ fun BookingItemForm(
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Info") },
-            maxLines = 10,
-            minLines = 10,
+            maxLines = 5,
+            minLines = 5,
             value = info,
             onValueChange = onInfoChange,
-            supportingText = { Text("${info.length}/500 characters") }
+            supportingText = { Text("${info.length}/250 characters") }
         )
 
         OutlinedTextField(
