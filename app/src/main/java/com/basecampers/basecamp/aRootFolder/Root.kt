@@ -26,7 +26,6 @@ import com.basecampers.basecamp.tabs.profile.viewModel.ProfileViewModel
 import com.basecampers.basecamp.tabs.social.viewModel.SocialViewModel
 import kotlinx.coroutines.delay
 
-// Root.kt with logging
 @Composable
 fun Root(
     authViewModel: AuthViewModel = viewModel(),
@@ -45,24 +44,33 @@ fun Root(
         if (!isLoggedIn) {
             Log.d("UserSessionFlow", "Not logged in - clearing session")
             UserSession.clearSession()
-        } else {
+        } else { // User logged in
             val userId = authViewModel.getCurrentUserUid()
             Log.d("UserSessionFlow", "Logged in with userId: $userId")
             
             if (userId != null) {
                 Log.d("UserSessionFlow", "Initializing UserSession with userId: $userId")
                 UserSession.initialize(userId)
+                Log.d("UserSessionFlow", "Fetching profile for userId: $userId")
+                profileViewModel.fetchProfile(userId)
                 
                 if (hasSelectedCompany) {
                     val companyId = companyViewModel.currentCompanyId.value
                     Log.d("UserSessionFlow", "Has selected company: $companyId")
                     
                     if (companyId != null) {
-                        loadCompanyData(companyViewModel, userId, companyId)
+                        Log.d("UserSessionFlow", "Setting selected company: $companyId")
+                        UserSession.setSelectedCompanyId(companyId)
+                        Log.d("UserSessionFlow", "Fetching company data for companyId: $companyId")
+                        companyViewModel.fetchCompanyData(companyId)
+                        Log.d("UserSessionFlow", "Fetching company profile for userId: $userId and companyId: $companyId")
+                        companyViewModel.fetchCompanyProfileData(userId, companyId)
                     }
                 } else {
                     Log.d("UserSessionFlow", "No company selected - clearing company data")
-                    clearCompanyData()
+                    UserSession.setSelectedCompanyId(null)
+                    UserSession.setCompany(CompanyModel())
+                    UserSession.setCompanyProfile(CompanyProfileModel())
                 }
             }
         }
@@ -96,20 +104,6 @@ fun Root(
             TabNavigation(authViewModel, companyViewModel, socialViewModel, profileViewModel)
         }
     }
-}
-
-private fun loadCompanyData(companyViewModel: CompanyViewModel, userId: String, companyId: String) {
-    Log.d("UserSessionFlow", "Loading company data - userId: $userId, companyId: $companyId")
-    UserSession.setSelectedCompanyId(companyId)
-    companyViewModel.fetchCompanyData(companyId)
-    companyViewModel.fetchCompanyProfileData(userId, companyId)
-}
-
-private fun clearCompanyData() {
-    Log.d("UserSessionFlow", "Clearing company data")
-    UserSession.setSelectedCompanyId(null)
-    UserSession.setCompany(CompanyModel())
-    UserSession.setCompanyProfile(CompanyProfileModel())
 }
 
 @Preview(showBackground = true)

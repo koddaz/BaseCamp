@@ -24,7 +24,7 @@ import kotlin.text.format
 class UserBookingViewModel : ViewModel() {
 
     // User information
-    val currentCompanyId = UserSession.companyProfile.value?.companyId
+    val currentCompanyId = UserSession.selectedCompanyId.value
     val userId = UserSession.userId.value
     private val db = Firebase.firestore
 
@@ -70,6 +70,18 @@ class UserBookingViewModel : ViewModel() {
 
 
     init {
+        if (currentCompanyId != null) {
+        retrieveCurrentBookings()
+        retrieveCategories()
+            Log.d("UserBookingViewModel", "Company ID is not empty")
+        } else {
+            Log.d("UserBookingViewModel", "Company ID is empty")
+        }
+    }
+
+    fun setUser(profile: CompanyProfileModel) {
+        Log.d("UserBookingViewModel", "Setting user profile: $profile")
+        // Update any necessary state based on the user profile
         retrieveCurrentBookings()
     }
 

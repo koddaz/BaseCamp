@@ -24,11 +24,13 @@ object AdminRoutes {
     const val CATEGORY = "admin_category"
     const val EXTRA = "admin_extra"
     const val CURRENT = "current"
+    const val EDIT = "edit"
 }
 
 @Composable
 fun AdminNavHost(
-    changeView: () -> Unit) {
+    onNavigateBack: () -> Unit = {},
+) {
 
     val adminBookingViewModel = viewModel<AdminBookingViewModel>()
     val navController = rememberNavController()
@@ -43,9 +45,12 @@ fun AdminNavHost(
         ) {
             composable(AdminRoutes.MAIN) {
                 AdminMainView(
+                    onNavigateBack = onNavigateBack,
                     navigateCat = { navController.navigate(AdminRoutes.CATEGORY) },
                     navigateBooking = { navController.navigate(AdminRoutes.BOOKING) },
-                    navigateOverview = { navController.navigate(AdminRoutes.CURRENT) }
+                    navigateOverview = { navController.navigate(AdminRoutes.CURRENT) },
+                    navigateEdit = { navController.navigate(AdminRoutes.EDIT) },
+                    adminBookingViewModel = adminBookingViewModel,
                 )
             }
 
@@ -78,6 +83,13 @@ fun AdminNavHost(
                     navOnConfirm = { navController.navigate(AdminRoutes.MAIN) }
                 )
             }
+
+            composable(AdminRoutes.EDIT) {
+                AdminEditItems(
+                    adminViewModel = adminBookingViewModel,
+                )
+            }
+
             composable(AdminRoutes.CURRENT) {
                 AdminCurrentBookings(
                 )

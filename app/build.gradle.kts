@@ -11,17 +11,17 @@ plugins {
 android {
     namespace = "com.basecampers"
     compileSdk = 35
-    
+
     defaultConfig {
         applicationId = "com.basecampers"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-        
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-    
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -57,11 +57,11 @@ dependencies {
     implementation("com.google.firebase:firebase-database")
     ///FireStore
     implementation("com.google.firebase:firebase-firestore-ktx")
-    
+
     // Navigation & UI Components
     implementation("com.arkivanov.decompose:decompose:1.0.0")
     implementation("com.arkivanov.decompose:extensions-compose-jetpack:1.0.0")
-    
+
     // Jetpack Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
@@ -70,20 +70,20 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
     implementation("androidx.compose.material:material-icons-extended")
-    
+
     // Core Android & Lifecycle
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")//2.6.2||2.8.7?
-    
-    
+
+
     // Room Database
     implementation("androidx.room:room-runtime:2.6.0")
     implementation("androidx.room:room-ktx:2.6.0")
     // Annotation processor for Room
     kapt("androidx.room:room-compiler:2.6.0")
-    
+
     // Test dependencies
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
