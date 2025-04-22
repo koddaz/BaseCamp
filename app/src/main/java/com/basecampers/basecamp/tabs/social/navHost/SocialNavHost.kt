@@ -44,16 +44,9 @@ fun SocialNavHost(
 	
 	Box(modifier = Modifier.fillMaxSize()) {
 		Column(modifier = Modifier.fillMaxSize()) {
-			
 			// Instead of safearea... /Top bar space
 			Spacer(modifier = Modifier.height(25.dp))
 			
-			if (companyProfile != null) {
-				Text(
-					text = "Role: ${companyProfile?.status}",
-					modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-				)
-			}
 			Box(modifier = Modifier.weight(1f)) {
 				when (currentSocialTabIndex) {
 					0 -> QnAScreen(

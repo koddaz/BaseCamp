@@ -8,31 +8,34 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Business
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.basecampers.basecamp.aRootFolder.UserSession
 import com.basecampers.basecamp.company.models.UserStatus
+import com.basecampers.basecamp.components.HorizontalOptionCard
 import com.basecampers.basecamp.tabs.profile.models.profileRoutes
 import com.basecampers.basecamp.tabs.profile.viewModel.ProfileViewModel
+import com.basecampers.basecamp.ui.theme.*
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ProfileScreen(
     onNavigateToEdit: () -> Unit = {},
-    onNavigateToAdmin: () -> Unit = {}
+    onNavigateToAdmin: () -> Unit = {},
+    onNavigateToOptions: () -> Unit = {}
 ) {
-    
     // Access data from UserSession
     val profile by UserSession.profile.collectAsState()
     val companyProfile by UserSession.companyProfile.collectAsState()
@@ -41,201 +44,284 @@ fun ProfileScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(AppBackground)
     ) {
-        // Profile Image Placeholder
+        // Header with Gradient Background
         Box(
             modifier = Modifier
-                .size(100.dp)
-                .background(Color.LightGray, CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = "Profile Picture",
-                tint = Color.White,
-                modifier = Modifier.size(50.dp)
-            )
-        }
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // User Name
-        Text(
-            text = "${profile?.firstName ?: ""} ${profile?.lastName ?: ""}",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
-        )
-        // EDIT BUTTON
-        Button(
-            onClick = { onNavigateToEdit() },
-            modifier = Modifier.padding(top = 8.dp)
-        ) {
-            Text("Edit name")
-        }
-        
-        // User Email
-        Text(
-            text = profile?.email ?: "",
-            style = MaterialTheme.typography.bodyLarge,
-            color = Color.Gray
-        )
-
-        // User Status Badge
-        companyProfile?.status?.let { status ->
-            val statusColor = when(status) {
-                UserStatus.ADMIN -> Color.Red
-                UserStatus.SUPER_USER -> Color.Blue
-                UserStatus.USER -> Color.Green
-            }
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            Surface(
-                modifier = Modifier.padding(4.dp),
-                shape = RoundedCornerShape(16.dp),
-                color = statusColor.copy(alpha = 0.1f)
-            ) {
-                Text(
-                    text = status.name,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                    color = statusColor
+                .fillMaxWidth()
+                .height(220.dp)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            SecondaryAqua.copy(alpha = 0.2f),
+                            AppBackground
+                        )
+                    )
                 )
-            }
-        }
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Scrollable content for all model data
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth()
         ) {
-            // Profile Model Card
-            item {
-                Card(
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Profile Image with Border
+                Box(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(CircleShape)
+                        .background(SecondaryAqua.copy(alpha = 0.1f))
+                        .padding(4.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Profile Picture",
+                        tint = SecondaryAqua,
+                        modifier = Modifier.size(60.dp)
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // User Name with proper wrapping
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        .height(100.dp)
+                        .padding(horizontal = 16.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = "Profile Data",
-                            style = MaterialTheme.typography.titleMedium,
+                    Text(
+                        text = "${profile?.firstName ?: ""} ${profile?.lastName ?: ""}".trim(),
+                        style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold
+                        ),
+                        color = TextPrimary,
+                        textAlign = TextAlign.Center,
+                        maxLines = 2,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp)
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // Email with proper wrapping
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = profile?.email ?: "",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TextSecondary,
+                        textAlign = TextAlign.Center,
+                        maxLines = 2
+                    )
+                }
+
+                // User Status Badge
+                companyProfile?.status?.let { status ->
+                    val statusColor = when(status) {
+                        UserStatus.ADMIN -> Color.Red
+                        UserStatus.SUPER_USER -> Color.Blue
+                        UserStatus.USER -> Color.Green
+                    }
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    Surface(
+                        modifier = Modifier.padding(4.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        color = statusColor.copy(alpha = 0.1f)
+                    ) {
+                        Text(
+                            text = status.name,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                            color = statusColor
                         )
-                        
-                        Spacer(modifier = Modifier.height(8.dp))
-                        
-                        if (profile != null) {
-                            ModelDataItem("ID", profile?.id ?: "")
-                            ModelDataItem("Email", profile?.email ?: "")
-                            ModelDataItem("First Name", profile?.firstName ?: "")
-                            ModelDataItem("Last Name", profile?.lastName ?: "")
-                            ModelDataItem("Company List", profile?.companyList?.joinToString(", ") ?: "")
-                        } else {
-                            Text(
-                                text = "No profile data found",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.Gray
-                            )
-                        }
                     }
                 }
             }
-            
-            // Company Profile Model Card
+        }
+
+        // Main Content
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Options Card
+            item {
+                HorizontalOptionCard(
+                    title = "Options",
+                    onClick = onNavigateToOptions,
+                    icon = Icons.Default.Settings,
+                    iconBackground = SecondaryAqua
+                )
+            }
+
+            // Company Profile Section
             item {
                 Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = "Company Profile Data",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Business,
+                                contentDescription = "Company Profile",
+                                tint = SecondaryAqua,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Company Profile",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                         
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
                         
                         if (companyProfile != null) {
-                            ModelDataItem("ID", companyProfile?.id ?: "")
-                            ModelDataItem("Company ID", companyProfile?.companyId ?: "")
-                            ModelDataItem("Bio", companyProfile?.bio ?: "")
-                            ModelDataItem("Status", companyProfile?.status?.name ?: "")
-                            ModelDataItem("Image URL", companyProfile?.imageUrl?.toString() ?: "No image")
+                            ProfileInfoItem("Role", companyProfile?.status?.name ?: "Not specified")
+                            ProfileInfoItem("Bio", companyProfile?.bio ?: "No bio available")
+                            if (companyProfile?.imageUrl != null) {
+                                ProfileInfoItem("Profile Picture", "Available")
+                            }
 
                             if (companyProfile?.status == UserStatus.ADMIN) {
                                 Button(
                                     onClick = onNavigateToAdmin,
-                                    modifier = Modifier.padding(top = 8.dp)
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 16.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = SecondaryAqua
+                                    ),
+                                    shape = RoundedCornerShape(12.dp)
                                 ) {
-                                    Text("Bookings")
+                                    Text("Manage Bookings")
                                 }
                             }
                         } else {
-                            Text(
-                                text = "No company profile data found",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.Gray
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "No company profile data found",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = TextSecondary
+                                )
+                            }
                         }
                     }
                 }
             }
             
-            // Company Model Card
-            item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = "Company Data",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                        
-                        Spacer(modifier = Modifier.height(8.dp))
-                        
-                        if (company != null) {
-                            ModelDataItem("Company ID", company?.companyId ?: "")
-                            ModelDataItem("Company Name", company?.companyName ?: "")
-                            ModelDataItem("Owner UID", company?.ownerUID ?: "")
-                            ModelDataItem("Bio", company?.bio ?: "")
-                            ModelDataItem("Image URL", company?.imageUrl?.toString() ?: "No image")
-                        } else {
-                            Text(
-                                text = "No company data found",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.Gray
-                            )
-                        }
-                    }
-                }
-            }
-            
-            // Your Companies List
+            // Company Data Section
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = "Your Companies",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Store,
+                                contentDescription = "Company Data",
+                                tint = SecondaryAqua,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Company Data",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                         
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        if (company != null) {
+                            ProfileInfoItem("Company Name", company?.companyName ?: "Not specified")
+                            ProfileInfoItem("Bio", company?.bio ?: "No bio available")
+                            if (company?.imageUrl != null) {
+                                ProfileInfoItem("Company Logo", "Available")
+                            }
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "No company data found",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = TextSecondary
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Your Companies Section
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Business,
+                                contentDescription = "Your Companies",
+                                tint = SecondaryAqua,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Your Companies",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
                         
                         if (profile?.companyList?.isNotEmpty() == true) {
                             Column {
@@ -254,11 +340,22 @@ fun ProfileScreen(
                                     .padding(vertical = 16.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    text = "No companies added yet",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = Color.Gray
-                                )
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Business,
+                                        contentDescription = "No Companies",
+                                        tint = TextSecondary,
+                                        modifier = Modifier.size(48.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = "No companies added yet",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = TextSecondary
+                                    )
+                                }
                             }
                         }
                     }
@@ -269,16 +366,17 @@ fun ProfileScreen(
 }
 
 @Composable
-fun ModelDataItem(label: String, value: String) {
-    Column(modifier = Modifier.padding(vertical = 4.dp)) {
+fun ProfileInfoItem(label: String, value: String) {
+    Column(modifier = Modifier.padding(vertical = 8.dp)) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodySmall,
-            color = Color.Gray
+            color = TextSecondary
         )
         Text(
             text = if (value.isNotEmpty()) value else "Not available",
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyMedium,
+            color = TextPrimary
         )
     }
 }
@@ -289,44 +387,55 @@ fun CompanyListItem(
     isSelected: Boolean,
     onCompanySelected: (String) -> Unit
 ) {
-    Row(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onCompanySelected(companyId) }
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .clickable { onCompanySelected(companyId) },
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) SecondaryAqua.copy(alpha = 0.1f) else Color.White
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(12.dp)
     ) {
-        // Company Icon placeholder
-        Box(
+        Row(
             modifier = Modifier
-                .size(32.dp)
-                .background(Color.LightGray, CircleShape),
-            contentAlignment = Alignment.Center
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Default.Business,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(16.dp)
+            // Company Icon
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(SecondaryAqua.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Business,
+                    contentDescription = null,
+                    tint = SecondaryAqua,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            // Company ID
+            Text(
+                text = companyId,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f)
             )
-        }
-        
-        Spacer(modifier = Modifier.width(8.dp))
-        
-        // Company ID
-        Text(
-            text = companyId,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.weight(1f)
-        )
-        
-        // Selected indicator
-        if (isSelected) {
-            Icon(
-                imageVector = Icons.Default.Check,
-                contentDescription = "Selected",
-                tint = MaterialTheme.colorScheme.primary
-            )
+            
+            // Selected indicator
+            if (isSelected) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = "Selected",
+                    tint = SecondaryAqua
+                )
+            }
         }
     }
 }

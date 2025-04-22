@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.basecampers.basecamp.components.HorizontalOptionCard
 import com.basecampers.basecamp.tabs.social.messaging.viewModels.UserMessagingViewModel
 
 @Composable
@@ -27,16 +28,12 @@ fun UserMessagingScreen(
 		)
 		
 		// Start New Chat Button
-		Button(
+		HorizontalOptionCard(
+			title = "New Conversation",
 			onClick = onStartNewChat,
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(horizontal = 16.dp),
-		) {
-			Icon(Icons.Default.Add, contentDescription = "Start Chat")
-			Spacer(modifier = Modifier.width(8.dp))
-			Text("New conversation")
-		}
+			icon = Icons.Default.Add,
+			iconBackground = MaterialTheme.colorScheme.primary
+		)
 		
 		Spacer(modifier = Modifier.height(16.dp))
 		
