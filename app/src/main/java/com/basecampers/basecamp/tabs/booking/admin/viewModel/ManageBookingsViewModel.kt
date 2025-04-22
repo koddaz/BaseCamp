@@ -20,13 +20,13 @@ enum class BookingStatus {
 
 class ManageBookingsViewModel() : ViewModel() {
     private val db = Firebase.firestore
-    val companyProfile = UserSession.companyProfile.value
+    val currentCompanyId = UserSession.selectedCompanyId.value
 
     private val _openBookings = MutableStateFlow<List<UserBookingModel>>(emptyList())
     val openBookings = _openBookings.asStateFlow()
 
     init {
-        retrieveBookings(companyProfile?.companyId ?: "")
+        retrieveBookings(currentCompanyId.toString())
     }
 
     private fun retrieveExtraList(document: DocumentSnapshot): List<BookingExtra> {
@@ -100,7 +100,7 @@ class ManageBookingsViewModel() : ViewModel() {
 
     fun cancelStatus(booking: UserBookingModel) {
         Log.d("ManageBookingsViewModel", "Cancelling status for booking: ${booking.userId}")
-        val companyId = companyProfile?.companyId ?: ""
+        val companyId =  currentCompanyId.toString()
         if (companyId.isEmpty()) {
             Log.e("ManageBookingsViewModel", "Company ID is empty, can't update booking")
             return
@@ -150,7 +150,7 @@ class ManageBookingsViewModel() : ViewModel() {
     }
 
     fun confirmStatus(booking: UserBookingModel) {
-        val companyId = companyProfile?.companyId ?: ""
+        val companyId = currentCompanyId.toString()
         if (companyId.isEmpty()) return
 
         val updatedBooking = booking.copy(status = BookingStatus.CONFIRMED)

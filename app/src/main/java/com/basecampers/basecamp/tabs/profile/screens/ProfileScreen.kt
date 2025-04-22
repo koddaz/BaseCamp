@@ -30,7 +30,10 @@ import com.basecampers.basecamp.ui.theme.*
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun ProfileScreen(onNavigateToEdit: () -> Unit = {}) {
+fun ProfileScreen(
+    onNavigateToEdit: () -> Unit = {},
+    onNavigateToAdmin: () -> Unit = {}
+) {
     // Access data from UserSession
     val profile by UserSession.profile.collectAsState()
     val companyProfile by UserSession.companyProfile.collectAsState()
@@ -119,6 +122,29 @@ fun ProfileScreen(onNavigateToEdit: () -> Unit = {}) {
                         maxLines = 2
                     )
                 }
+
+                // User Status Badge
+                companyProfile?.status?.let { status ->
+                    val statusColor = when(status) {
+                        UserStatus.ADMIN -> Color.Red
+                        UserStatus.SUPER_USER -> Color.Blue
+                        UserStatus.USER -> Color.Green
+                    }
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    Surface(
+                        modifier = Modifier.padding(4.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        color = statusColor.copy(alpha = 0.1f)
+                    ) {
+                        Text(
+                            text = status.name,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                            color = statusColor
+                        )
+                    }
+                }
             }
         }
 
@@ -185,6 +211,21 @@ fun ProfileScreen(onNavigateToEdit: () -> Unit = {}) {
                             ProfileInfoItem("Bio", companyProfile?.bio ?: "No bio available")
                             if (companyProfile?.imageUrl != null) {
                                 ProfileInfoItem("Profile Picture", "Available")
+                            }
+
+                            if (companyProfile?.status == UserStatus.ADMIN) {
+                                Button(
+                                    onClick = onNavigateToAdmin,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 16.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = SecondaryAqua
+                                    ),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Text("Manage Bookings")
+                                }
                             }
                         } else {
                             Box(

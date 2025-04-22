@@ -92,23 +92,7 @@ fun TabNavigation(
                     companyViewModel = companyViewModel
                 )
                 1 -> {
-                    val navController = rememberNavController()
-                    val bookingViewModel = viewModel<UserBookingViewModel>()
-                    val companyProfile by companyViewModel.companyProfile.collectAsState()
-                    
-                    // Initialize booking view model with user profile
-                    LaunchedEffect(companyProfile) {
-                        Log.d("TabNavigation", "Company profile update: $companyProfile")
-                        companyProfile?.let { profile ->
-                            Log.d("TabNavigation", "Setting user profile in BookingViewModel with companyId: ${profile.companyId}")
-                            bookingViewModel.setUser(profile)
-                        }
-                    }
-                    
-                    UserBookingNavHost(
-                        navController = navController,
-                        bookingViewModel = bookingViewModel
-                    )
+                    UserBookingNavHost()
                 }
                 2 -> SocialNavHost(
                     socialViewModel = socialViewModel,

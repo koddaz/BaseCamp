@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.basecampers.basecamp.tabs.booking.admin.AdminNavHost
 import com.basecampers.basecamp.tabs.profile.screens.EditProfileScreen
 import com.basecampers.basecamp.tabs.profile.screens.ProfileScreen
 import com.basecampers.basecamp.tabs.profile.viewModel.ProfileViewModel
@@ -26,12 +27,17 @@ fun ProfileNavHost(
     
     when (currentProfileTabIndex) {
         0 -> ProfileScreen(
-            onNavigateToEdit = { onProfileTabSelected(1) }
+            onNavigateToEdit = { onProfileTabSelected(1) },
+            onNavigateToAdmin = { onProfileTabSelected(2) }
         )
         1 -> EditProfileScreen(
             profileViewModel = profileViewModel,
             onNavigateBack = { onProfileTabSelected(0) }
         )
+        2 -> AdminNavHost(
+            onNavigateBack = { onProfileTabSelected(0) }
+        )
+
         else -> Text("Error: Profile tab not found")
     }
 }

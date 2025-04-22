@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 class AdminBookingViewModel : ViewModel() {
     val db = Firebase.firestore
     val userId = UserSession.userId
-    val currentCompanyId = UserSession.companyProfile.value?.companyId
+    val currentCompanyId = UserSession.selectedCompanyId.value
 
     private val _bookingExtras = MutableStateFlow<List<BookingExtra>>(emptyList())
     val bookingExtras: StateFlow<List<BookingExtra>> = _bookingExtras
@@ -54,6 +54,10 @@ class AdminBookingViewModel : ViewModel() {
 
     fun addExtraList(extraList: List<BookingExtra>) {
         _bookingExtras.value = extraList + _bookingExtras.value
+    }
+
+    fun setSelectedItem(item: BookingItem) {
+        _selectedItem.value = item
     }
 
     fun updateExtraValue(
@@ -212,6 +216,12 @@ class AdminBookingViewModel : ViewModel() {
 
         } catch (e: Exception) {
             Log.e("AdminBookingViewModel", "Error adding booking item and extras", e)
+        }
+    }
+
+    fun loadAllBookingItems() {
+        categories.value.forEach { category ->
+            retrieveBookingItems(category.id)
         }
     }
 

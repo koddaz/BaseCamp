@@ -29,7 +29,7 @@ import com.basecampers.basecamp.tabs.booking.user.viewModel.UserBookingViewModel
 
 @Composable
 fun UserItemView(
-    bookingViewModel: UserBookingViewModel?,
+    bookingViewModel: UserBookingViewModel,
     navExtra: (String) -> Unit,
 ) {
 
@@ -37,9 +37,10 @@ fun UserItemView(
     var startDate by remember { mutableStateOf<Long?>(null) }
     var endDate by remember { mutableStateOf<Long?>(null) }
     var showDatePicker by remember { mutableStateOf(false) }
-    val formattedDateRange by bookingViewModel?.formattedDateRange?.collectAsState() ?: remember { mutableStateOf("") }
-    val selectedItem by bookingViewModel?.selectedBookingItem?.collectAsState() ?: remember { mutableStateOf<BookingItem?>(null) }
-    val itemList by bookingViewModel?.bookingItemsList?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
+    val formattedDateRange by bookingViewModel.formattedDateRange.collectAsState()
+    val selectedItem by bookingViewModel.selectedBookingItem.collectAsState()
+    val itemList by bookingViewModel.bookingItemsList.collectAsState()
+    val selectedCategory by bookingViewModel.selectedCategory.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.weight(1f).verticalScroll(scrollState)) {
@@ -50,7 +51,7 @@ fun UserItemView(
                     info = item.info,
                     price = item.pricePerDay,
                     onClick = {
-                        bookingViewModel?.setSelectedBookingItem(item)
+                        bookingViewModel.setSelectedBookingItem(item)
                     }
                 )
             }
@@ -80,7 +81,7 @@ fun UserItemView(
                     startDate = startDate,
                     endDate = endDate,
                     onDateRangeSelected = { startDate, endDate ->
-                        bookingViewModel?.updateDateRange(startDate, endDate)
+                        bookingViewModel.updateDateRange(startDate, endDate)
                     },
                     onDismiss = {
                         showDatePicker = !showDatePicker
@@ -91,7 +92,7 @@ fun UserItemView(
             }
             CustomButton(text = "Next", onClick = {
                 selectedItem?.let { item ->
-                    bookingViewModel?.retrieveExtraItems(item.categoryId, item.id)
+                    bookingViewModel.retrieveExtraItems(item.categoryId, item.id)
                     navExtra(item.id)
                 }
 
