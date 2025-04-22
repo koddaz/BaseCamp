@@ -2,11 +2,11 @@ package com.basecampers.basecamp.authentication.viewModels
 
 import android.util.Log
 import android.util.Patterns
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.basecampers.basecamp.aRootFolder.AppPreferences
 import com.basecampers.basecamp.aRootFolder.UserSession
 import com.basecampers.basecamp.company.models.CompanyModel
-import com.basecampers.basecamp.company.viewModel.CompanyViewModel
 import com.basecampers.basecamp.tabs.profile.viewModel.ProfileViewModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -20,9 +20,11 @@ import kotlinx.coroutines.flow.stateIn
 /**
  * ViewModel handling all authentication-related operations.
  */
-class AuthViewModel : ViewModel() {
+class AuthViewModel(private val application: android.app.Application) : AndroidViewModel(application) {
     private val tag = this::class.java.simpleName
-
+    
+    private val appPreferences = AppPreferences(application)
+    
     // General state values
     private val _loggedin = MutableStateFlow(false)
     val loggedin = _loggedin.asStateFlow()
@@ -183,7 +185,8 @@ class AuthViewModel : ViewModel() {
         Firebase.auth.signOut()
         // Clear UserSession
         UserSession.clearSession()
-        
+        // Clear selected company
+        appPreferences.clearSelectedCompanyId()
         // Update existing state
         checkLoggedin()
     }
