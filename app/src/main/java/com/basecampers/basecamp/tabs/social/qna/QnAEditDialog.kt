@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.basecampers.basecamp.tabs.social.models.QnAItem
+import com.basecampers.basecamp.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,8 +25,9 @@ fun QnAEditDialog(
 	
 	Dialog(onDismissRequest = onDismiss) {
 		Surface(
-			shape = MaterialTheme.shapes.medium,
-			color = MaterialTheme.colorScheme.surface
+			shape = MaterialTheme.shapes.large,
+			color = CardBackground,
+			modifier = Modifier.padding(16.dp)
 		) {
 			Column(
 				modifier = Modifier
@@ -34,7 +36,8 @@ fun QnAEditDialog(
 			) {
 				Text(
 					text = if (qnaItem == null) "Add Q&A Item" else "Edit Q&A Item",
-					style = MaterialTheme.typography.headlineSmall
+					style = MaterialTheme.typography.titleLarge,
+					color = TextPrimary
 				)
 				
 				Spacer(modifier = Modifier.height(16.dp))
@@ -45,12 +48,22 @@ fun QnAEditDialog(
 						question = it
 						questionError = it.isBlank()
 					},
-					label = { Text("Question") },
+					label = { Text("Question", color = TextSecondary) },
 					modifier = Modifier.fillMaxWidth(),
 					isError = questionError,
+					colors = TextFieldDefaults.outlinedTextFieldColors(
+						focusedTextColor = TextPrimary,
+						unfocusedTextColor = TextPrimary,
+						focusedBorderColor = SecondaryAqua,
+						unfocusedBorderColor = BorderColor,
+						errorBorderColor = ErrorRed,
+						focusedLabelColor = TextSecondary,
+						unfocusedLabelColor = TextSecondary,
+						errorLabelColor = ErrorRed
+					),
 					supportingText = {
 						if (questionError) {
-							Text("Question cannot be empty")
+							Text("Question cannot be empty", color = ErrorRed)
 						}
 					}
 				)
@@ -63,14 +76,24 @@ fun QnAEditDialog(
 						answer = it
 						answerError = it.isBlank()
 					},
-					label = { Text("Answer") },
+					label = { Text("Answer", color = TextSecondary) },
 					modifier = Modifier
 						.fillMaxWidth()
 						.heightIn(min = 100.dp),
 					isError = answerError,
+					colors = TextFieldDefaults.outlinedTextFieldColors(
+						focusedTextColor = TextPrimary,
+						unfocusedTextColor = TextPrimary,
+						focusedBorderColor = SecondaryAqua,
+						unfocusedBorderColor = BorderColor,
+						errorBorderColor = ErrorRed,
+						focusedLabelColor = TextSecondary,
+						unfocusedLabelColor = TextSecondary,
+						errorLabelColor = ErrorRed
+					),
 					supportingText = {
 						if (answerError) {
-							Text("Answer cannot be empty")
+							Text("Answer cannot be empty", color = ErrorRed)
 						}
 					}
 				)
@@ -82,11 +105,15 @@ fun QnAEditDialog(
 					modifier = Modifier.fillMaxWidth(),
 					verticalAlignment = Alignment.CenterVertically
 				) {
-					Text("Published")
+					Text("Published", color = TextPrimary)
 					Spacer(modifier = Modifier.width(8.dp))
 					Switch(
 						checked = isPublished,
-						onCheckedChange = { isPublished = it }
+						onCheckedChange = { isPublished = it },
+						colors = SwitchDefaults.colors(
+							checkedThumbColor = SecondaryAqua,
+							checkedTrackColor = SecondaryAqua.copy(alpha = 0.5f)
+						)
 					)
 				}
 				
@@ -96,7 +123,12 @@ fun QnAEditDialog(
 					modifier = Modifier.fillMaxWidth(),
 					horizontalArrangement = Arrangement.End
 				) {
-					TextButton(onClick = onDismiss) {
+					TextButton(
+						onClick = onDismiss,
+						colors = ButtonDefaults.textButtonColors(
+							contentColor = TextSecondary
+						)
+					) {
 						Text("Cancel")
 					}
 					
@@ -114,7 +146,10 @@ fun QnAEditDialog(
 							}
 							onSave(question, answer, isPublished)
 							onDismiss()
-						}
+						},
+						colors = ButtonDefaults.buttonColors(
+							containerColor = SecondaryAqua
+						)
 					) {
 						Text("Save")
 					}

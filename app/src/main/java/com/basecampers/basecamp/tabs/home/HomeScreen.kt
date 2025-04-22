@@ -222,25 +222,59 @@ fun HomeScreen(authViewModel: AuthViewModel, companyViewModel: CompanyViewModel)
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                QuickActionButton(
-                    icon = Icons.Default.CalendarMonth,
-                    text = "Bookings",
-                    onClick = { /* TODO: Navigate to bookings */ }
-                )
-                QuickActionButton(
-                    icon = Icons.Default.Forum,
-                    text = "Forum",
-                    onClick = { /* TODO: Navigate to forum */ }
-                )
-                QuickActionButton(
-                    icon = Icons.Default.Person,
-                    text = "Profile",
-                    onClick = { /* TODO: Navigate to profile */ }
-                )
+            // Quick Actions Grid
+            Column {
+                // First Row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    QuickActionButton(
+                        icon = Icons.Default.CalendarMonth,
+                        text = "Schedule",
+                        onClick = { /* TODO: Navigate to schedule */ },
+                        gradientColors = listOf(SecondaryAqua, SecondaryAqua.copy(alpha = 0.7f))
+                    )
+                    QuickActionButton(
+                        icon = Icons.Default.Group,
+                        text = "Team",
+                        onClick = { /* TODO: Navigate to team */ },
+                        gradientColors = listOf(SecondaryAqua, SecondaryAqua.copy(alpha = 0.7f))
+                    )
+                    QuickActionButton(
+                        icon = Icons.Default.Assignment,
+                        text = "Projects",
+                        onClick = { /* TODO: Navigate to projects */ },
+                        gradientColors = listOf(SecondaryAqua, SecondaryAqua.copy(alpha = 0.7f))
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Second Row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    QuickActionButton(
+                        icon = Icons.Default.Chat,
+                        text = "Messages",
+                        onClick = { /* TODO: Navigate to messages */ },
+                        gradientColors = listOf(SecondaryAqua, SecondaryAqua.copy(alpha = 0.7f))
+                    )
+                    QuickActionButton(
+                        icon = Icons.Default.Description,
+                        text = "Docs",
+                        onClick = { /* TODO: Navigate to documents */ },
+                        gradientColors = listOf(SecondaryAqua, SecondaryAqua.copy(alpha = 0.7f))
+                    )
+                    QuickActionButton(
+                        icon = Icons.Default.QuestionAnswer,
+                        text = "Help",
+                        onClick = { /* TODO: Navigate to help center */ },
+                        gradientColors = listOf(SecondaryAqua, SecondaryAqua.copy(alpha = 0.7f))
+                    )
+                }
             }
         }
 
@@ -307,7 +341,8 @@ fun HomeScreen(authViewModel: AuthViewModel, companyViewModel: CompanyViewModel)
 private fun QuickActionButton(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     text: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    gradientColors: List<Color>
 ) {
     Column(
         modifier = Modifier
@@ -319,21 +354,27 @@ private fun QuickActionButton(
             modifier = Modifier
                 .size(64.dp)
                 .clip(RoundedCornerShape(16.dp))
-                .background(SecondaryAqua.copy(alpha = 0.1f)),
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = gradientColors
+                    )
+                ),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = text,
-                tint = SecondaryAqua,
+                tint = Color.White,
                 modifier = Modifier.size(28.dp)
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = text,
-            style = MaterialTheme.typography.bodyMedium,
-            color = TextSecondary,
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontWeight = FontWeight.Medium
+            ),
+            color = TextPrimary,
             textAlign = TextAlign.Center
         )
     }

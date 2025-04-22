@@ -94,31 +94,51 @@ fun BasecampButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    isLoading: Boolean = false
+    isLoading: Boolean = false,
+    color: Color = PrimaryRed
 ) {
-    Button(
-        onClick = onClick,
-        modifier = modifier
-            .fillMaxWidth()
-            .height(48.dp),
-        enabled = enabled && !isLoading,
-        shape = RoundedCornerShape(12.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = PrimaryRed,
-            disabledContainerColor = TextSecondary,
-            contentColor = Color.White
-        )
-    ) {
-        if (isLoading) {
-            CircularProgressIndicator(
-                color = Color.White,
-                modifier = Modifier.size(24.dp)
+    if (enabled && !isLoading) {
+        Button(
+            onClick = onClick,
+            modifier = modifier
+                .fillMaxWidth()
+                .height(48.dp),
+            enabled = true,
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = color,
+                contentColor = Color.White
             )
-        } else {
+        ) {
             Text(
                 text = text,
                 style = MaterialTheme.typography.bodyLarge
             )
+        }
+    } else {
+        OutlinedButton(
+            onClick = onClick,
+            modifier = modifier
+                .fillMaxWidth()
+                .height(48.dp),
+            enabled = false,
+            shape = RoundedCornerShape(12.dp),
+            border = BorderStroke(1.dp, color),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = color
+            )
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    color = color,
+                    modifier = Modifier.size(24.dp)
+                )
+            } else {
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
         }
     }
 }
