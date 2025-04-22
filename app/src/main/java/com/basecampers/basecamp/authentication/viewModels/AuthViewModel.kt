@@ -126,7 +126,12 @@ class AuthViewModel : ViewModel() {
      * Handles user login with email and password.
      * Updates UserSession on successful authentication.
      */
-    fun login(email: String, password: String) {
+    fun login(
+        email: String,
+        password: String,
+        onSuccess: () -> Unit = {},
+        onError: () -> Unit = {}
+    ) {
         Firebase.auth.signInWithEmailAndPassword(email, password).addOnSuccessListener { authResult ->
             // Get user ID
             val userId = authResult.user?.uid ?: return@addOnSuccessListener
@@ -139,6 +144,7 @@ class AuthViewModel : ViewModel() {
             clearLoginErrors()
             
             Log.i("LOGINDEBUG", "Checked login")
+            onSuccess()
         }.addOnFailureListener { exception ->
             // Existing error handling
             val errors = mutableListOf<LoginErrors>()
@@ -166,6 +172,7 @@ class AuthViewModel : ViewModel() {
             Log.d(tag, "Final errors list before setting value: $errors")
             _loginErrorMessage.value = errors
             println(tag + "Login failed ${exception.message}")
+            onError()
         }
     }
     
@@ -287,14 +294,14 @@ class AuthViewModel : ViewModel() {
         val password = "aQ!2345"
         login(email, password)
     }
-    
-    /**
+    /*
+    *//**
      * Test function: Toggles super user status for testing in SOCIAL tab.
-     */
+     *//*
     fun toggleSuperUser() {
         _isSuper.value = !_isSuper.value
     }
-    
+    */
     //=== VALIDATION FUNCTIONS ===//
     
     /**

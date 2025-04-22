@@ -145,33 +145,58 @@ fun LoginScreen(
                 )
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Forgot Password
-            TextButton(
-                onClick = { goForgotPass() },
-                modifier = Modifier.align(Alignment.End)
-            ) {
-                Text("Forgot Password?", color = SecondaryAqua)
+            // Error Message
+            if (loginErrorMessage.isNotEmpty()) {
+                Text(
+                    text = "Incorrect email or password",
+                    color = Color.Red,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier
+                        .align(Alignment.Start)
+                        .padding(top = 8.dp)
+                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             // Login Button
             Button(
-                onClick = { authViewModel.login(email, password) },
+                onClick = {
+                    isLoading = true
+                    authViewModel.login(
+                        email = email,
+                        password = password,
+                        onSuccess = { isLoading = false },
+                        onError = { isLoading = false }
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                enabled = email.isNotBlank() && password.isNotBlank(),
+                enabled = !isLoading && email.isNotEmpty() && password.isNotEmpty(),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Sign In", fontSize = 16.sp)
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = Color.White
+                    )
+                } else {
+                    Text("Login", fontSize = 16.sp)
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Test Buttons Toggle
+            // Forgot Password Button
+            TextButton(
+                onClick = goForgotPass,
+                modifier = Modifier.padding(bottom = 16.dp)
+            ) {
+                Text("Forgot Password?", color = SecondaryAqua)
+            }
+
+            // Test Accounts Section
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -224,7 +249,7 @@ fun LoginScreen(
 
             // Register Button
             TextButton(
-                onClick = { goRegister() },
+                onClick = goRegister,
                 modifier = Modifier.padding(bottom = 32.dp)
             ) {
                 Text("Don't have an account? Sign Up", color = SecondaryAqua)

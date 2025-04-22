@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ForumScreen(
-	isSuper: Boolean,
+	isPrivilegedUser: Boolean,
 ) {
 	Box(modifier = Modifier.fillMaxSize()) {
 		Column(
@@ -50,7 +50,7 @@ fun ForumScreen(
 		}
 		
 		// Add post button (only visible to Super Users)
-		if (isSuper) {
+		if (isPrivilegedUser) {
 			FloatingActionButton(
 				onClick = { /* TODO: Implement create post */ },
 				modifier = Modifier
