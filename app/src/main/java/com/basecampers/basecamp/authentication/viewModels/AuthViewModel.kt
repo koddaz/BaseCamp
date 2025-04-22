@@ -1,18 +1,18 @@
 package com.basecampers.basecamp.authentication.viewModels
 
+import android.app.Application
 import android.util.Log
 import android.util.Patterns
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.basecampers.basecamp.aRootFolder.AppPreferences
 import com.basecampers.basecamp.aRootFolder.UserSession
 import com.basecampers.basecamp.company.models.CompanyProfileModel
-import com.basecampers.basecamp.company.viewModel.CompanyViewModel
 import com.basecampers.basecamp.tabs.profile.viewModel.ProfileViewModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -20,8 +20,9 @@ import kotlinx.coroutines.flow.stateIn
 /**
  * ViewModel handling all authentication-related operations.
  */
-class AuthViewModel : ViewModel() {
+class AuthViewModel(private val application: Application) : AndroidViewModel(application) {
     private val tag = this::class.java.simpleName
+    private val appPreferences = AppPreferences(application)
     
     // General state values
     private val _loggedin = MutableStateFlow(false)
@@ -161,10 +162,12 @@ class AuthViewModel : ViewModel() {
      * Logs the user out and clears UserSession.
      */
     fun logout() {
+        Log.i("LOGOUTDEBUG", "Logged out")
         Firebase.auth.signOut()
         // Clear UserSession
         UserSession.clearSession()
-        
+        // Clear selected company
+        appPreferences.clearSelectedCompanyId()
         // Update existing state
         checkLoggedin()
     }
