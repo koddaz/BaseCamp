@@ -60,7 +60,7 @@ import com.basecampers.basecamp.ui.theme.BaseCampTheme
 // Feature imports
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.company.viewModel.CompanyViewModel
-import com.basecampers.basecamp.tabs.booking.models.UserBookingViewModel
+import com.basecampers.basecamp.tabs.booking.user.viewModel.UserBookingViewModel
 import com.basecampers.basecamp.tabs.booking.user.UserBookingNavHost
 import com.basecampers.basecamp.tabs.home.HomeNavHost
 import com.basecampers.basecamp.tabs.profile.navHost.ProfileNavHost

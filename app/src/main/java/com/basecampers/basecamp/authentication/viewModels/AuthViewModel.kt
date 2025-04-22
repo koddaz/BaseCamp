@@ -5,7 +5,7 @@ import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.basecampers.basecamp.aRootFolder.UserSession
-import com.basecampers.basecamp.company.models.CompanyProfileModel
+import com.basecampers.basecamp.company.models.CompanyModel
 import com.basecampers.basecamp.company.viewModel.CompanyViewModel
 import com.basecampers.basecamp.tabs.profile.viewModel.ProfileViewModel
 import com.google.firebase.auth.ktx.auth
@@ -31,7 +31,7 @@ class AuthViewModel : ViewModel() {
     private val _isSuper = MutableStateFlow(false)
     val isSuper: StateFlow<Boolean> = _isSuper.asStateFlow()
 
-    private val _companyProfile = MutableStateFlow<CompanyProfileModel?>(null)
+    private val _companyProfile = MutableStateFlow<CompanyModel?>(null)
     val companyProfile = _companyProfile.asStateFlow()
 
     // Validation state values
