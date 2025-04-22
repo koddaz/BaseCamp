@@ -115,12 +115,6 @@ fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotP
         Text("Testing buttons")
         
         Spacer(modifier = Modifier.height(8.dp))
-        
-        Button(onClick = {
-            authViewModel.isLoggedInTrue()
-        }) {
-            Text("Change isLoggedIn to True")
-        }
 
         Button(onClick = {
             authViewModel.loginUser1()

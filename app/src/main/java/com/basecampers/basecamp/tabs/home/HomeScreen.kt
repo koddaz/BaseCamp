@@ -26,12 +26,6 @@ fun HomeScreen(authViewModel: AuthViewModel, companyViewModel: CompanyViewModel)
         }
 
         Button(onClick = {
-            authViewModel.isLoggedInFalse()
-        }) {
-            Text("Change isLoggedIn to False")
-        }
-        
-        Button(onClick = {
             companyViewModel.clearSelectedCompany()
         }) {
             Text("Change hasSelectedCompany to False")

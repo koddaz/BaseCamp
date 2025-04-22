@@ -54,7 +54,6 @@ fun TabNavigation(authViewModel : AuthViewModel, companyViewModel: CompanyViewMo
                 0 -> HomeNavHost(authViewModel, companyViewModel)
                 1 -> UserBookingNavHost()
                 2 -> SocialNavHost(
-                    authViewModel = authViewModel,
 	                socialViewModel = socialViewModel,
 	                selectedSocialTabIndex = selectedSocialTabIndex
                 )
