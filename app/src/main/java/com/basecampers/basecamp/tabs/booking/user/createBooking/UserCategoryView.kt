@@ -15,10 +15,10 @@ import com.basecampers.basecamp.tabs.booking.user.viewModel.UserBookingViewModel
 
 @Composable
 fun UserCategoryView(
-    bookingViewModel: UserBookingViewModel?,
+    bookingViewModel: UserBookingViewModel,
     navBooking: (String) -> Unit
 ) {
-    val categoryList by bookingViewModel?.categoriesList?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
+    val categoryList by bookingViewModel.categoriesList.collectAsState()
     val scrollState = rememberScrollState()
     Column(modifier = Modifier.fillMaxSize().verticalScroll(scrollState)) {
         categoryList.forEach { category ->
@@ -26,7 +26,8 @@ fun UserCategoryView(
                 title = category.name,
                 info = category.info,
                 onClick = {
-                    bookingViewModel?.setSelectedCategory(category)
+                    bookingViewModel.setSelectedCategory(category)
+                    bookingViewModel.retrieveBookingItems(category.id)
                     navBooking(category.id)
                 }
             )

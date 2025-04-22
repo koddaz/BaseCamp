@@ -15,26 +15,33 @@ import com.basecampers.basecamp.tabs.booking.user.viewModel.UserBookingViewModel
 @Composable
 fun UserExtraItem(
     bookingViewModel: UserBookingViewModel,
-    navBooking: () -> Unit,
+    navBooking: (String) -> Unit = {},
 ) {
     val scrollState = rememberScrollState()
     val selectedExtraItems by bookingViewModel.selectedExtraItems.collectAsState()
     val extraList by bookingViewModel.bookingExtraList.collectAsState()
 
-    Column(modifier = Modifier.fillMaxSize().verticalScroll(scrollState)) {
-        extraList.forEach { extra ->
-            BookingCard(
-                selected = selectedExtraItems.any { it.id == extra.id },
-                title = extra.name,
-                info = extra.info,
-                price = extra.price,
-                onClick = {
-                    bookingViewModel.addExtraItem(extra)
-                })
+    if (extraList.isEmpty()) {
+        UserConfirmationView(
+            bookingViewModel = bookingViewModel,
+            navBooking = navBooking
+        )
+    } else {
+        Column(modifier = Modifier.fillMaxSize().verticalScroll(scrollState)) {
+            extraList.forEach { extra ->
+                BookingCard(
+                    selected = selectedExtraItems.any { it.id == extra.id },
+                    title = extra.name,
+                    info = extra.info,
+                    price = extra.price,
+                    onClick = {
+                        bookingViewModel.addExtraItem(extra)
+                    })
+            }
+            CustomButton(text = "Next", onClick = {
+                bookingViewModel.updatePriceCalculation()
+                navBooking
+            })
         }
-        CustomButton(text = "Next", onClick = {
-            bookingViewModel.updatePriceCalculation()
-            navBooking()
-        })
     }
 }

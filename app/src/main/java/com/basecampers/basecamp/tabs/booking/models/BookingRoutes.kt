@@ -6,6 +6,7 @@ object BookingRoutes {
     const val CONFIRMATION = "confirmation"
     const val REGISTER = "register"
     const val ADMIN = "admin"
+    const val EDIT = "edit"
 
 
 }

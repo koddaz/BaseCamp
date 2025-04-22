@@ -15,7 +15,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -24,6 +23,7 @@ import com.basecampers.basecamp.components.CustomButton
 import com.basecampers.basecamp.tabs.booking.admin.AdminNavHost
 import com.basecampers.basecamp.tabs.booking.user.bookingOverview.UserCurrentBookings
 import com.basecampers.basecamp.tabs.booking.user.bookingOverview.UserEditBookingView
+import com.basecampers.basecamp.tabs.booking.user.createBooking.UserBookingMainView
 import com.basecampers.basecamp.tabs.booking.user.createBooking.UserCategoryView
 import com.basecampers.basecamp.tabs.booking.user.createBooking.UserConfirmationView
 import com.basecampers.basecamp.tabs.booking.user.createBooking.UserExtraItem
@@ -32,21 +32,13 @@ import com.basecampers.basecamp.tabs.booking.user.createBooking.UserItemView
 import com.basecampers.basecamp.tabs.booking.user.viewModel.UserBookingViewModel
 
 @Composable
-fun UserBookingNavHost(
-    navController: NavHostController,
-    bookingViewModel: UserBookingViewModel
-) {
-    var isAdmin by remember { mutableStateOf(false) }
+fun UserBookingNavHost() {
+
+    val navController = rememberNavController()
+    val bookingViewModel: UserBookingViewModel = viewModel()
 
     Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
-        Row(modifier = Modifier.fillMaxWidth()) {
-            CustomButton(text = (if (isAdmin) "User" else "Admin"), onClick = { isAdmin = !isAdmin })
-        }
-        if (isAdmin) {
-            Column(modifier = Modifier.weight(1f)) {
-                AdminNavHost(changeView = { isAdmin = false })
-            }
-        } else {
+
             NavHost(
                 navController = navController,
                 startDestination = "start",
@@ -122,25 +114,5 @@ fun UserBookingNavHost(
             }
         }
     }
-}
 
-@Composable
-fun UserBookingMainView(
-    navToBooking: () -> Unit,
-    navToCurrentBookings: () -> Unit
-) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        CustomButton(
-            text = "Book an item",
-            onClick = {
-                navToBooking()
-            }
-        )
-        CustomButton(
-            text = "See current bookings",
-            onClick = {
-                navToCurrentBookings()
-            }
-        )
-    }
-}
+
