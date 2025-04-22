@@ -17,6 +17,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.basecampers.basecamp.tabs.social.models.QnAItem
+import com.basecampers.basecamp.ui.theme.CardBackground
+import com.basecampers.basecamp.ui.theme.ErrorRed
+import com.basecampers.basecamp.ui.theme.SecondaryAqua
+import com.basecampers.basecamp.ui.theme.TextPrimary
+import com.basecampers.basecamp.ui.theme.TextSecondary
+
 @Composable
 fun QnAItemView(
 	item: QnAItem,
@@ -25,98 +31,104 @@ fun QnAItemView(
 	onDeleteClick: () -> Unit,
 	onPublishToggle: (Boolean) -> Unit
 ) {
-	var expanded by remember { mutableStateOf(false) }
+	var isExpanded by remember { mutableStateOf(false) }
 	
 	Card(
 		modifier = Modifier
 			.fillMaxWidth()
 			.padding(vertical = 8.dp),
-		elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+		colors = CardDefaults.cardColors(
+			containerColor = CardBackground,
+			contentColor = TextPrimary
+		),
+		elevation = CardDefaults.cardElevation(
+			defaultElevation = 2.dp
+		)
 	) {
 		Column(
-			modifier = Modifier.padding(16.dp)
+			modifier = Modifier
+				.fillMaxWidth()
+				.padding(16.dp)
 		) {
-			// Question row with expand/collapse control
+			// Question and Expand/Collapse button
 			Row(
-				modifier = Modifier
-					.fillMaxWidth()
-					.clickable { expanded = !expanded },
-				verticalAlignment = Alignment.CenterVertically,
-				horizontalArrangement = Arrangement.SpaceBetween
+				modifier = Modifier.fillMaxWidth(),
+				horizontalArrangement = Arrangement.SpaceBetween,
+				verticalAlignment = Alignment.CenterVertically
 			) {
 				Text(
 					text = item.question,
-					style = MaterialTheme.typography.titleMedium,
-					fontWeight = FontWeight.Bold,
+					style = MaterialTheme.typography.titleMedium.copy(
+						fontWeight = FontWeight.Bold
+					),
 					modifier = Modifier.weight(1f)
 				)
 				
-				if (!item.isPublished && isPrivilegedUser) {
-					// Show draft indicator for privileged users
-					Text(
-						text = "DRAFT",
-						style = MaterialTheme.typography.labelSmall,
-						color = MaterialTheme.colorScheme.error,
-						modifier = Modifier.padding(end = 8.dp)
+				IconButton(
+					onClick = { isExpanded = !isExpanded }
+				) {
+					Icon(
+						imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+						contentDescription = if (isExpanded) "Collapse" else "Expand",
+						tint = SecondaryAqua
 					)
 				}
-				
-				Icon(
-					imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-					contentDescription = if (expanded) "Collapse" else "Expand"
-				)
 			}
 			
-			// Answer section (expandable)
-			AnimatedVisibility(
-				visible = expanded,
-				enter = expandVertically(),
-				exit = shrinkVertically()
-			) {
-				Column {
-					Divider(modifier = Modifier.padding(vertical = 8.dp))
-					Text(
-						text = item.answer,
-						style = MaterialTheme.typography.bodyMedium
-					)
-					
-					// Edit/Delete controls for privileged users
-					if (isPrivilegedUser) {
+			// Answer (shown when expanded)
+			if (isExpanded) {
+				Spacer(modifier = Modifier.height(8.dp))
+				Text(
+					text = item.answer,
+					style = MaterialTheme.typography.bodyMedium,
+					color = TextSecondary
+				)
+				
+				// Admin controls
+				if (isPrivilegedUser) {
+					Spacer(modifier = Modifier.height(16.dp))
+					Row(
+						modifier = Modifier.fillMaxWidth(),
+						horizontalArrangement = Arrangement.SpaceBetween
+					) {
+						// Publish toggle
 						Row(
-							modifier = Modifier
-								.fillMaxWidth()
-								.padding(top = 16.dp),
-							horizontalArrangement = Arrangement.End,
 							verticalAlignment = Alignment.CenterVertically
 						) {
-							// Published toggle
-							Row(
-								verticalAlignment = Alignment.CenterVertically
+							Switch(
+								checked = item.isPublished,
+								onCheckedChange = onPublishToggle,
+								colors = SwitchDefaults.colors(
+									checkedThumbColor = SecondaryAqua,
+									checkedTrackColor = SecondaryAqua.copy(alpha = 0.5f)
+								)
+							)
+							Spacer(modifier = Modifier.width(8.dp))
+							Text(
+								text = if (item.isPublished) "Published" else "Draft",
+								style = MaterialTheme.typography.bodySmall,
+								color = if (item.isPublished) TextPrimary else TextSecondary
+							)
+						}
+						
+						// Edit and Delete buttons
+						Row {
+							IconButton(
+								onClick = onEditClick
 							) {
-								Text("Published")
-								Switch(
-									checked = item.isPublished,
-									onCheckedChange = onPublishToggle,
-									modifier = Modifier.padding(horizontal = 8.dp)
+								Icon(
+									Icons.Default.Edit,
+									contentDescription = "Edit",
+									tint = SecondaryAqua
 								)
 							}
-							
-							Spacer(modifier = Modifier.width(16.dp))
-							
-							// Edit button
-							IconButton(onClick = onEditClick) {
+							IconButton(
+								onClick = onDeleteClick
+							) {
 								Icon(
-									imageVector = Icons.Default.Edit,
-									contentDescription = "Edit"
-								)
-							}
-							
-							// Delete button
-							IconButton(onClick = onDeleteClick) {
-								Icon(
-									imageVector = Icons.Default.Delete,
+									Icons.Default.Delete,
 									contentDescription = "Delete",
-									tint = MaterialTheme.colorScheme.error
+									tint = ErrorRed
 								)
 							}
 						}

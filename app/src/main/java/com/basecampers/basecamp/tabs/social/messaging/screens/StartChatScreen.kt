@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.basecampers.basecamp.components.BasecampButton
 import com.basecampers.basecamp.tabs.social.messaging.viewModels.UserMessagingViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,17 +49,15 @@ fun StartChatScreen(
 			
 			Spacer(modifier = Modifier.height(24.dp))
 			
-			Button(
+			BasecampButton(
+				text = "Submit Chat Request",
 				onClick = {
 					try {
 						onChatStarted("new-chat-1")
 					} catch (e: Exception) {
 					}
-				},
-				modifier = Modifier.fillMaxWidth()
-			) {
-				Text("Submit Chat Request")
-			}
+				}
+			)
 		}
 	}
 }

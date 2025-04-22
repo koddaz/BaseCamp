@@ -3,18 +3,20 @@ package com.basecampers.basecamp.tabs.social.forum
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.basecampers.basecamp.components.BasecampSearchBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ForumScreen(
 	isPrivilegedUser: Boolean,
 ) {
+	var searchQuery by remember { mutableStateOf("") }
+	
 	Box(modifier = Modifier.fillMaxSize()) {
 		Column(
 			modifier = Modifier
@@ -22,20 +24,13 @@ fun ForumScreen(
 				.padding(horizontal = 16.dp)
 		) {
 			// Search and filter section
-			OutlinedTextField(
-				value = "",
-				onValueChange = { /* TODO: Implement search */ },
+			BasecampSearchBar(
+				query = searchQuery,
+				onQueryChange = { searchQuery = it },
+				placeholder = "Search in forum...",
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(top = 16.dp, bottom = 16.dp),
-				placeholder = { Text("Search in forum...") },
-				leadingIcon = {
-					Icon(
-						imageVector = Icons.Default.Search,
-						contentDescription = "Search"
-					)
-				},
-				singleLine = true
+					.padding(top = 16.dp, bottom = 16.dp)
 			)
 			
 			// Placeholder forum content

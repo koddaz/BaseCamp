@@ -108,18 +108,44 @@ fun HomeScreen(authViewModel: AuthViewModel, companyViewModel: CompanyViewModel)
                         }
 
                         // Sign Out Button
-                        IconButton(
-                            onClick = { authViewModel.logout() },
+                        Box(
                             modifier = Modifier
                                 .size(48.dp)
                                 .clip(CircleShape)
                                 .background(SecondaryAqua.copy(alpha = 0.1f))
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Logout,
-                                contentDescription = "Sign Out",
-                                tint = SecondaryAqua
-                            )
+                            var showMenu by remember { mutableStateOf(false) }
+                            
+                            IconButton(
+                                onClick = { showMenu = true }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Logout,
+                                    contentDescription = "Sign Out",
+                                    tint = SecondaryAqua
+                                )
+                            }
+                            
+                            DropdownMenu(
+                                expanded = showMenu,
+                                onDismissRequest = { showMenu = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Sign Out") },
+                                    onClick = {
+                                        authViewModel.logout()
+                                        companyViewModel.clearSelectedCompany()
+                                        showMenu = false
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Switch Company") },
+                                    onClick = {
+                                        companyViewModel.clearSelectedCompany()
+                                        showMenu = false
+                                    }
+                                )
+                            }
                         }
                     }
                 }

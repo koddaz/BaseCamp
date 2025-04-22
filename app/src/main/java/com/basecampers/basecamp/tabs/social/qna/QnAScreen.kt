@@ -1,5 +1,6 @@
 package com.basecampers.basecamp.tabs.social.qna
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -10,10 +11,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.basecamp.tabs.social.models.QnAItem
 import com.basecampers.basecamp.tabs.social.viewModel.QnAViewModel
+import com.basecampers.basecamp.ui.theme.AppBackground
+import com.basecampers.basecamp.ui.theme.SecondaryAqua
+import com.basecampers.basecamp.ui.theme.TextPrimary
+import com.basecampers.basecamp.ui.theme.TextSecondary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,29 +41,46 @@ fun QnAScreen(
 		qnaViewModel.fetchQnAItems()
 	}
 	
-	Box(modifier = Modifier.fillMaxSize()) {
-		Column(
+	Scaffold(
+		topBar = {
+			TopAppBar(
+				title = { 
+					Text(
+						text = "Frequently Asked Questions",
+						style = MaterialTheme.typography.titleLarge.copy(
+							fontWeight = FontWeight.Bold
+						)
+					)
+				},
+				colors = TopAppBarDefaults.topAppBarColors(
+					containerColor = AppBackground,
+					titleContentColor = TextPrimary
+				)
+			)
+		}
+	) { paddingValues ->
+		Box(
 			modifier = Modifier
 				.fillMaxSize()
-				.padding(horizontal = 16.dp)
+				.padding(paddingValues)
+				.background(AppBackground)
 		) {
-			// Q&A content
 			if (isLoading) {
 				// Loading indicator
 				Box(
-					modifier = Modifier
-						.fillMaxSize()
-						.weight(1f),
+					modifier = Modifier.fillMaxSize(),
 					contentAlignment = Alignment.Center
 				) {
-					CircularProgressIndicator()
+					CircularProgressIndicator(
+						color = SecondaryAqua
+					)
 				}
 			} else {
 				// List of Q&A items
 				LazyColumn(
 					modifier = Modifier
 						.fillMaxSize()
-						.weight(1f)
+						.padding(horizontal = 16.dp)
 				) {
 					// Show published items for everyone, drafts only for privileged users
 					val filteredItems = if (isPrivilegedUser) {
@@ -74,7 +97,11 @@ fun QnAScreen(
 									.height(200.dp),
 								contentAlignment = Alignment.Center
 							) {
-								Text("No Q&A items found.")
+								Text(
+									text = "No questions found.",
+									style = MaterialTheme.typography.bodyLarge,
+									color = TextSecondary
+								)
 							}
 						}
 					} else {
@@ -109,14 +136,18 @@ fun QnAScreen(
 				Row(
 					modifier = Modifier
 						.fillMaxWidth()
-						.padding(vertical = 16.dp),
+						.padding(16.dp)
+						.align(Alignment.BottomCenter),
 					horizontalArrangement = Arrangement.Center
 				) {
-					OutlinedButton(
+					Button(
 						onClick = {
 							currentQnAItem = null  // Null indicates adding new item
 							showAddEditDialog = true
 						},
+						colors = ButtonDefaults.buttonColors(
+							containerColor = SecondaryAqua
+						),
 						contentPadding = PaddingValues(
 							horizontal = 24.dp,
 							vertical = 12.dp

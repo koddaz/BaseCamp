@@ -24,6 +24,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.basecampers.basecamp.aRootFolder.UserSession
 import com.basecampers.basecamp.company.models.UserStatus
+import com.basecampers.basecamp.components.HorizontalOptionCard
 import com.basecampers.basecamp.tabs.profile.models.profileRoutes
 import com.basecampers.basecamp.tabs.profile.viewModel.ProfileViewModel
 import com.basecampers.basecamp.ui.theme.*
@@ -32,7 +33,8 @@ import com.basecampers.basecamp.ui.theme.*
 @Composable
 fun ProfileScreen(
     onNavigateToEdit: () -> Unit = {},
-    onNavigateToAdmin: () -> Unit = {}
+    onNavigateToAdmin: () -> Unit = {},
+    onNavigateToOptions: () -> Unit = {}
 ) {
     // Access data from UserSession
     val profile by UserSession.profile.collectAsState()
@@ -155,24 +157,14 @@ fun ProfileScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Edit Profile Button
+            // Options Card
             item {
-                Button(
-                    onClick = onNavigateToEdit,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = SecondaryAqua
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit Profile",
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Edit Profile")
-                }
+                HorizontalOptionCard(
+                    title = "Options",
+                    onClick = onNavigateToOptions,
+                    icon = Icons.Default.Settings,
+                    iconBackground = SecondaryAqua
+                )
             }
 
             // Company Profile Section
