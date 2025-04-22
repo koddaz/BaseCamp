@@ -111,7 +111,6 @@ fun TabNavigation(
                     )
                 }
                 2 -> SocialNavHost(
-                    authViewModel = authViewModel,
                     socialViewModel = socialViewModel,
                     selectedSocialTabIndex = selectedSocialTabIndex,
                     onSocialTabSelected = { newIndex ->
