@@ -12,9 +12,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
+import com.basecampers.basecamp.ui.theme.CardBackground
+import com.basecampers.basecamp.ui.theme.SecondaryAqua
+import com.basecampers.basecamp.ui.theme.TextPrimary
 
 @Composable
 fun SocialMenu(
@@ -39,7 +43,9 @@ fun SocialMenu(
 			onClick = onToggleMenu,
 			modifier = Modifier
 				.align(Alignment.BottomEnd)
-				.padding(16.dp)
+				.padding(16.dp),
+			containerColor = SecondaryAqua,
+			contentColor = Color.White
 		) {
 			// Animate rotation between + and ×
 			val rotation by animateFloatAsState(
@@ -99,21 +105,13 @@ private fun ArcMenuItems(
 		menuItems.forEachIndexed { index, item ->
 			val position = positions[index]
 			
-			// Staggered animation for appearing
-			val scale by animateFloatAsState(
-				targetValue = 1f,
-				animationSpec = spring(
-					dampingRatio = Spring.DampingRatioMediumBouncy,
-					stiffness = Spring.StiffnessLow
-				),
-				label = "Menu item scale"
-			)
+			// Add staggered animation delay
+			val delay = index * 100L
 			
 			Box(
 				modifier = Modifier
 					.align(Alignment.BottomEnd)
 					.offset(x = position.x.dp, y = position.y.dp)
-					.scale(scale)
 			) {
 				ArcMenuItem(
 					item = item,
@@ -131,16 +129,23 @@ private fun ArcMenuItem(
 	isSelected: Boolean,
 	onClick: () -> Unit
 ) {
+	// Add scale animation for appearing
+	val scale by animateFloatAsState(
+		targetValue = 1f,
+		animationSpec = spring(
+			dampingRatio = Spring.DampingRatioMediumBouncy,
+			stiffness = Spring.StiffnessLow
+		),
+		label = "Menu item scale"
+	)
+
 	FloatingActionButton(
 		onClick = onClick,
-		containerColor = if (isSelected)
-			MaterialTheme.colorScheme.primary
-		else
-			MaterialTheme.colorScheme.surfaceVariant,
-		contentColor = if (isSelected)
-			MaterialTheme.colorScheme.onPrimary
-		else
-			MaterialTheme.colorScheme.onSurfaceVariant
+		containerColor = CardBackground,
+		contentColor = TextPrimary,
+		modifier = Modifier
+			.scale(scale)
+			.size(40.dp) // Make the FAB background smaller
 	) {
 		BadgedBox(
 			badge = {
@@ -151,7 +156,8 @@ private fun ArcMenuItem(
 		) {
 			Icon(
 				imageVector = if (isSelected) item.selectedIcon else item.unselectedIcon,
-				contentDescription = item.label
+				contentDescription = item.label,
+				modifier = Modifier.size(20.dp)
 			)
 		}
 	}

@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -133,34 +134,31 @@ fun QnAScreen(
 			
 			// Add button for privileged users - always visible at the bottom
 			if (isPrivilegedUser) {
-				Row(
+				Button(
+					onClick = {
+						currentQnAItem = null  // Null indicates adding new item
+						showAddEditDialog = true
+					},
 					modifier = Modifier
-						.fillMaxWidth()
+						.align(Alignment.BottomStart)
 						.padding(16.dp)
-						.align(Alignment.BottomCenter),
-					horizontalArrangement = Arrangement.Center
+						.height(58.dp),
+					colors = ButtonDefaults.buttonColors(
+						containerColor = SecondaryAqua
+					),
+					shape = MaterialTheme.shapes.large,
+					contentPadding = PaddingValues(
+						horizontal = 16.dp,
+						vertical = 0.dp
+					)
 				) {
-					Button(
-						onClick = {
-							currentQnAItem = null  // Null indicates adding new item
-							showAddEditDialog = true
-						},
-						colors = ButtonDefaults.buttonColors(
-							containerColor = SecondaryAqua
-						),
-						contentPadding = PaddingValues(
-							horizontal = 24.dp,
-							vertical = 12.dp
-						)
-					) {
-						Icon(
-							Icons.Default.Add,
-							contentDescription = "Add Question",
-							modifier = Modifier.size(20.dp)
-						)
-						Spacer(modifier = Modifier.width(8.dp))
-						Text("Add Question")
-					}
+					Icon(
+						Icons.Default.Add,
+						contentDescription = "Add Question",
+						modifier = Modifier.size(20.dp)
+					)
+					Spacer(modifier = Modifier.width(8.dp))
+					Text("Add Question")
 				}
 			}
 		}
