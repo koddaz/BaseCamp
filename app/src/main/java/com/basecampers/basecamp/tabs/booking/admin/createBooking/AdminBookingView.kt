@@ -1,4 +1,4 @@
-package com.basecampers.basecamp.tabs.booking.admin
+package com.basecampers.basecamp.tabs.booking.admin.createBooking
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -25,47 +25,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.basecampers.basecamp.aRootFolder.UserSession
 import com.basecampers.basecamp.company.models.CompanyProfileModel
 import com.basecampers.basecamp.company.models.UserStatus
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.components.CustomButton
 import com.basecampers.basecamp.components.CustomColumn
-import com.basecampers.basecamp.tabs.booking.models.AdminBookingViewModel
+import com.basecampers.basecamp.tabs.booking.admin.viewModel.AdminBookingViewModel
 import com.basecampers.basecamp.tabs.booking.models.BookingCategories
 import com.basecampers.basecamp.tabs.booking.models.BookingItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminBookingView(
-    authViewModel: AuthViewModel? = viewModel(),
     modifier: Modifier = Modifier,
-    userInfo: CompanyProfileModel?,
-    adminBookingViewModel: AdminBookingViewModel?,
+    adminBookingViewModel: AdminBookingViewModel,
     goBack: () -> Unit,
     navigateToExtra: (String) -> Unit = {},
 ) {
+    val userId = UserSession.userId
     var expanded by remember { mutableStateOf(false) }
-    var userId = authViewModel?.getCurrentUserUid()
-    val categories by adminBookingViewModel?.categories?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
-    val bookingId = "${System.currentTimeMillis()}_${(1000..9999).random()}"
 
-    val selectedItem by adminBookingViewModel?.selectedItem?.collectAsState() ?: remember { mutableStateOf(
-        BookingItem(
-            id = "",
-            name = "",
-            info = "",
-            pricePerDay = "",
-            quantity = "",
-            categoryId = "",
-            createdBy = ""
-        )) }
-    val selectedCategory by adminBookingViewModel?.selectedCategory?.collectAsState() ?: remember { mutableStateOf(
-        BookingCategories(
-            id = "",
-            name = "",
-            info = "",
-            createdBy = ""
-        )) }
+    val categories by adminBookingViewModel.categories.collectAsState()
+    val bookingId = "${System.currentTimeMillis()}_${(1000..9999).random()}"
+    val selectedItem by adminBookingViewModel.selectedItem.collectAsState()
+    val selectedCategory by adminBookingViewModel.selectedCategory.collectAsState()
 
     var name by remember { mutableStateOf("") }
     var info by remember { mutableStateOf("") }
@@ -84,7 +68,7 @@ fun AdminBookingView(
                 onExpandedChange = { expanded = !expanded },
                 onCategorySelected = { category ->
 
-                    adminBookingViewModel?.updateCategoriesValues(
+                    adminBookingViewModel.updateCategoriesValues(
                         id = category.id,
                         name = category.name,
                         info = category.info,
@@ -103,14 +87,14 @@ fun AdminBookingView(
                     pricePerDay = pricePerDay,
                     quantity = quantity,
                     onNameChange = { name = it },
-                    onInfoChange = { if (it.length <= 500) info = it },
+                    onInfoChange = { if (it.length <= 250) info = it },
                     onPricePerDayChange = { pricePerDay = it },
                     onQuantityChange = { quantity = it },
 
                     onAddItemClick = {
                         if (name.isNotEmpty() && pricePerDay.isNotEmpty() && selectedCategory != null) {
 
-                            adminBookingViewModel?.updateBookingItemValues(
+                            adminBookingViewModel.updateBookingItemValues(
                                 id = bookingId,
                                 name = name,
                                 info = info,
@@ -118,7 +102,7 @@ fun AdminBookingView(
                                 quantity = quantity,
                             )
 
-                            adminBookingViewModel?.addBookingItem(
+                            adminBookingViewModel.addBookingItem(
                                 selectedCategory = selectedCategory?.id ?: "",
                                 bookingItem = BookingItem(
                                     id = bookingId,
@@ -127,7 +111,7 @@ fun AdminBookingView(
                                     pricePerDay = pricePerDay,
                                     quantity = quantity,
                                     categoryId = selectedCategory?.id ?: "",
-                                    createdBy = userId ?: ""
+                                    createdBy = userId.value.toString()
                                 ),
                             )
                             name = ""
@@ -137,7 +121,7 @@ fun AdminBookingView(
                         }
                     },
                     onAddExtrasClick = {
-                        adminBookingViewModel?.updateBookingItemValues(
+                        adminBookingViewModel.updateBookingItemValues(
                             id = bookingId,
                             name = name,
                             info = info,
@@ -225,11 +209,11 @@ fun BookingItemForm(
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Info") },
-            maxLines = 10,
-            minLines = 10,
+            maxLines = 5,
+            minLines = 5,
             value = info,
             onValueChange = onInfoChange,
-            supportingText = { Text("${info.length}/500 characters") }
+            supportingText = { Text("${info.length}/250 characters") }
         )
 
         OutlinedTextField(
@@ -259,13 +243,7 @@ fun BookingItemForm(
 @Composable
 fun AdminBookingViewPreview() {
     AdminBookingView(
-        userInfo = CompanyProfileModel(
-            imageUrl = null,
-            bio = "",
-            status = UserStatus.ADMIN,
-            id = "",
-        ),
-        adminBookingViewModel = null,
+        adminBookingViewModel = viewModel(),
         goBack = {},
     )
 

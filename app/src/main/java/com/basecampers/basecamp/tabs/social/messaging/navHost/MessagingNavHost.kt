@@ -15,14 +15,14 @@ import com.basecampers.basecamp.tabs.social.messaging.models.MessagingRoutes
 @Composable
 fun MessagingNavHost(
 	socialViewModel: SocialViewModel,
-	isSuper: Boolean,
+	isPrivilegedUser: Boolean,
 	unreadCount: Int
 ) {
 	val navController = rememberNavController()
 	
 	NavHost(navController = navController, startDestination = MessagingRoutes.MAIN) {
 		composable(MessagingRoutes.MAIN) {
-			if (isSuper) {
+			if (isPrivilegedUser) {
 				SuperUserMessagingScreen(
 					onSelectPendingChat = { chatId ->
 						navController.navigate("${MessagingRoutes.CHAT_REQUEST}/$chatId")
