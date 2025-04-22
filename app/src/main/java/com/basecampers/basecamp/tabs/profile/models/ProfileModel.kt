@@ -11,5 +11,6 @@ data class ProfileModel(
     val email: String = "",
     val firstName: String = "",
     val lastName: String = "",
-    val companyList: List<String> = emptyList()
+    val companyList: List<String> = emptyList(),
+    val profilePictureUrl: String = ""
 )

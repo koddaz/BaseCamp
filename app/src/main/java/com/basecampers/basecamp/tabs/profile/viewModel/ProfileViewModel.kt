@@ -12,6 +12,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import android.net.Uri
+
+import com.google.firebase.storage.ktx.storage
+import com.google.firebase.firestore.ktx.firestore
+import kotlinx.coroutines.tasks.await
 
 /**
  * ViewModel responsible for managing user profile data
@@ -39,7 +44,49 @@ class ProfileViewModel : ViewModel() {
 		// Load profile data if user is logged in
 		getCurrentUserId()?.let { fetchProfile(it) }
 	}
-	
+
+	fun uploadProfilePicture(uri: Uri) {
+		val userId = getCurrentUserId() ?: return
+		val storageRef = Firebase.storage.reference
+		val profilePicsRef = storageRef.child("profile_pictures/$userId.jpg")
+
+		_isLoading.value = true
+
+		// Upload the file
+		profilePicsRef.putFile(uri)
+			.continueWithTask { task ->
+				if (!task.isSuccessful) {
+					throw task.exception ?: Exception("Upload failed")
+				}
+				profilePicsRef.downloadUrl
+			}
+			.addOnSuccessListener { downloadUri ->
+				// Update Firestore
+				firestore.collection("users").document(userId)
+					.update("profilePictureUrl", downloadUri.toString())
+					.addOnSuccessListener {
+						// Update local profile
+						val updatedProfile = _profile.value?.copy(profilePictureUrl = downloadUri.toString())
+						_profile.value = updatedProfile
+						updatedProfile?.let { UserSession.setProfile(it) }
+
+						Log.d(TAG, "Profile picture uploaded and saved")
+					}
+					.addOnFailureListener {
+						Log.e(TAG, "Failed to update Firestore with picture URL", it)
+					}
+					.also {
+						_isLoading.value = false
+					}
+			}
+			.addOnFailureListener {
+				Log.e(TAG, "Image upload failed", it)
+				_isLoading.value = false
+			}
+	}
+
+
+
 	/**
 	 * Fetches user profile from Firestore
 	 */
