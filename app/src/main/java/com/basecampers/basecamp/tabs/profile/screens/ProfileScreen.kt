@@ -1,6 +1,7 @@
 package com.basecampers.basecamp.tabs.profile.screens
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -16,28 +17,44 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.basecampers.basecamp.aRootFolder.UserSession
+import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.company.models.UserStatus
 import com.basecampers.basecamp.tabs.profile.models.profileRoutes
 import com.basecampers.basecamp.tabs.profile.viewModel.ProfileViewModel
+import kotlinx.coroutines.launch
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ProfileScreen(
     onNavigateToEdit: () -> Unit = {},
-    onNavigateToAdmin: () -> Unit = {}
+    onNavigateToAdmin: () -> Unit = {},
+    authViewModel: AuthViewModel
 ) {
     
     // Access data from UserSession
     val profile by UserSession.profile.collectAsState()
     val companyProfile by UserSession.companyProfile.collectAsState()
     val company by UserSession.company.collectAsState()
-    
+
+    // State for confirmation dialog and deletion status
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var isDeleting by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -81,6 +98,15 @@ fun ProfileScreen(
             style = MaterialTheme.typography.bodyLarge,
             color = Color.Gray
         )
+
+        Button(
+            onClick = { showDeleteDialog = true },
+            modifier = Modifier.padding(top = 8.dp),
+            enabled = !isDeleting,
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+        ) {
+            Text(if (isDeleting) "Deleting..." else "Delete Account")
+        }
 
         // User Status Badge
         companyProfile?.status?.let { status ->
@@ -266,6 +292,49 @@ fun ProfileScreen(
             }
         }
     }
+    // Confirmation Dialog for Delete Account
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete Account") },
+            text = { Text("Are you sure you want to delete your account? This action cannot be undone.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteDialog = false
+                        isDeleting = true
+                        coroutineScope.launch {
+                            try {
+                               authViewModel.deleteUser()
+                                snackbarHostState.showSnackbar("Account deleted successfully")
+                            } catch (e: Exception) {
+                                Toast.makeText(
+                                    context,
+                                    "Failed to delete account: ${e.message}",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            } finally {
+                                isDeleting = false
+                            }
+                        }
+                    }
+                ) {
+                    Text("Delete", color = Color.Red)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+    // Snackbar Host for feedback
+    SnackbarHost(
+        hostState = snackbarHostState,
+        modifier = Modifier.align(Alignment.BottomCenter)
+    )
+}
 }
 
 @Composable

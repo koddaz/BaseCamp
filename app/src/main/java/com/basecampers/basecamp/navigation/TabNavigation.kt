@@ -108,7 +108,8 @@ fun TabNavigation(
                     onProfileTabSelected = { newIndex ->
                         selectedProfileTabIndex = newIndex
                         AppState.selectedProfileTabIndex = newIndex
-                    }
+                    },
+                    authViewModel = authViewModel
                 )
                 else -> Text("Error: Tab not found")
             }

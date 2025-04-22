@@ -9,6 +9,7 @@ import com.basecampers.basecamp.aRootFolder.UserSession
 import com.basecampers.basecamp.company.models.CompanyModel
 import com.basecampers.basecamp.tabs.profile.viewModel.ProfileViewModel
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.tasks.await
 
 /**
  * ViewModel handling all authentication-related operations.
@@ -24,7 +26,7 @@ class AuthViewModel(private val application: android.app.Application) : AndroidV
     private val tag = this::class.java.simpleName
     
     private val appPreferences = AppPreferences(application)
-    
+
     // General state values
     private val _loggedin = MutableStateFlow(false)
     val loggedin = _loggedin.asStateFlow()
@@ -190,16 +192,85 @@ class AuthViewModel(private val application: android.app.Application) : AndroidV
         // Update existing state
         checkLoggedin()
     }
-    
+
     /**
-     * Deletes the current user's account.
+     * Deletes the current user's account from Firebase Auth and removes their data from
+     * the Firestore 'users' collection and 'users' subcollections under 'companies'.
      */
-    fun deleteUser() {
-        Firebase.auth.currentUser?.delete()?.addOnCompleteListener {
+    suspend fun deleteUser() {
+        val user = Firebase.auth.currentUser
+        val userId = user?.uid ?: return
+        val db = Firebase.firestore
+
+        try {
+            // Start a firebase batch operation
+            val batch = db.batch()
+
+            // Get user company list
+            val companyList = UserSession.profile.value?.companyList
+                ?: db.collection("users").document(userId).get().await()
+                    .get("companyList") as? List<String>
+                ?: emptyList()
+
+            // Remove user from companies' users sub-collections
+            deleteCompanyProfiles(userId, companyList, batch)
+
+            // Delete user's profile
+            deleteProfile(userId, batch)
+
+            // Commit all firestore deletions
+            batch.commit().await()
+
+            // Delete firebase auth account
+            user.delete().await()
+
+            // Clear UserSession
+            UserSession.clearSession()
+            // Clear selected company
+            appPreferences.clearSelectedCompanyId()
+            // Update existing state
             checkLoggedin()
+
+            Log.d("RemoveUser", "User $userId successfully deleted from Firebase Auth and Firestore")
+        } catch (e: Exception) {
+            Log.e("RemoveUser", "Failed to delete user data: ${e.message}", e)
+            // In a production environment, we might want to handle partial deletions
+            // and implement retry logic or cleanup mechanisms
         }
     }
-    
+
+    /**
+     * Removes the users company profile from the 'users' subcollection of each company.
+     */
+    private fun deleteCompanyProfiles(
+        userId: String,
+        companyList: List<String>,
+        batch: com.google.firebase.firestore.WriteBatch
+    ) {
+        val db = Firebase.firestore
+        companyList.forEach { companyId ->
+            val companyUserRef = db.collection("companies")
+                .document(companyId)
+                .collection("users")
+                .document(userId)
+            batch.delete(companyUserRef)
+        }
+        Log.d(tag, "Scheduled deletion of user $userId from companies' users subcollections")
+    }
+
+    /**
+     * Deletes the user's profile from the 'users' collection in Firestore.
+     */
+    private fun deleteProfile(
+        userId: String,
+        batch: com.google.firebase.firestore.WriteBatch
+    ) {
+        val db = Firebase.firestore
+        val userProfileRef = db.collection("users").document(userId)
+        batch.delete(userProfileRef)
+        Log.d(tag, "Scheduled deletion of profile for user $userId")
+    }
+
     /**
      * Sends a password reset email to the specified address.
      */

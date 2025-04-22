@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.tabs.booking.admin.AdminNavHost
 import com.basecampers.basecamp.tabs.profile.screens.EditProfileScreen
 import com.basecampers.basecamp.tabs.profile.screens.ProfileScreen
@@ -15,6 +16,7 @@ import com.basecampers.basecamp.tabs.profile.viewModel.ProfileViewModel
 @Composable
 fun ProfileNavHost(
     profileViewModel: ProfileViewModel,
+    authViewModel: AuthViewModel,
     selectedProfileTabIndex: Int = 0,
     onProfileTabSelected: (Int) -> Unit = {}
 ) {
@@ -28,7 +30,8 @@ fun ProfileNavHost(
     when (currentProfileTabIndex) {
         0 -> ProfileScreen(
             onNavigateToEdit = { onProfileTabSelected(1) },
-            onNavigateToAdmin = { onProfileTabSelected(2) }
+            onNavigateToAdmin = { onProfileTabSelected(2) },
+            authViewModel = authViewModel
         )
         1 -> EditProfileScreen(
             profileViewModel = profileViewModel,
