@@ -13,7 +13,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
-import com.basecampers.basecamp.components.CustomButton
 import com.basecampers.basecamp.components.PasswordTextFieldLogin
 import com.google.firebase.ktx.Firebase
 
@@ -89,10 +88,19 @@ fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotP
         ) {
             Text("Login")
         }
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Button(
+            onClick = { goForgotPass() },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Forgot Password")
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Button(onClick = {
+        /*Button(onClick = {
             authViewModel.login(email = "admin@test.se", password = "Test123!")
         }) {
             Text("admin@test.se & Test123!")
@@ -102,14 +110,12 @@ fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotP
             authViewModel.login(email = "user5398@example.com", password = "Test123!")
         }) {
             Text("user5398@example.com & Test123!")
-        }
-        Button(
-            onClick = { goForgotPass() },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Forgot Password")
-        }
-
+        }*/
+        
+        Text("Testing buttons")
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
         Button(onClick = {
             authViewModel.isLoggedInTrue()
         }) {
@@ -119,21 +125,19 @@ fun LoginScreen(authViewModel: AuthViewModel, goRegister : () -> Unit, goForgotP
         Button(onClick = {
             authViewModel.loginUser1()
         }) {
-            Text("User 1 (User)")
+            Text("Quick sign in: User One (Admin)")
         }
 
         Button(onClick = {
             authViewModel.loginUser2()
         }) {
-            Text("User 2 (SuperUser)")
+            Text("Quick sign in: User Two (SuperUser)")
         }
-
-
 
         Button(onClick = {
             authViewModel.loginUser3()
         }) {
-            Text("User 3 (Admin)")
+            Text("Quick sign in: User Three (User)")
         }
 
         Spacer(modifier = Modifier.weight(1f))

@@ -36,13 +36,5 @@ fun HomeScreen(authViewModel: AuthViewModel, companyViewModel: CompanyViewModel)
         }) {
             Text("Change hasSelectedCompany to False")
         }
-
-        Button(onClick = {
-            authViewModel.registerUserToCompany(
-                companyId = "66a2bdbb-7218-48a3-ab86-4d1bd2de0728"
-            )
-        }) {
-            Text("Register User to Company --> TEST FUNKAR BARA FÖR ETT FÖRETAG")
-        }
     }
 }

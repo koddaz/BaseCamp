@@ -31,8 +31,6 @@ Unit) {
     val hasEmailError by authViewModel.hasEmailError.collectAsState()
     val errorMessage by authViewModel.registerErrorMessage.collectAsState()
     val isEmailValid by authViewModel.emailValid.collectAsState()
-    var isAdmin by remember { mutableStateOf(false) }
-    var companyName by remember { mutableStateOf("") }
 
     val emailErrors = errorMessage.filter { error ->
         error in listOf(
@@ -71,20 +69,6 @@ Unit) {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text("Register", style = MaterialTheme.typography.headlineMedium)
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = isAdmin, onCheckedChange = { isAdmin = it })
-                Text("Register as Admin")
-            }
-
-            if (isAdmin) {
-                TextField(
-                    label = { Text("Company Name") },
-                    value = companyName,
-                    onValueChange = { companyName = it },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
 
             // Display email error messages
             emailErrors.forEach { error ->
@@ -137,43 +121,6 @@ Unit) {
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-
-            // Random company button
-            Button(
-                onClick = {
-                    val randomSuffix = (1000..9999).random()
-                    val randomEmail = "company${randomSuffix}@example.com"
-                    val randomCompanyName = "Company${randomSuffix}"
-                    val companyId = UUID.randomUUID().toString()
-
-                    authViewModel.registerAsCompany(
-                        email = randomEmail,
-                        password = "Test123!", // Password that meets all requirements
-                        companyName = randomCompanyName,
-                        firstName = "Test",
-                        lastName = "Testsson",
-                        confirmPassword = "Test123!",
-                        companyId = companyId,
-                        onSuccess = {},
-                        onError = {}
-                    )
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Create Random Company")
-            }
-
-            Button(
-                onClick = {
-                    authViewModel.testRegToCompany(
-                        companyId = "17c9dab0-e425-457a-b0d3-b3009ee81c27"
-                    )
-
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Create Random User")
-            }
 
             // Register button
             Button(
