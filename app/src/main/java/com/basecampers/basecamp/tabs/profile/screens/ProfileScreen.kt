@@ -167,6 +167,21 @@ fun ProfileScreen(
                 )
             }
 
+            // Admin Tools Card (only for admins)
+            if (companyProfile?.status == UserStatus.ADMIN) {
+                item {
+                    HorizontalOptionCard(
+                        title = "Admin Tools",
+                        onClick = onNavigateToAdmin,
+                        icon = Icons.Default.AdminPanelSettings,
+                        iconBackground = SecondaryAqua,
+                        textColor = TextPrimary,
+                        textSize = 16f,
+                        textWeight = FontWeight.Bold
+                    )
+                }
+            }
+
             // Company Profile Section
             item {
                 Card(
@@ -206,18 +221,7 @@ fun ProfileScreen(
                             }
 
                             if (companyProfile?.status == UserStatus.ADMIN) {
-                                Button(
-                                    onClick = onNavigateToAdmin,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(top = 16.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = SecondaryAqua
-                                    ),
-                                    shape = RoundedCornerShape(12.dp)
-                                ) {
-                                    Text("Manage Bookings")
-                                }
+                                // Admin Tools card moved to main content area
                             }
                         } else {
                             Box(

@@ -95,20 +95,20 @@ fun BasecampButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     isLoading: Boolean = false,
-    color: Color = PrimaryRed
+    color: Color = SecondaryAqua
 ) {
     if (enabled && !isLoading) {
-        Button(
-            onClick = onClick,
-            modifier = modifier
-                .fillMaxWidth()
-                .height(48.dp),
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(48.dp),
             enabled = true,
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(
+        shape = RoundedCornerShape(12.dp),
+        colors = ButtonDefaults.buttonColors(
                 containerColor = color,
-                contentColor = Color.White
-            )
+            contentColor = Color.White
+        )
         ) {
             Text(
                 text = text,
@@ -127,17 +127,17 @@ fun BasecampButton(
             colors = ButtonDefaults.outlinedButtonColors(
                 contentColor = color
             )
-        ) {
-            if (isLoading) {
-                CircularProgressIndicator(
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator(
                     color = color,
-                    modifier = Modifier.size(24.dp)
-                )
-            } else {
-                Text(
-                    text = text,
-                    style = MaterialTheme.typography.bodyLarge
-                )
+                modifier = Modifier.size(24.dp)
+            )
+        } else {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodyLarge
+            )
             }
         }
     }

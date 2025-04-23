@@ -17,6 +17,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.basecampers.basecamp.tabs.social.messaging.models.Message
+import com.basecampers.basecamp.ui.theme.CardBackground
+import com.basecampers.basecamp.ui.theme.TextSecondary
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -43,9 +45,9 @@ fun MessageItem(
 				)
 				.background(
 					if (isFromCurrentUser)
-						MaterialTheme.colorScheme.primary
+						TextSecondary
 					else
-						MaterialTheme.colorScheme.surfaceVariant
+						CardBackground
 				)
 				.padding(12.dp)
 		) {

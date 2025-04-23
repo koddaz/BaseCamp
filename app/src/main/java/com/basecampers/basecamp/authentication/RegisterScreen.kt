@@ -71,176 +71,226 @@ fun RegisterScreen(authViewModel: AuthViewModel, profileViewModel: ProfileViewMo
         )
     }
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = Color.White
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AppBackground)
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            PasswordPolicyInfo(
-                visible = showPasswordPolicy,
-                onDismiss = { showPasswordPolicy = false },
-                modifier = Modifier.zIndex(10f)
+        // Background Pattern
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .background(SecondaryAqua.copy(alpha = 0.1f))
+        )
+
+        // Content
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(120.dp))
+
+            // Logo/App Name
+            Text(
+                text = "Basecamp",
+                style = MaterialTheme.typography.headlineLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 32.sp
+                ),
+                color = TextSecondary
             )
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-                // Logo/App Name
+            // Email Field
+            OutlinedTextField(
+                value = email,
+                onValueChange = {
+                    if (hasEmailError && it != email) {
+                        authViewModel.clearEmailErrors()
+                    }
+                    email = it
+                    authViewModel.validateEmailLive(it)
+                },
+                label = { Text("Email", style = MaterialTheme.typography.bodyLarge) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = SecondaryAqua,
+                    unfocusedBorderColor = Color.Gray
+                )
+            )
+
+            // Display email error messages
+            emailErrors.forEach { error ->
                 Text(
-                    text = "Basecamp",
-                    style = MaterialTheme.typography.headlineLarge.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = TextPrimary
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // Email Field
-                BasecampTextField(
-                    value = email,
-                    onValueChange = {
-                        if (hasEmailError && it != email) {
-                            authViewModel.clearEmailErrors()
-                        }
-                        email = it
-                        authViewModel.validateEmailLive(it)
+                    text = when (error) {
+                        AuthViewModel.RegisterErrors.EMAIL_ALREADY_IN_USE -> "Email is already in use"
+                        AuthViewModel.RegisterErrors.EMAIL_EMPTY -> "Email cannot be empty"
+                        AuthViewModel.RegisterErrors.EMAIL_NOT_VALID -> "Please enter a valid email"
+                        else -> "Unknown error"
                     },
-                    label = "Email",
-                    isError = hasEmailError,
-                    modifier = Modifier.fillMaxWidth()
+                    color = ErrorRed,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.align(Alignment.Start)
                 )
+            }
 
-                // Display email error messages
-                emailErrors.forEach { error ->
-                    Text(
-                        text = when (error) {
-                            AuthViewModel.RegisterErrors.EMAIL_ALREADY_IN_USE -> "Email is already in use"
-                            AuthViewModel.RegisterErrors.EMAIL_EMPTY -> "Email cannot be empty"
-                            AuthViewModel.RegisterErrors.EMAIL_NOT_VALID -> "Please enter a valid email"
-                            else -> "Unknown error"
-                        },
-                        color = ErrorRed,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.align(Alignment.Start)
-                    )
-                }
+            Spacer(modifier = Modifier.height(16.dp))
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Password Field with Policy Button
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    BasecampTextField(
-                        value = password,
-                        onValueChange = { password = it },
-                        label = "Password",
-                        isError = passwordError.isNotEmpty(),
-                        modifier = Modifier.weight(1f),
-                        visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-                        trailingIcon = {
-                            IconButton(onClick = { showPassword = !showPassword }) {
-                                Icon(
-                                    imageVector = if (showPassword) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                    contentDescription = if (showPassword) "Hide password" else "Show password",
-                                    tint = TextSecondary
-                                )
-                            }
-                        }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    PasswordInfoButton(
-                        onInfoClick = { showPasswordPolicy = true }
-                    )
-                }
-
-                // Display password error messages
-                passwordError.forEach { error ->
-                    Text(
-                        text = when (error) {
-                            AuthViewModel.RegisterErrors.PASSWORD_EMPTY -> "Password cannot be empty"
-                            AuthViewModel.RegisterErrors.PASSWORD_TOO_SHORT -> "Password must be at least 8 characters"
-                            AuthViewModel.RegisterErrors.PASSWORD_NO_SPECIAL_CHAR -> "Password must contain at least one special character"
-                            AuthViewModel.RegisterErrors.PASSWORD_NO_UPPERCASE -> "Password must contain at least one uppercase letter"
-                            AuthViewModel.RegisterErrors.PASSWORD_NO_NUMBER -> "Password must contain at least one number"
-                            else -> "Unknown error"
-                        },
-                        color = ErrorRed,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.align(Alignment.Start)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Confirm Password Field
-                BasecampTextField(
-                    value = confirmPassword,
-                    onValueChange = { confirmPassword = it },
-                    label = "Confirm Password",
-                    isError = confirmPasswordError.isNotEmpty(),
-                    modifier = Modifier.fillMaxWidth(),
-                    visualTransformation = if (showConfirmPassword) VisualTransformation.None else PasswordVisualTransformation(),
+            // Password Field with Policy Button
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Password", style = MaterialTheme.typography.bodyLarge) },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
-                        IconButton(onClick = { showConfirmPassword = !showConfirmPassword }) {
+                        IconButton(onClick = { showPassword = !showPassword }) {
                             Icon(
-                                imageVector = if (showConfirmPassword) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                contentDescription = if (showConfirmPassword) "Hide password" else "Show password",
+                                imageVector = if (showPassword) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                contentDescription = if (showPassword) "Hide password" else "Show password",
                                 tint = TextSecondary
                             )
                         }
-                    }
-                )
-
-                // Display confirm password error messages
-                confirmPasswordError.forEach { error ->
-                    Text(
-                        text = when (error) {
-                            AuthViewModel.RegisterErrors.CONFIRM_PASSWORD_EMPTY -> "Please confirm your password"
-                            AuthViewModel.RegisterErrors.CONFIRM_PASSWORD_MISMATCH -> "Passwords do not match"
-                            else -> "Unknown error"
-                        },
-                        color = ErrorRed,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.align(Alignment.Start)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // Register button
-                BasecampButton(
-                    text = "Register",
-                    onClick = {
-                        authViewModel.registerAsUser(
-                            email = email,
-                            password = password,
-                            confirmPassword = confirmPassword,
-                            profileViewModel = profileViewModel,
-                            onSuccess = { /* Handle success */ },
-                            onError = { /* Handle error */ }
-                        )
                     },
-                    enabled = email.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank(),
-                    color = SecondaryAqua
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = SecondaryAqua,
+                        unfocusedBorderColor = Color.Gray
+                    )
                 )
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                // Go to login button
-                BasecampOutlinedButton(
-                    text = "Already have an account? Login",
-                    onClick = goLogin
+                Spacer(modifier = Modifier.width(8.dp))
+                PasswordInfoButton(
+                    onInfoClick = { showPasswordPolicy = true }
                 )
             }
+
+            // Display password error messages
+            passwordError.forEach { error ->
+                Text(
+                    text = when (error) {
+                        AuthViewModel.RegisterErrors.PASSWORD_EMPTY -> "Password cannot be empty"
+                        AuthViewModel.RegisterErrors.PASSWORD_TOO_SHORT -> "Password must be at least 8 characters"
+                        AuthViewModel.RegisterErrors.PASSWORD_NO_SPECIAL_CHAR -> "Password must contain at least one special character"
+                        AuthViewModel.RegisterErrors.PASSWORD_NO_UPPERCASE -> "Password must contain at least one uppercase letter"
+                        AuthViewModel.RegisterErrors.PASSWORD_NO_NUMBER -> "Password must contain at least one number"
+                        else -> "Unknown error"
+                    },
+                    color = ErrorRed,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.align(Alignment.Start)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Confirm Password Field
+            OutlinedTextField(
+                value = confirmPassword,
+                onValueChange = { confirmPassword = it },
+                label = { Text("Confirm Password", style = MaterialTheme.typography.bodyLarge) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                visualTransformation = if (showConfirmPassword) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    IconButton(onClick = { showConfirmPassword = !showConfirmPassword }) {
+                        Icon(
+                            imageVector = if (showConfirmPassword) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                            contentDescription = if (showConfirmPassword) "Hide password" else "Show password",
+                            tint = TextSecondary
+                        )
+                    }
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = SecondaryAqua,
+                    unfocusedBorderColor = Color.Gray
+                )
+            )
+
+            // Display confirm password error messages
+            confirmPasswordError.forEach { error ->
+                Text(
+                    text = when (error) {
+                        AuthViewModel.RegisterErrors.CONFIRM_PASSWORD_EMPTY -> "Please confirm your password"
+                        AuthViewModel.RegisterErrors.CONFIRM_PASSWORD_MISMATCH -> "Passwords do not match"
+                        else -> "Unknown error"
+                    },
+                    color = ErrorRed,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.align(Alignment.Start)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Register button
+            Button(
+                onClick = {
+                    authViewModel.registerAsUser(
+                        email = email,
+                        password = password,
+                        confirmPassword = confirmPassword,
+                        profileViewModel = profileViewModel,
+                        onSuccess = { /* Handle success */ },
+                        onError = { /* Handle error */ }
+                    )
+                },
+                enabled = email.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = SecondaryAqua,
+                    disabledContainerColor = SecondaryAqua.copy(alpha = 0.5f)
+                ),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(
+                    text = "Register",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = Color.White
+                )
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            // Go to login text
+            TextButton(
+                onClick = goLogin,
+                modifier = Modifier.padding(bottom = 32.dp)
+            ) {
+                Text(
+                    text = "Already have an account? ",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = TextSecondary
+                )
+                Text(
+                    text = "Login",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = SecondaryAqua
+                )
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
         }
+
+        // Password Policy Dialog
+        PasswordPolicyInfo(
+            visible = showPasswordPolicy,
+            onDismiss = { showPasswordPolicy = false },
+            modifier = Modifier.zIndex(10f)
+        )
     }
 }
 
