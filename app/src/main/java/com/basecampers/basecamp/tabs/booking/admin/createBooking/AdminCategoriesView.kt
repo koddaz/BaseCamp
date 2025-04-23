@@ -141,7 +141,7 @@ fun AdminCategoriesView(
                 error = ""
                 isAddVisible = !isAddVisible
             },
-                text = "Cancel")
+                text = "New Category")
             CustomButton(text = "Back", onClick = goBack)
         }
     }

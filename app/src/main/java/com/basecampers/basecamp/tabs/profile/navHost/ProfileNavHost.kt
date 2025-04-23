@@ -31,7 +31,6 @@ fun ProfileNavHost(
     
     when (currentProfileTabIndex) {
         0 -> ProfileScreen(
-            onNavigateToEdit = { onProfileTabSelected(1) },
             onNavigateToAdmin = { onProfileTabSelected(2) },
             onNavigateToOptions = { onProfileTabSelected(3) }
         )
