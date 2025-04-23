@@ -91,9 +91,10 @@ fun LoginScreen(
             Text(
                 text = "Basecamp",
                 style = MaterialTheme.typography.headlineLarge.copy(
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 32.sp
                 ),
-                color = TextPrimary
+                color = TextSecondary
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -107,7 +108,7 @@ fun LoginScreen(
                         authViewModel.clearLoginErrors()
                     }
                 },
-                label = { Text("Email") },
+                label = { Text("Email", style = MaterialTheme.typography.bodyLarge) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -127,7 +128,7 @@ fun LoginScreen(
                         authViewModel.clearLoginErrors()
                     }
                 },
-                label = { Text("Password") },
+                label = { Text("Password", style = MaterialTheme.typography.bodyLarge) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -174,7 +175,11 @@ fun LoginScreen(
                     .fillMaxWidth()
                     .height(56.dp),
                 enabled = !isLoading && email.isNotEmpty() && password.isNotEmpty(),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = SecondaryAqua,
+                    disabledContainerColor = SecondaryAqua.copy(alpha = 0.5f)
+                )
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(
@@ -182,7 +187,13 @@ fun LoginScreen(
                         color = Color.White
                     )
                 } else {
-                    Text("Login", fontSize = 16.sp)
+                    Text(
+                        text = "Login",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = Color.White
+                    )
                 }
             }
 
@@ -193,7 +204,11 @@ fun LoginScreen(
                 onClick = goForgotPass,
                 modifier = Modifier.padding(bottom = 16.dp)
             ) {
-                Text("Forgot Password?", color = SecondaryAqua)
+                Text(
+                    "Forgot Password?",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = SecondaryAqua
+                )
             }
 
             // Test Accounts Section
@@ -206,6 +221,7 @@ fun LoginScreen(
             ) {
                 Text(
                     text = "Test Accounts",
+                    style = MaterialTheme.typography.bodyLarge,
                     color = SecondaryAqua,
                     modifier = Modifier.weight(1f)
                 )
@@ -246,7 +262,16 @@ fun LoginScreen(
                 onClick = goRegister,
                 modifier = Modifier.padding(bottom = 32.dp)
             ) {
-                Text("Don't have an account? Sign Up", color = SecondaryAqua)
+                Text(
+                    text = "Don't have an account? ",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = TextSecondary
+                )
+                Text(
+                    text = "Sign Up",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = SecondaryAqua
+                )
             }
         }
     }

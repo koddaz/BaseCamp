@@ -1,23 +1,28 @@
 package com.basecampers.basecamp.tabs.booking.admin
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.basecampers.basecamp.components.HorizontalOptionCard
+import com.basecampers.basecamp.ui.theme.*
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.basecamp.components.BaseScreenContainer
 import com.basecampers.basecamp.components.BasecampCard
@@ -38,60 +43,184 @@ fun AdminMainView(
     navigateEdit: () -> Unit = {},
     onNavigateBack: () -> Unit,
 ) {
-
     val scrollState = rememberScrollState()
 
-
-    Column(modifier.fillMaxSize()) {
-        BasecampCard(
-            title = "Admin Main View",
-            subtitle = "Welcome to the admin main view, Here you navigate to the different tabs",
-            content = {},
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(AppBackground)
+            .verticalScroll(scrollState)
+            .padding(16.dp)
+    ) {
+        // Header
+        Text(
+            text = "Admin Dashboard",
+            style = MaterialTheme.typography.headlineMedium.copy(
+                fontWeight = FontWeight.Bold
+            ),
+            color = TextPrimary,
+            modifier = Modifier.padding(bottom = 24.dp)
         )
-        Column(modifier.weight(1f).verticalScroll(scrollState)) {
-            BasecampDivider(text = "Add", thickness = 2f)
 
-            BasecampCard(content = {
-                Column() {
-                    BasecampOutlinedButton(
+        // Add Section
+        Text(
+            text = "Add New",
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.SemiBold
+            ),
+            color = TextSecondary,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Categories Card
+            Card(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(120.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                shape = MaterialTheme.shapes.large
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable(onClick = navigateCat)
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Category,
+                        contentDescription = "Categories",
+                        tint = SecondaryAqua,
+                        modifier = Modifier.size(32.dp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
                         text = "Categories",
-                        onClick = {
-                            navigateCat()
-                        }
+                        style = MaterialTheme.typography.titleSmall,
+                        color = TextPrimary
                     )
-                    Spacer(modifier = Modifier.padding(8.dp))
-                    BasecampOutlinedButton(
+                }
+            }
+
+            // Booking Items Card
+            Card(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(120.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                shape = MaterialTheme.shapes.large
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable(onClick = navigateBooking)
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AddShoppingCart,
+                        contentDescription = "Booking Items",
+                        tint = SecondaryAqua,
+                        modifier = Modifier.size(32.dp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
                         text = "Booking Items",
-                        onClick = {
-                            navigateBooking()
-                        }
+                        style = MaterialTheme.typography.titleSmall,
+                        color = TextPrimary
                     )
                 }
-            })
+            }
+        }
 
+        Spacer(modifier = Modifier.height(24.dp))
 
+        // Current Section
+        Text(
+            text = "Current",
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.SemiBold
+            ),
+            color = TextSecondary,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
 
-
-            BasecampDivider(text = "Current", thickness = 2f)
-            BasecampCard(content = {
-                BasecampOutlinedButton(
-                    text = "Overview",
-                    onClick = {
-                        navigateOverview()
-                    }
+        // Overview Card
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+            shape = MaterialTheme.shapes.large
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable(onClick = navigateOverview)
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Dashboard,
+                    contentDescription = "Overview",
+                    tint = SecondaryAqua,
+                    modifier = Modifier.size(32.dp)
                 )
-            })
-
-            CustomButton(
-                text = "Back",
-                onClick = {
-                    onNavigateBack()
+                Spacer(modifier = Modifier.width(16.dp))
+                Column {
+                    Text(
+                        text = "Bookings Overview",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = TextPrimary
+                    )
+                    Text(
+                        text = "View and manage current bookings",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TextSecondary
+                    )
                 }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Back Button
+        Button(
+            onClick = onNavigateBack,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = SecondaryAqua.copy(alpha = 0.1f),
+                contentColor = SecondaryAqua
+            ),
+            shape = MaterialTheme.shapes.large
+        ) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "Back",
+                modifier = Modifier.size(20.dp)
             )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Back to Profile")
         }
     }
 }
-
 
 @Composable
 fun AdminEditItems(adminViewModel: AdminBookingViewModel) {
@@ -144,7 +273,6 @@ fun AdminEditItems(adminViewModel: AdminBookingViewModel) {
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable

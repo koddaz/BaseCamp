@@ -3,28 +3,22 @@ package com.basecampers.basecamp.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.basecampers.basecamp.ui.theme.*
 
 @Composable
 fun PasswordPolicyInfo(
@@ -49,14 +43,13 @@ fun PasswordPolicyInfo(
 				modifier = Modifier
 					.padding(16.dp)
 					.align(Alignment.Center)
-					// This prevents the click from passing through to the background
 					.clickable(
 						interactionSource = remember { MutableInteractionSource() },
 						indication = null
 					) {
 						// Do nothing, just consume the click
 					},
-				shape = MaterialTheme.shapes.medium,
+				shape = RoundedCornerShape(16.dp),
 				colors = CardDefaults.cardColors(
 					containerColor = MaterialTheme.colorScheme.surface
 				),
@@ -65,16 +58,25 @@ fun PasswordPolicyInfo(
 				)
 			) {
 				Column(
-					modifier = Modifier.padding(16.dp)
+					modifier = Modifier
+						.padding(24.dp)
+						.verticalScroll(rememberScrollState())
 				) {
 					Text(
-						"Password Policy:",
-						style = MaterialTheme.typography.titleMedium,
-						modifier = Modifier.padding(bottom = 8.dp)
+						"Password Requirements",
+						style = MaterialTheme.typography.titleLarge.copy(
+							fontWeight = FontWeight.Bold
+						),
+						color = TextPrimary,
+						modifier = Modifier.padding(bottom = 16.dp)
 					)
-					PasswordRequirementItem("At least 6 characters long")
+					
+					PasswordRequirementItem("At least 8 characters long")
+					Spacer(modifier = Modifier.height(8.dp))
 					PasswordRequirementItem("Contains at least one uppercase letter")
+					Spacer(modifier = Modifier.height(8.dp))
 					PasswordRequirementItem("Contains at least one number")
+					Spacer(modifier = Modifier.height(8.dp))
 					PasswordRequirementItem("Contains at least one special character")
 				}
 			}
@@ -91,10 +93,14 @@ fun PasswordRequirementItem(text: String) {
 		Icon(
 			imageVector = Icons.Default.Info,
 			contentDescription = null,
-			modifier = Modifier.size(16.dp),
-			tint = MaterialTheme.colorScheme.primary
+			modifier = Modifier.size(20.dp),
+			tint = SecondaryAqua
 		)
-		Spacer(modifier = Modifier.width(8.dp))
-		Text(text, style = MaterialTheme.typography.bodyMedium)
+		Spacer(modifier = Modifier.width(12.dp))
+		Text(
+			text = text,
+			style = MaterialTheme.typography.bodyLarge,
+			color = TextSecondary
+		)
 	}
 }

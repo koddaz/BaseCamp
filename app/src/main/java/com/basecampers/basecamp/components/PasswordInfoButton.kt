@@ -5,10 +5,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.basecampers.basecamp.ui.theme.SecondaryAqua
 
 @Composable
 fun PasswordInfoButton(
@@ -21,6 +21,6 @@ fun PasswordInfoButton(
 		modifier = modifier
 			.size(24.dp)
 			.clickable { onInfoClick() },
-		tint = MaterialTheme.colorScheme.primary
+		tint = SecondaryAqua
 	)
 }

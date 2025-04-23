@@ -123,6 +123,57 @@ fun ProfileScreen(
                             maxLines = 2
                         )
                     }
+                }
+            }
+        }
+
+        // Main Content
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Options Card
+            item {
+                HorizontalOptionCard(
+                    title = "Options",
+                    onClick = onNavigateToOptions,
+                    icon = Icons.Default.Settings,
+                    iconBackground = SecondaryAqua
+                )
+            }
+
+            // Admin Tools Card (only for admins)
+            if (companyProfile?.status == UserStatus.ADMIN) {
+                item {
+                    HorizontalOptionCard(
+                        title = "Admin Tools",
+                        onClick = onNavigateToAdmin,
+                        icon = Icons.Default.AdminPanelSettings,
+                        iconBackground = SecondaryAqua,
+                        textColor = TextPrimary,
+                        textSize = 16f,
+                        textWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            // Company Profile Section
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                          /*
                     
                     // User Status Badge
                     companyProfile?.status?.let { status ->
@@ -138,6 +189,7 @@ fun ProfileScreen(
                             modifier = Modifier.padding(4.dp),
                             shape = RoundedCornerShape(16.dp),
                             color = statusColor.copy(alpha = 0.1f)
+*/
                         ) {
                             Text(
                                 text = status.name,
@@ -194,6 +246,10 @@ fun ProfileScreen(
                                     fontWeight = FontWeight.Bold
                                 )
                             }
+
+                            if (companyProfile?.status == UserStatus.ADMIN) {
+                                // Admin Tools card moved to main content area
+/*
                             
                             Spacer(modifier = Modifier.height(16.dp))
                             
@@ -231,6 +287,7 @@ fun ProfileScreen(
                                         color = TextSecondary
                                     )
                                 }
+*/
                             }
                         }
                     }

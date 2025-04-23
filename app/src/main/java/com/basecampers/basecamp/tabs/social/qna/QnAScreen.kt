@@ -14,10 +14,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.basecamp.tabs.social.models.QnAItem
 import com.basecampers.basecamp.tabs.social.viewModel.QnAViewModel
 import com.basecampers.basecamp.ui.theme.AppBackground
+import com.basecampers.basecamp.ui.theme.CardBackground
 import com.basecampers.basecamp.ui.theme.SecondaryAqua
 import com.basecampers.basecamp.ui.theme.TextPrimary
 import com.basecampers.basecamp.ui.theme.TextSecondary
@@ -42,30 +44,37 @@ fun QnAScreen(
 		qnaViewModel.fetchQnAItems()
 	}
 	
-	Scaffold(
-		topBar = {
-			TopAppBar(
-				title = { 
-					Text(
-						text = "Frequently Asked Questions",
-						style = MaterialTheme.typography.titleLarge.copy(
-							fontWeight = FontWeight.Bold
-						)
-					)
-				},
-				colors = TopAppBarDefaults.topAppBarColors(
-					containerColor = AppBackground,
-					titleContentColor = TextPrimary
-				)
-			)
-		}
-	) { paddingValues ->
+	Box(
+		modifier = Modifier
+			.fillMaxSize()
+			.background(AppBackground)
+	) {
+		// Background Pattern
 		Box(
 			modifier = Modifier
+				.fillMaxWidth()
+				.height(200.dp)
+				.background(SecondaryAqua.copy(alpha = 0.1f))
+		)
+
+		Column(
+			modifier = Modifier
 				.fillMaxSize()
-				.padding(paddingValues)
-				.background(AppBackground)
+				.padding(horizontal = 24.dp)
 		) {
+			Spacer(modifier = Modifier.height(60.dp))
+
+			// Header
+			Text(
+				text = "Frequently Asked Questions",
+				style = MaterialTheme.typography.headlineLarge.copy(
+					fontWeight = FontWeight.Bold,
+					fontSize = 32.sp
+				),
+				color = TextSecondary,
+				modifier = Modifier.padding(bottom = 24.dp)
+			)
+
 			if (isLoading) {
 				// Loading indicator
 				Box(
@@ -79,9 +88,8 @@ fun QnAScreen(
 			} else {
 				// List of Q&A items
 				LazyColumn(
-					modifier = Modifier
-						.fillMaxSize()
-						.padding(horizontal = 16.dp)
+					modifier = Modifier.fillMaxSize(),
+					verticalArrangement = Arrangement.spacedBy(16.dp)
 				) {
 					// Show published items for everyone, drafts only for privileged users
 					val filteredItems = if (isPrivilegedUser) {
@@ -107,58 +115,56 @@ fun QnAScreen(
 						}
 					} else {
 						items(filteredItems) { item ->
-							QnAItemView(
-								item = item,
-								isPrivilegedUser = isPrivilegedUser,
-								onEditClick = {
-									currentQnAItem = item
-									showAddEditDialog = true
-								},
-								onDeleteClick = {
-									currentQnAItem = item
-									showDeleteDialog = true
-								},
-								onPublishToggle = { isPublished ->
-									qnaViewModel.toggleQnAPublished(
-										id = item.id,
-										isPublished = isPublished,
-										onSuccess = {},
-										onError = {}
+							Card(
+								modifier = Modifier.fillMaxWidth(),
+								colors = CardDefaults.cardColors(
+									containerColor = CardBackground
+								),
+								elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+							) {
+								Column(
+									modifier = Modifier.padding(16.dp)
+								) {
+									Text(
+										text = item.question,
+										style = MaterialTheme.typography.titleMedium,
+										color = TextPrimary,
+										fontWeight = FontWeight.Bold
 									)
+									Spacer(modifier = Modifier.height(8.dp))
+									Text(
+										text = item.answer,
+										style = MaterialTheme.typography.bodyMedium,
+										color = TextSecondary
+									)
+									if (isPrivilegedUser) {
+										Spacer(modifier = Modifier.height(16.dp))
+										Row(
+											modifier = Modifier.fillMaxWidth(),
+											horizontalArrangement = Arrangement.End
+										) {
+											TextButton(
+												onClick = { 
+													currentQnAItem = item
+													showAddEditDialog = true 
+												}
+											) {
+												Text("Edit")
+											}
+											TextButton(
+												onClick = { 
+													currentQnAItem = item
+													showDeleteDialog = true 
+												}
+											) {
+												Text("Delete")
+											}
+										}
+									}
 								}
-							)
+							}
 						}
 					}
-				}
-			}
-			
-			// Add button for privileged users - always visible at the bottom
-			if (isPrivilegedUser) {
-				Button(
-					onClick = {
-						currentQnAItem = null  // Null indicates adding new item
-						showAddEditDialog = true
-					},
-					modifier = Modifier
-						.align(Alignment.BottomStart)
-						.padding(16.dp)
-						.height(58.dp),
-					colors = ButtonDefaults.buttonColors(
-						containerColor = SecondaryAqua
-					),
-					shape = MaterialTheme.shapes.large,
-					contentPadding = PaddingValues(
-						horizontal = 16.dp,
-						vertical = 0.dp
-					)
-				) {
-					Icon(
-						Icons.Default.Add,
-						contentDescription = "Add Question",
-						modifier = Modifier.size(20.dp)
-					)
-					Spacer(modifier = Modifier.width(8.dp))
-					Text("Add Question")
 				}
 			}
 		}
