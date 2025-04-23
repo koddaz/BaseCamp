@@ -130,6 +130,7 @@ fun AdminBookingView(
                             price = pricePerDay,
                             quantity = quantity,
                         )
+                        adminBookingViewModel.retrieveBookingExtras(selectedCategory?.id ?: "", selectedItem?.id ?: "")
                         navigateToExtra(selectedItem?.id ?: "")
                     }
                 )

@@ -206,6 +206,7 @@ fun UserItemView(
             onClick = {
                 selectedItem?.let { item ->
                     bookingViewModel.retrieveExtraItems(item.categoryId, item.id)
+                    bookingViewModel.updatePriceCalculation()
                     navExtra(item.id)
                 }
             },
