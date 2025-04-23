@@ -29,7 +29,7 @@ import kotlin.collections.forEach
 @Composable
 fun UserConfirmationView(
     bookingViewModel: UserBookingViewModel,
-    navBooking: (String) -> Unit
+    navBooking: () -> Unit
 ) {
     val selectedItem by bookingViewModel.selectedBookingItem.collectAsState()
     val selectedExtraItems by bookingViewModel.selectedExtraItems.collectAsState()
@@ -176,7 +176,7 @@ fun UserConfirmationView(
                         IconButton(
                             onClick = {
                                 bookingViewModel.updatePriceCalculation()
-                                bookingViewModel.removeExtraItem(extra.id)
+                                bookingViewModel.removeExtraItem(extra)
                             }
                         ) {
                             Icon(
@@ -236,7 +236,7 @@ fun UserConfirmationView(
             Button(
                 onClick = {
                     bookingViewModel.clearAllValues()
-                    navBooking("")
+                    navBooking()
                 },
                 modifier = Modifier
                     .weight(1f)
@@ -257,6 +257,7 @@ fun UserConfirmationView(
             Button(
                 onClick = {
                     bookingViewModel.saveBooking()
+                    navBooking()
                 },
                 modifier = Modifier
                     .weight(1f)

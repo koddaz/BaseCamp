@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlin.text.get
 
 class AdminBookingViewModel : ViewModel() {
     val db = Firebase.firestore
@@ -297,6 +298,11 @@ class AdminBookingViewModel : ViewModel() {
 
     fun retrieveBookingExtras(categoryId: String, bookingItemId: String) {
 
+        if (categoryId.isEmpty() || bookingItemId.isEmpty()) {
+            Log.e("AdminBookingViewModel", "Empty categoryId or bookingItemId")
+            _bookingExtras.value = emptyList()
+            return
+        }
         db.collection("companies").document(currentCompanyId.toString())
             .collection("categories").document(categoryId)
             .collection("bookings").document(bookingItemId)

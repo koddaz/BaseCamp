@@ -21,8 +21,9 @@ import com.basecampers.basecamp.tabs.booking.user.viewModel.UserBookingViewModel
 
 @Composable
 fun UserCategoryView(
+    goBack : () -> Unit,
     bookingViewModel: UserBookingViewModel,
-    navBooking: (String) -> Unit
+    navBooking: () -> Unit
 ) {
     val categoryList by bookingViewModel.categoriesList.collectAsState()
     val scrollState = rememberScrollState()
@@ -42,7 +43,7 @@ fun UserCategoryView(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
-                onClick = { /* TODO: Add back navigation */ },
+                onClick = { goBack() },
                 modifier = Modifier.size(48.dp)
             ) {
                 Icon(
@@ -79,9 +80,8 @@ fun UserCategoryView(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                bookingViewModel.setSelectedCategory(category)
-                                bookingViewModel.retrieveBookingItems(category.id)
-                                navBooking(category.id)
+                                bookingViewModel.bookingRetrieveEverything(category)
+                                navBooking()
                             }
                             .padding(24.dp)
                     ) {

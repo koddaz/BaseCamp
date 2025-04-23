@@ -65,6 +65,7 @@ fun Root(
                         companyViewModel.fetchCompanyData(companyId)
                         Log.d("UserSessionFlow", "Fetching company profile for userId: $userId and companyId: $companyId")
                         companyViewModel.fetchCompanyProfileData(userId, companyId)
+
                     }
                 } else {
                     Log.d("UserSessionFlow", "No company selected - clearing company data")

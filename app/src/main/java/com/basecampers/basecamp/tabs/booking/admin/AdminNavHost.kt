@@ -71,8 +71,11 @@ fun AdminNavHost(
                 AdminBookingView(
                     adminBookingViewModel = adminBookingViewModel,
                     goBack = { navController.popBackStack() },
-                    navigateToExtra = { itemId ->
+                    navigateToExtra = {
                         navController.navigate(AdminRoutes.EXTRA)
+                    },
+                    navigateHome = {
+                        navController.navigate(AdminRoutes.MAIN)
                     }
                 )
             }
