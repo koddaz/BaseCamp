@@ -210,7 +210,7 @@ fun LoginScreen(
                     color = SecondaryAqua
                 )
             }
-
+            /*
             // Test Accounts Section
             Row(
                 modifier = Modifier
@@ -255,7 +255,11 @@ fun LoginScreen(
                 }
             }
 
+             */
+
             Spacer(modifier = Modifier.weight(1f))
+
+
 
             // Register Button
             TextButton(
@@ -273,6 +277,8 @@ fun LoginScreen(
                     color = SecondaryAqua
                 )
             }
+
+
         }
     }
 }

@@ -29,8 +29,8 @@ import com.basecampers.basecamp.ui.theme.*
 @Composable
 fun HomeScreen(authViewModel: AuthViewModel, companyViewModel: CompanyViewModel) {
 
-    val userProfile = UserSession.profile
-    val company = UserSession.company
+    val userProfile = UserSession.profile.collectAsState()
+    val company = UserSession.company.collectAsState()
 
 
     Column(
@@ -185,7 +185,7 @@ fun HomeScreen(authViewModel: AuthViewModel, companyViewModel: CompanyViewModel)
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = company.value?.companyName ?: "No company selected",
+                            text = company.value?.companyName?: "No company selected",
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.Bold
                             ),
