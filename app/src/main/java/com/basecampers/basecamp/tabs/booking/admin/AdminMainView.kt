@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.basecamp.components.BaseScreenContainer
@@ -45,179 +46,195 @@ fun AdminMainView(
 ) {
     val scrollState = rememberScrollState()
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(AppBackground)
-            .verticalScroll(scrollState)
-            .padding(16.dp)
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(280.dp)
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        SecondaryAqua.copy(alpha = 0.2f),
+                        AppBackground
+                    )
+                )
+            )
     ) {
-        // Header
-        Text(
-            text = "Admin Dashboard",
-            style = MaterialTheme.typography.headlineMedium.copy(
-                fontWeight = FontWeight.Bold
-            ),
-            color = TextPrimary,
-            modifier = Modifier.padding(bottom = 24.dp)
-        )
-
-        // Add Section
-        Text(
-            text = "Add New",
-            style = MaterialTheme.typography.titleMedium.copy(
-                fontWeight = FontWeight.SemiBold
-            ),
-            color = TextSecondary,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(16.dp)
         ) {
-            // Categories Card
-            Card(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(120.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.White
+            // Header
+            Text(
+                text = "Admin Dashboard",
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    fontWeight = FontWeight.Bold
                 ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                shape = MaterialTheme.shapes.large
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clickable(onClick = navigateCat)
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Category,
-                        contentDescription = "Categories",
-                        tint = SecondaryAqua,
-                        modifier = Modifier.size(32.dp)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Categories",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = TextPrimary
-                    )
-                }
-            }
+                color = TextPrimary,
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
 
-            // Booking Items Card
-            Card(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(120.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.White
+            // Add Section
+            Text(
+                text = "Add New",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.SemiBold
                 ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                shape = MaterialTheme.shapes.large
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clickable(onClick = navigateBooking)
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AddShoppingCart,
-                        contentDescription = "Booking Items",
-                        tint = SecondaryAqua,
-                        modifier = Modifier.size(32.dp)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Booking Items",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = TextPrimary
-                    )
-                }
-            }
-        }
+                color = TextSecondary,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Current Section
-        Text(
-            text = "Current",
-            style = MaterialTheme.typography.titleMedium.copy(
-                fontWeight = FontWeight.SemiBold
-            ),
-            color = TextSecondary,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
-        // Overview Card
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color.White
-            ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-            shape = MaterialTheme.shapes.large
-        ) {
             Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Categories Card
+                Card(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(120.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    shape = MaterialTheme.shapes.large
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clickable(
+                                onClick =
+                                    navigateCat
+                            )
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Category,
+                            contentDescription = "Categories",
+                            tint = SecondaryAqua,
+                            modifier = Modifier.size(32.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Categories",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = TextPrimary
+                        )
+                    }
+                }
+
+                // Booking Items Card
+                Card(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(120.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    shape = MaterialTheme.shapes.large
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clickable(onClick = navigateBooking)
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AddShoppingCart,
+                            contentDescription = "Booking Items",
+                            tint = SecondaryAqua,
+                            modifier = Modifier.size(32.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Booking Items",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = TextPrimary
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Current Section
+            Text(
+                text = "Current",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = TextSecondary,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            // Overview Card
+            Card(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .clickable(onClick = navigateOverview)
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .fillMaxWidth()
+                    .height(120.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                shape = MaterialTheme.shapes.large
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable(onClick = navigateOverview)
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Dashboard,
+                        contentDescription = "Overview",
+                        tint = SecondaryAqua,
+                        modifier = Modifier.size(32.dp)
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column {
+                        Text(
+                            text = "Bookings Overview",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = TextPrimary
+                        )
+                        Text(
+                            text = "View and manage current bookings",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextSecondary
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Back Button
+            Button(
+                onClick = onNavigateBack,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = SecondaryAqua.copy(alpha = 0.1f),
+                    contentColor = SecondaryAqua
+                ),
+                shape = MaterialTheme.shapes.large
             ) {
                 Icon(
-                    imageVector = Icons.Default.Dashboard,
-                    contentDescription = "Overview",
-                    tint = SecondaryAqua,
-                    modifier = Modifier.size(32.dp)
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    modifier = Modifier.size(20.dp)
                 )
-                Spacer(modifier = Modifier.width(16.dp))
-                Column {
-                    Text(
-                        text = "Bookings Overview",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = TextPrimary
-                    )
-                    Text(
-                        text = "View and manage current bookings",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = TextSecondary
-                    )
-                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Back to Profile")
             }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Back Button
-        Button(
-            onClick = onNavigateBack,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = SecondaryAqua.copy(alpha = 0.1f),
-                contentColor = SecondaryAqua
-            ),
-            shape = MaterialTheme.shapes.large
-        ) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = "Back",
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Back to Profile")
         }
     }
 }

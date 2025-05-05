@@ -36,7 +36,7 @@ fun UserEditBookingView(
                 Spacer(modifier = Modifier.weight(1f))
                 Icon(Icons.Default.Delete, contentDescription = "Delete",
                     modifier = Modifier.clickable {
-                        bookingViewModel.removeExtraItem(extra.id)
+                        bookingViewModel.removeExtraItem(extra)
                     })
             }
         }

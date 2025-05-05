@@ -79,10 +79,15 @@ class UserBookingViewModel : ViewModel() {
         }
     }
 
-    fun setUser(profile: CompanyProfileModel) {
-        Log.d("UserBookingViewModel", "Setting user profile: $profile")
-        // Update any necessary state based on the user profile
-        retrieveCurrentBookings()
+    fun bookingRetrieveEverything(category: BookingCategories) {
+        if(bookingItemsList.value.isEmpty()) {
+            setSelectedCategory(category)
+            retrieveBookingItems(category.id)
+        } else {
+            _bookingItemsList.value = emptyList()
+            setSelectedCategory(category)
+            retrieveBookingItems(category.id)
+        }
     }
 
     fun setSelectedBookingItem(item: BookingItem?) {
@@ -90,7 +95,10 @@ class UserBookingViewModel : ViewModel() {
     }
 
     fun setSelectedCategory(category: BookingCategories) {
+
         _selectedCategory.value = category
+
+
     }
 
     fun setSelectedBooking(booking: UserBookingModel){
@@ -269,8 +277,8 @@ class UserBookingViewModel : ViewModel() {
         _selectedExtraItems.value = _selectedExtraItems.value + item
     }
 
-    fun removeExtraItem(itemId: String) {
-        _selectedExtraItems.value = _selectedExtraItems.value.filter { it.id != itemId }
+    fun removeExtraItem(item: BookingExtra) {
+        _selectedExtraItems.value = _selectedExtraItems.value - item
     }
 
 

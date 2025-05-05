@@ -57,8 +57,9 @@ fun UserBookingNavHost() {
 
                 composable("categoryView") {
                     UserCategoryView(
+                        goBack = { navController.popBackStack() },
                         bookingViewModel = bookingViewModel,
-                        navBooking = { categoryId ->
+                        navBooking = {
                             navController.navigate("itemView")
                         }
                     )
@@ -67,7 +68,7 @@ fun UserBookingNavHost() {
                 composable("itemView") {
                     UserItemView(
                         bookingViewModel = bookingViewModel,
-                        navExtra = { itemId ->
+                        navExtra = {
                             navController.navigate("extrasView")
                         }
                     )

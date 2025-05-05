@@ -39,6 +39,9 @@ object UserSession {
 	// Selected company ID (for reference only)
 	private val _selectedCompanyId = MutableStateFlow<String?>(null)
 	val selectedCompanyId = _selectedCompanyId.asStateFlow()
+
+	private val _selectedCompanyName = MutableStateFlow<String?>(null)
+	val selectedCompanyName = _selectedCompanyName.asStateFlow()
 	
 	/**
 	 * Initialize the session with user ID.
@@ -94,7 +97,7 @@ object UserSession {
 		Log.d(TAG, "Setting selectedCompanyId: $companyId")
 		_selectedCompanyId.value = companyId
 	}
-	
+
 	/**
 	 * Clear all session data
 	 */

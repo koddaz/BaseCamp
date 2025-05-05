@@ -181,23 +181,25 @@ fun UserItemView(
                             }
                         )
                     },
-                    readOnly = true
+                    readOnly = true,
+                    enabled = false
                 )
+                if (showDatePicker) {
+                    DatePickerView(
+                        startDate = startDate,
+                        endDate = endDate,
+                        onDateRangeSelected = { start, end ->
+                            bookingViewModel.updateDateRange(start, end)
+                        },
+                        onDismiss = {
+                            showDatePicker = !showDatePicker
+                        }
+                    )
+                }
             }
         }
 
-        if (showDatePicker) {
-            DatePickerView(
-                startDate = startDate,
-                endDate = endDate,
-                onDateRangeSelected = { start, end ->
-                    bookingViewModel.updateDateRange(start, end)
-                },
-                onDismiss = {
-                    showDatePicker = !showDatePicker
-                }
-            )
-        }
+
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -206,6 +208,7 @@ fun UserItemView(
             onClick = {
                 selectedItem?.let { item ->
                     bookingViewModel.retrieveExtraItems(item.categoryId, item.id)
+                    bookingViewModel.updatePriceCalculation()
                     navExtra(item.id)
                 }
             },

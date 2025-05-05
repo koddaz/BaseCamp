@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -24,17 +25,17 @@ fun UserBookingMainView(
 ) {
     Box(
         modifier = Modifier
-            .fillMaxSize()
-            .background(AppBackground)
+            .fillMaxWidth()
+            .height(280.dp)
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        SecondaryAqua.copy(alpha = 0.2f),
+                        AppBackground
+                    )
+                )
+            )
     ) {
-        // Background Pattern
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .background(SecondaryAqua.copy(alpha = 0.1f))
-        )
-
         Column(
             modifier = Modifier
                 .fillMaxSize()

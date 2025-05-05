@@ -21,15 +21,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.basecampers.basecamp.aRootFolder.UserSession
 import com.basecampers.basecamp.authentication.viewModels.AuthViewModel
 import com.basecampers.basecamp.company.viewModel.CompanyViewModel
 import com.basecampers.basecamp.ui.theme.*
 
 @Composable
 fun HomeScreen(authViewModel: AuthViewModel, companyViewModel: CompanyViewModel) {
-    val userInfo by authViewModel.companyProfile.collectAsState()
-    val companyInfo by companyViewModel.companyProfile.collectAsState()
+
+    val userProfile = UserSession.profile.collectAsState()
+    val company = UserSession.company.collectAsState()
+
 
     Column(
         modifier = Modifier
@@ -99,7 +101,7 @@ fun HomeScreen(authViewModel: AuthViewModel, companyViewModel: CompanyViewModel)
                                 color = TextSecondary
                             )
                             Text(
-                                text = userInfo?.companyName ?: "User",
+                                text = userProfile.value?.firstName ?: "User",
                                 style = MaterialTheme.typography.titleLarge.copy(
                                     fontWeight = FontWeight.Bold
                                 ),
@@ -183,7 +185,7 @@ fun HomeScreen(authViewModel: AuthViewModel, companyViewModel: CompanyViewModel)
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = companyInfo?.companyId ?: "No company selected",
+                            text = company.value?.companyName?: "No company selected",
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.Bold
                             ),
@@ -338,7 +340,7 @@ fun HomeScreen(authViewModel: AuthViewModel, companyViewModel: CompanyViewModel)
 }
 
 @Composable
-private fun QuickActionButton(
+fun QuickActionButton(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     text: String,
     onClick: () -> Unit,
