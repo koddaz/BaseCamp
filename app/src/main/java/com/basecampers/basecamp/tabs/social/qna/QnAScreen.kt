@@ -56,14 +56,14 @@ fun QnAScreen(
 				.height(200.dp)
 				.background(SecondaryAqua.copy(alpha = 0.1f))
 		)
-
+		
 		Column(
 			modifier = Modifier
 				.fillMaxSize()
 				.padding(horizontal = 24.dp)
 		) {
 			Spacer(modifier = Modifier.height(60.dp))
-
+			
 			// Header
 			Text(
 				text = "Frequently Asked Questions",
@@ -74,7 +74,7 @@ fun QnAScreen(
 				color = TextSecondary,
 				modifier = Modifier.padding(bottom = 24.dp)
 			)
-
+			
 			if (isLoading) {
 				// Loading indicator
 				Box(
@@ -91,14 +91,12 @@ fun QnAScreen(
 					modifier = Modifier.fillMaxSize(),
 					verticalArrangement = Arrangement.spacedBy(16.dp)
 				) {
-					// Show published items for everyone, drafts only for privileged users
-					val filteredItems = if (isPrivilegedUser) {
-						qnaItems
-					} else {
-						qnaItems.filter { it.isPublished }
-					}
+					// Separate published and draft items
+					val publishedItems = qnaItems.filter { it.isPublished }
+					val draftItems = qnaItems.filter { !it.isPublished }
 					
-					if (filteredItems.isEmpty()) {
+					// Show message if no items at all
+					if (qnaItems.isEmpty()) {
 						item {
 							Box(
 								modifier = Modifier
@@ -114,58 +112,95 @@ fun QnAScreen(
 							}
 						}
 					} else {
-						items(filteredItems) { item ->
-							Card(
-								modifier = Modifier.fillMaxWidth(),
-								colors = CardDefaults.cardColors(
-									containerColor = CardBackground
-								),
-								elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-							) {
-								Column(
-									modifier = Modifier.padding(16.dp)
+						// Published items section
+						if (publishedItems.isEmpty()) {
+							item {
+								Box(
+									modifier = Modifier
+										.fillMaxWidth()
+										.height(100.dp),
+									contentAlignment = Alignment.Center
 								) {
 									Text(
-										text = item.question,
-										style = MaterialTheme.typography.titleMedium,
-										color = TextPrimary,
-										fontWeight = FontWeight.Bold
-									)
-									Spacer(modifier = Modifier.height(8.dp))
-									Text(
-										text = item.answer,
-										style = MaterialTheme.typography.bodyMedium,
+										text = "No published questions available.",
+										style = MaterialTheme.typography.bodyLarge,
 										color = TextSecondary
 									)
-									if (isPrivilegedUser) {
-										Spacer(modifier = Modifier.height(16.dp))
-										Row(
-											modifier = Modifier.fillMaxWidth(),
-											horizontalArrangement = Arrangement.End
-										) {
-											TextButton(
-												onClick = { 
-													currentQnAItem = item
-													showAddEditDialog = true 
-												}
-											) {
-												Text("Edit")
-											}
-											TextButton(
-												onClick = { 
-													currentQnAItem = item
-													showDeleteDialog = true 
-												}
-											) {
-												Text("Delete")
-											}
-										}
-									}
 								}
 							}
+						} else {
+							items(publishedItems) { item ->
+								QnAItemCard(
+									item = item,
+									isPrivilegedUser = isPrivilegedUser,
+									onEdit = {
+										currentQnAItem = item
+										showAddEditDialog = true
+									},
+									onDelete = {
+										currentQnAItem = item
+										showDeleteDialog = true
+									}
+								)
+							}
+						}
+						
+						// Draft items section - only visible to privileged users
+						if (isPrivilegedUser && draftItems.isNotEmpty()) {
+							item {
+								Spacer(modifier = Modifier.height(16.dp))
+								Text(
+									text = "Drafts",
+									style = MaterialTheme.typography.titleLarge.copy(
+										fontWeight = FontWeight.Bold
+									),
+									color = TextSecondary,
+									modifier = Modifier.padding(vertical = 16.dp)
+								)
+							}
+							
+							items(draftItems) { item ->
+								QnAItemCard(
+									item = item,
+									isPrivilegedUser = isPrivilegedUser,
+									onEdit = {
+										currentQnAItem = item
+										showAddEditDialog = true
+									},
+									onDelete = {
+										currentQnAItem = item
+										showDeleteDialog = true
+									}
+								)
+							}
+						}
+						
+						// Add extra space at the bottom for scrolling past floating buttons
+						item {
+							Spacer(modifier = Modifier.height(100.dp))
 						}
 					}
 				}
+			}
+		}
+		
+		// FAB for adding new QnA item
+		if (isPrivilegedUser) {
+			FloatingActionButton(
+				onClick = {
+					currentQnAItem = null
+					showAddEditDialog = true
+				},
+				modifier = Modifier
+					.align(Alignment.BottomEnd)
+					.padding(16.dp),
+				containerColor = SecondaryAqua
+			) {
+				Icon(
+					imageVector = Icons.Default.Add,
+					contentDescription = "Add Question",
+					tint = Color.White
+				)
 			}
 		}
 	}
@@ -182,7 +217,7 @@ fun QnAScreen(
 						question = question,
 						answer = answer,
 						isPublished = isPublished,
-						onSuccess = {},
+						onSuccess = { showAddEditDialog = false },
 						onError = {}
 					)
 				} else {
@@ -192,7 +227,7 @@ fun QnAScreen(
 						question = question,
 						answer = answer,
 						isPublished = isPublished,
-						onSuccess = {},
+						onSuccess = { showAddEditDialog = false },
 						onError = {}
 					)
 				}
@@ -207,10 +242,69 @@ fun QnAScreen(
 			onConfirm = {
 				qnaViewModel.deleteQnAItem(
 					id = currentQnAItem!!.id,
-					onSuccess = {},
+					onSuccess = {
+						showDeleteDialog = false
+					},
 					onError = {}
 				)
 			}
 		)
+	}
+}
+
+@Composable
+fun QnAItemCard(
+	item: QnAItem,
+	isPrivilegedUser: Boolean,
+	onEdit: () -> Unit,
+	onDelete: () -> Unit
+) {
+	Card(
+		modifier = Modifier.fillMaxWidth(),
+		colors = CardDefaults.cardColors(
+			containerColor = CardBackground
+		),
+		elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+	) {
+		Column(
+			modifier = Modifier.padding(16.dp)
+		) {
+			Text(
+				text = item.question,
+				style = MaterialTheme.typography.titleMedium,
+				color = TextPrimary,
+				fontWeight = FontWeight.Bold
+			)
+			Spacer(modifier = Modifier.height(8.dp))
+			Text(
+				text = item.answer,
+				style = MaterialTheme.typography.bodyMedium,
+				color = TextSecondary
+			)
+			if (isPrivilegedUser) {
+				Spacer(modifier = Modifier.height(16.dp))
+				Row(
+					modifier = Modifier.fillMaxWidth(),
+					horizontalArrangement = Arrangement.End
+				) {
+					if (!item.isPublished) {
+						Text(
+							text = "Draft",
+							style = MaterialTheme.typography.bodySmall,
+							color = SecondaryAqua,
+							modifier = Modifier
+								.padding(end = 8.dp)
+								.align(Alignment.CenterVertically)
+						)
+					}
+					TextButton(onClick = onEdit) {
+						Text("Edit")
+					}
+					TextButton(onClick = onDelete) {
+						Text("Delete")
+					}
+				}
+			}
+		}
 	}
 }

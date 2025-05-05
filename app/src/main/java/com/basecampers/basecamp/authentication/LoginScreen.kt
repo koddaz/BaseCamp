@@ -258,9 +258,7 @@ fun LoginScreen(
              */
 
             Spacer(modifier = Modifier.weight(1f))
-
-
-
+            
             // Register Button
             TextButton(
                 onClick = goRegister,
@@ -277,27 +275,7 @@ fun LoginScreen(
                     color = SecondaryAqua
                 )
             }
-
-
+            Spacer(modifier = Modifier.height(32.dp))
         }
-    }
-}
-
-@Composable
-private fun TestButton(
-    text: String,
-    onClick: () -> Unit
-) {
-    OutlinedButton(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        shape = RoundedCornerShape(8.dp),
-        colors = ButtonDefaults.outlinedButtonColors(
-            contentColor = SecondaryAqua
-        )
-    ) {
-        Text(text)
     }
 }

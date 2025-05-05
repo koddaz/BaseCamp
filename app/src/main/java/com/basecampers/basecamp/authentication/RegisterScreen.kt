@@ -83,7 +83,14 @@ fun RegisterScreen(authViewModel: AuthViewModel, profileViewModel: ProfileViewMo
                 .height(200.dp)
                 .background(SecondaryAqua.copy(alpha = 0.1f))
         )
-
+        
+        // Password Policy Dialog
+        PasswordPolicyInfo(
+            visible = showPasswordPolicy,
+            onDismiss = { showPasswordPolicy = false },
+            modifier = Modifier.zIndex(10f)
+        )
+        
         // Content
         Column(
             modifier = Modifier
@@ -264,8 +271,8 @@ fun RegisterScreen(authViewModel: AuthViewModel, profileViewModel: ProfileViewMo
             }
 
             Spacer(modifier = Modifier.weight(1f))
-
-            // Go to login text
+            
+            // Register Button
             TextButton(
                 onClick = goLogin,
                 modifier = Modifier.padding(bottom = 32.dp)
@@ -281,16 +288,8 @@ fun RegisterScreen(authViewModel: AuthViewModel, profileViewModel: ProfileViewMo
                     color = SecondaryAqua
                 )
             }
-
             Spacer(modifier = Modifier.height(32.dp))
         }
-
-        // Password Policy Dialog
-        PasswordPolicyInfo(
-            visible = showPasswordPolicy,
-            onDismiss = { showPasswordPolicy = false },
-            modifier = Modifier.zIndex(10f)
-        )
     }
 }
 
