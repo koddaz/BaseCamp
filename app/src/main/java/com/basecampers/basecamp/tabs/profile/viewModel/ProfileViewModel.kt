@@ -27,13 +27,17 @@ class ProfileViewModel : ViewModel() {
 	// Loading state
 	private val _isLoading = MutableStateFlow(false)
 	val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-	
+
+	private val _companyNames = MutableStateFlow<Map<String, String>>(emptyMap())
+	val companyNames = _companyNames.asStateFlow()
+
 	init {
 		// Initialize by observing UserSession profile
 		viewModelScope.launch {
 			UserSession.profile.collect { profile ->
 				_profile.value = profile
 			}
+
 		}
 		
 		// Load profile data if user is logged in
@@ -43,6 +47,27 @@ class ProfileViewModel : ViewModel() {
 	/**
 	 * Fetches user profile from Firestore
 	 */
+	fun fetchCompanyNames() {
+		val companyIds = _profile.value?.companyList ?: return
+		if (companyIds.isEmpty()) return
+
+		companyIds.forEach { companyId ->
+			firestore.collection("companies").document(companyId).get()
+				.addOnSuccessListener { document ->
+					if (document != null && document.exists()) {
+						val companyName = document.getString("companyName") ?: companyId
+
+						// Update ViewModel state
+						val currentMap = _companyNames.value.toMutableMap()
+						currentMap[companyId] = companyName
+						_companyNames.value = currentMap
+
+						// Update UserSession
+						UserSession.updateCompanyName(companyId, companyName)
+					}
+				}
+		}
+	}
 	fun fetchProfile(userId: String) {
 		_isLoading.value = true
 		

@@ -3,8 +3,7 @@ package com.basecampers.basecamp.tabs.booking.user.createBooking
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -23,38 +22,47 @@ fun UserBookingMainView(
     navToBooking: () -> Unit,
     navToCurrentBookings: () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(280.dp)
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        SecondaryAqua.copy(alpha = 0.2f),
-                        AppBackground
-                    )
-                )
-            )
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp)
-        ) {
-            Spacer(modifier = Modifier.height(60.dp))
+        // Header with Gradient Background
+        item {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(220.dp)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                SecondaryAqua.copy(alpha = 0.2f),
+                                AppBackground
+                            )
+                        )
+                    )
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(modifier = Modifier.height(60.dp))
 
-            // Header
-            Text(
-                text = "Bookings",
-                style = MaterialTheme.typography.headlineLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 32.sp
-                ),
-                color = TextSecondary,
-                modifier = Modifier.padding(bottom = 24.dp)
-            )
-
-            // New Booking Card
+                    // Header
+                    Text(
+                        text = "Bookings",
+                        style = MaterialTheme.typography.headlineLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 32.sp
+                        ),
+                        color = TextSecondary,
+                        modifier = Modifier.padding(bottom = 24.dp)
+                    )
+                }
+            }
+        }   // New Booking Card
+        item {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -95,10 +103,11 @@ fun UserBookingMainView(
                     )
                 }
             }
+        }
 
-            Spacer(modifier = Modifier.height(24.dp))
 
-            // Current Bookings Card
+        // Current Bookings Card
+        item {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -141,4 +150,8 @@ fun UserBookingMainView(
             }
         }
     }
+
+
 }
+
+

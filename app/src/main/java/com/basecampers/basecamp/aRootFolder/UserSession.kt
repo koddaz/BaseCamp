@@ -42,7 +42,9 @@ object UserSession {
 
 	private val _selectedCompanyName = MutableStateFlow<String?>(null)
 	val selectedCompanyName = _selectedCompanyName.asStateFlow()
-	
+
+	private val _companyNames = MutableStateFlow<Map<String, String>>(emptyMap())
+	val companyNames = _companyNames.asStateFlow()
 	/**
 	 * Initialize the session with user ID.
 	 * This is called when the user logs in.
@@ -57,7 +59,22 @@ object UserSession {
 			clearSession()
 		}
 	}
-	
+
+	fun updateCompanyName(companyId: String, companyName: String) {
+		val currentMap = _companyNames.value.toMutableMap()
+		currentMap[companyId] = companyName
+		_companyNames.value = currentMap
+
+		// Update selected company name if this is the selected company
+		if (companyId == _selectedCompanyId.value) {
+			_selectedCompanyName.value = companyName
+		}
+	}
+
+	// Method to set all company names at once
+	fun setCompanyNames(namesMap: Map<String, String>) {
+		_companyNames.value = namesMap
+	}
 	/**
 	 * Set user ID
 	 */

@@ -75,14 +75,14 @@ fun TabNavigation(
     Column(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.weight(1f)) {
             when (selectedTabIndex) {
-                0 -> HomeNavHost(
+                3 -> HomeNavHost(
                     authViewModel = authViewModel,
                     companyViewModel = companyViewModel
                 )
-                1 -> {
+                0 -> {
                     UserBookingNavHost()
                 }
-                2 -> SocialNavHost(
+                1 -> SocialNavHost(
                     socialViewModel = socialViewModel,
                     selectedSocialTabIndex = selectedSocialTabIndex,
                     onSocialTabSelected = { newIndex ->
@@ -90,7 +90,7 @@ fun TabNavigation(
                         AppState.selectedSocialTabIndex = newIndex
                     }
                 )
-                3 -> ProfileNavHost(
+                2 -> ProfileNavHost(
                     profileViewModel = profileViewModel,
                     authViewModel = authViewModel,
                     companyViewModel = companyViewModel,
@@ -118,7 +118,7 @@ fun TabNavigation(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val tabs = listOf(
-                    TabItem("Home", Icons.Filled.Home, Icons.Outlined.Home),
+                    // TabItem("Home", Icons.Filled.Home, Icons.Outlined.Home),
                     TabItem("Bookings", Icons.Filled.CalendarMonth, Icons.Outlined.CalendarMonth),
                     TabItem("Forum", Icons.Filled.Forum, Icons.Outlined.Forum),
                     TabItem("Profile", Icons.Filled.Person, Icons.Outlined.Person)
