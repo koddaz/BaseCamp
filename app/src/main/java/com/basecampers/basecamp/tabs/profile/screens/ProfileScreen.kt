@@ -19,21 +19,35 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.basecampers.basecamp.aRootFolder.UserSession
 import com.basecampers.basecamp.company.models.UserStatus
+import com.basecampers.basecamp.company.viewModel.CompanyViewModel
 import com.basecampers.basecamp.components.HorizontalOptionCard
+import com.basecampers.basecamp.tabs.profile.viewModel.ProfileViewModel
 import com.basecampers.basecamp.ui.theme.*
+import kotlin.text.get
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ProfileScreen(
     onNavigateToAdmin: () -> Unit = {},
     onNavigateToOptions: () -> Unit = {},
+    profileViewModel: ProfileViewModel = viewModel(),
+    companyViewModel: CompanyViewModel = viewModel()
 ) {
     // Access data from UserSession
+
     val profile by UserSession.profile.collectAsState()
     val companyProfile by UserSession.companyProfile.collectAsState()
     val company by UserSession.company.collectAsState()
+    val companyNames by UserSession.companyNames.collectAsState()
+
+    LaunchedEffect(profile?.companyList) {
+        if (profile?.companyList?.isNotEmpty() == true) {
+            profileViewModel.fetchCompanyNames()
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -333,12 +347,18 @@ fun ProfileScreen(
 
                         if (profile?.companyList?.isNotEmpty() == true) {
                             Column {
+
                                 profile?.companyList?.forEach { companyId ->
                                     CompanyListItem(
+                                        companyName = companyNames[companyId] ?: "",
                                         companyId = companyId,
                                         isSelected = companyId == UserSession.selectedCompanyId.value,
-                                        onCompanySelected = { /* Call your selectCompany function */ }
+                                        onCompanySelected = { companyViewModel.selectCompany(
+                                            companyId = companyId,
+                                            userId = UserSession.userId.value ?: ""
+                                        ) }
                                     )
+                                    Spacer(modifier = Modifier.height(8.dp))
                                 }
                             }
                         } else {
@@ -391,6 +411,7 @@ fun ProfileInfoItem(label: String, value: String) {
 
 @Composable
 fun CompanyListItem(
+    companyName: String,
     companyId: String,
     isSelected: Boolean,
     onCompanySelected: (String) -> Unit
@@ -431,7 +452,7 @@ fun CompanyListItem(
 
             // Company ID
             Text(
-                text = companyId,
+                text = companyName,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.weight(1f)
             )
